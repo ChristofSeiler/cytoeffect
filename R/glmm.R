@@ -51,6 +51,7 @@ glmm = function(df_samples_subset,
   # # cluster function
   # run_sampling = function(seed) {
     # run sampler
+    seed = 1
     fit_mcmc = sampling(model,
                         data = stan_data,
                         iter = iter,
