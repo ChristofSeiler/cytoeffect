@@ -16,7 +16,8 @@ Imports:
     dplyr,
     tibble,
     tidyr,
-    rstan
+    rstan,
+    ggcorrplot
 Depends:
     Rcpp
 RoxygenNote: 6.0.1

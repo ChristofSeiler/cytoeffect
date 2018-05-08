@@ -22,11 +22,12 @@ traceplot = function(obj) {
                                varnames = c("iteration","chain","parameter"))
   ggplot(beta_warmup, aes(x = iteration, y = value, color = parameter)) +
     geom_line() +
-    facet_wrap(~ chain) +
+    facet_wrap(~ chain, nrow = 2) +
     annotate("rect",
              xmin = 0, xmax = warmup,
              ymin = -Inf, ymax = Inf,
              alpha = 0.2,
-             color = "gray")
+             color = "gray") +
+    scale_colour_few()
 
 }

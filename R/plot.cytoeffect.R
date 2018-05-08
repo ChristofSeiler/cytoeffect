@@ -2,6 +2,7 @@
 #'
 #' @import rstan
 #' @import ggplot2
+#' @import ggcorrplot
 #' @import magrittr
 #' @import dplyr
 #' @import tidyr
@@ -46,7 +47,8 @@ plot.cytoeffect = function(obj, type = "distribution") {
       geom_point(size = 2) +
       ggtitle("Standard Deviations") +
       theme(axis.title.y = element_blank()) +
-      facet_wrap(~effect, ncol = 2)
+      facet_wrap(~effect, ncol = 2) +
+      scale_colour_few()
 
   } else if (type == "Corc" || type == "Cord") {
 
@@ -60,25 +62,9 @@ plot.cytoeffect = function(obj, type = "distribution") {
     cor = cor[,-1,-1] # remove intercept
     cor_median = apply(X = cor, MARGIN = c(2,3), FUN = median)
     colnames(cor_median) = rownames(cor_median) = protein_names
-    # reorder
-    hc = hclust(as.dist(1-cor_median))
-    # plot correlations
-    diag(cor_median) = NA
-    cor_long = melt(cor_median, na.rm = FALSE)
-    names(cor_long) = c("p1","p2","value")
-    cor_long$p1 %<>% factor(levels = protein_names[hc$order])
-    cor_long$p2 %<>% factor(levels = protein_names[hc$order])
-    ggplot(data = cor_long, aes(p1, p2, fill = value)) +
-      geom_tile(color = "white") +
-      scale_fill_gradient2(low = "blue", high = "red", mid = "white",
-                           midpoint = 0, space = "Lab",
-                           name = "correlation") +
-      theme_minimal() +
-      theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
-            axis.title.x=element_blank(),
-            axis.title.y=element_blank(),
-            legend.position="right") +
-      coord_fixed() +
+    ggcorrplot(cor_median, hc.order = TRUE, type = "lower",
+               outline.col = "white",
+               colors = c("#6D9EC1", "white", "#E46726")) +
       ggtitle(title_str)
 
   } else if (type == "uc") {
