@@ -26,10 +26,6 @@ glmm = function(df_samples_subset,
   if(!eta > 0)
     stop("eta needs to be positive")
 
-  # compile model
-  stan_file = system.file("exec", "glmm.stan", package = "cytoeffect")
-  model = stan_model(file = stan_file, model_name = "glmm")
-
   # prepare input data
   protein_names_collapsed = paste(protein_names,collapse = " + ")
   X = unname(model.matrix(formula(paste("~",protein_names_collapsed)),
@@ -48,10 +44,14 @@ glmm = function(df_samples_subset,
     eta = eta
   )
 
-  # # cluster function
-  # run_sampling = function(seed) {
+  # cluster function
+  run_sampling = function(seed) {
+
+    # compile model
+    stan_file = system.file("exec", "glmm.stan", package = "cytoeffect")
+    model = stan_model(file = stan_file, model_name = "glmm")
+
     # run sampler
-    seed = 1
     fit_mcmc = sampling(model,
                         data = stan_data,
                         iter = iter,
@@ -59,19 +59,19 @@ glmm = function(df_samples_subset,
                         chains = num_chains,
                         cores = num_chains,
                         seed = seed)
-  #   fit_mcmc
-  # }
-  #
-  # # preapte and submit cluster job
-  # current_time = Sys.time() %>%
-  #   str_replace_all(":","") %>%
-  #   str_replace_all("-| ","_")
-  # reg = makeRegistry(file.dir = paste0("registry_",current_time),
-  #                    packages = "rstan")
-  # batchMap(run_sampling, seed = 1)
-  # submitJobs()
-  # waitForJobs()
-  # fit_mcmc = reduceResultsList()[[1]]
+    fit_mcmc
+  }
+
+  # preapte and submit cluster job
+  current_time = Sys.time() %>%
+    str_replace_all(":","") %>%
+    str_replace_all("-| ","_")
+  reg = makeRegistry(file.dir = paste0("registry_",current_time),
+                     packages = "rstan")
+  batchMap(run_sampling, seed = 1)
+  submitJobs()
+  waitForJobs()
+  fit_mcmc = reduceResultsList()[[1]]
 
   # create cytoeffect class
   obj = list(fit_mcmc = fit_mcmc,
