@@ -35,7 +35,7 @@ glmm = function(df_samples_subset,
   X = unname(model.matrix(formula(paste("~",protein_names_collapsed)),
                           df_samples_subset))
   attr(X, "assign") = NULL
-  treatment = as.integer(pull(df_samples_subset, condition))
+  treatment = as.integer(pull(df_samples_subset, condition))-1
   stan_data = list(
     N = nrow(X),
     P = ncol(X),
