@@ -3,6 +3,7 @@
 #' @import rstan
 #' @import ggplot2
 #' @import reshape2
+#' @import ggthemes
 #' @export
 #'
 traceplot = function(obj) {

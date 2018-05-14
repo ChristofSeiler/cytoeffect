@@ -6,6 +6,7 @@
 #' @import magrittr
 #' @import dplyr
 #' @import tidyr
+#' @import ggthemes
 #' @export
 #'
 plot.cytoeffect = function(obj, type = "distribution") {

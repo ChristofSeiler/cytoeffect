@@ -24,14 +24,14 @@ transformed parameters {
   {
     matrix[P,P] Sigmad; // donor random effects cov matrix
     Sigmad = diag_pre_multiply(sigmad, Ld);
-    for(j in 1:J)
-    ud[j] = Sigmad * zd[j];
+    for (j in 1:J)
+      ud[j] = Sigmad * zd[j];
   }
   {
     matrix[P,P] Sigmac; // cell type random effects cov matrix
     Sigmac = diag_pre_multiply(sigmac, Lc);
-    for(k in 1:K)
-    uc[k] = Sigmac * zc[k];
+    for (k in 1:K)
+      uc[k] = Sigmac * zc[k];
   }
 }
 model {
@@ -39,9 +39,9 @@ model {
   Ld ~ lkj_corr_cholesky(eta);
   Lc ~ lkj_corr_cholesky(eta);
   for (j in 1:J)
-  zd[j] ~ normal(0,1);
+    zd[j] ~ normal(0,1);
   for (k in 1:K)
-  zc[k] ~ normal(0,1);
+    zc[k] ~ normal(0,1);
   // likelihood
   for (i in 1:N)
     treatment[i] ~ bernoulli_logit(X[i] * beta + X[i] * ud[donor[i]] + X[i] * uc[celltype[i]]);
