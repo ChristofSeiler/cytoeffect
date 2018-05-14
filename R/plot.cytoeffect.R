@@ -68,6 +68,32 @@ plot.cytoeffect = function(obj, type = "distribution") {
                colors = c("#6D9EC1", "white", "#E46726")) +
       ggtitle(title_str)
 
+  } else if (type == "Corc_all" || type == "Cord_all") {
+
+    if(type == "Corc_all") {
+      title_str = "Cell Correlations"
+    } else {
+      title_str = "Donor Correlations"
+    }
+    type = strsplit(type, split = "_")[[1]][1]
+    cor = rstan::extract(fit_mcmc, pars = type)[[1]]
+    cor = cor[,-1,-1] # remove intercept
+    pairs = combn(protein_names, m = 2)
+    cor_long = lapply(1:dim(cor)[1], function(j) {
+      mcor = cor[j,,]
+      rownames(mcor) = colnames(mcor) = protein_names
+      tibble(
+        name = sapply(1:ncol(pairs),
+                      function(i) paste(pairs[,i], collapse = "-")),
+        draw = as.integer(j),
+        corr = sapply(1:ncol(pairs),
+                      function(i) mcor[pairs[1,i], pairs[2,i]]))
+    }) %>% bind_rows
+    ggplot(cor_long, aes(corr, group = name)) +
+      geom_line(color = "black", stat = "density", alpha = 0.3) +
+      theme(legend.position="none") +
+      ggtitle(title_str)
+
   } else if (type == "uc") {
 
     reordered_names = protein_names[order(summary(obj, "sigmac")$median)]
