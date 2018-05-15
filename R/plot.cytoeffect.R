@@ -20,6 +20,9 @@ plot.cytoeffect = function(obj, type = "distribution") {
   conditions = obj$conditions
   celltypes = obj$celltypes
 
+  current_theme = theme_get()
+  theme_set(theme_few())
+
   if(type == "beta") {
 
     tb_beta = summary(obj, "beta")
@@ -62,10 +65,14 @@ plot.cytoeffect = function(obj, type = "distribution") {
     cor = rstan::extract(fit_mcmc, pars = type)[[1]]
     cor = cor[,-1,-1] # remove intercept
     cor_median = apply(X = cor, MARGIN = c(2,3), FUN = median)
+    cor_pos = apply(X = cor, MARGIN = c(2,3), FUN = function(x) mean(x > 0))
+    cor_neg = apply(X = cor, MARGIN = c(2,3), FUN = function(x) mean(x < 0))
+    p_mat = 1-pmax(cor_pos, cor_neg)
     colnames(cor_median) = rownames(cor_median) = protein_names
     ggcorrplot(cor_median, hc.order = TRUE, type = "lower",
-               outline.col = "white",
-               colors = c("#6D9EC1", "white", "#E46726")) +
+               outline.col = "lightgray",
+               colors = c("#6D9EC1", "white", "#E46726"),
+               p.mat = p_mat, insig = "blank") +
       ggtitle(title_str)
 
   } else if (type == "Corc_all" || type == "Cord_all") {
@@ -134,5 +141,7 @@ plot.cytoeffect = function(obj, type = "distribution") {
     stop("Plotting for this type is not yet implemented.")
 
   }
+
+  theme_set(current_theme)
 
 }
