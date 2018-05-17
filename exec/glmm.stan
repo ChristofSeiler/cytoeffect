@@ -1,3 +1,7 @@
+/*
+ * Generalized Linear Mixed Model with donor and cell type random effects
+ * Author: Christof Seiler
+ */
 data {
   int<lower=0> N; // number of cells
   int<lower=1> P; // number of fixed effects
