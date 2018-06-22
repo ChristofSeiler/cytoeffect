@@ -3,7 +3,6 @@
 #' @import rstan
 #' @import ggplot2
 #' @import reshape2
-#' @import ggthemes
 #' @export
 #'
 traceplot = function(obj) {
@@ -28,7 +27,6 @@ traceplot = function(obj) {
              xmin = 0, xmax = warmup,
              ymin = -Inf, ymax = Inf,
              alpha = 0.2,
-             color = "gray") +
-    scale_colour_few()
+             color = "gray")
 
 }

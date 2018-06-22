@@ -6,7 +6,6 @@
 #' @import magrittr
 #' @import dplyr
 #' @import tidyr
-#' @import ggthemes
 #' @export
 #'
 plot.cytoeffect = function(obj, type = "distribution") {
@@ -33,8 +32,7 @@ plot.cytoeffect = function(obj, type = "distribution") {
       geom_errorbarh(aes(xmin = low, xmax = high)) +
       ggtitle("Fixed Effects") +
       xlab(xlab_str) +
-      theme(axis.title.y = element_blank()) +
-      theme_few()
+      theme(axis.title.y = element_blank())
 
   } else if (type == "sigma") {
 
@@ -49,8 +47,7 @@ plot.cytoeffect = function(obj, type = "distribution") {
       geom_point(size = 2) +
       ggtitle("Standard Deviations") +
       theme(axis.title.y = element_blank()) +
-      facet_wrap(~effect, ncol = 2) +
-      scale_colour_few()
+      facet_wrap(~effect, ncol = 2)
 
   } else if (type == "Corc" || type == "Cord") {
 
@@ -72,7 +69,8 @@ plot.cytoeffect = function(obj, type = "distribution") {
                colors = c("#6D9EC1", "white", "#E46726"),
                p.mat = p_mat, insig = "blank") +
       ggtitle(title_str) +
-      theme_few()
+      theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank())
 
   } else if (type == "Corc_all" || type == "Cord_all") {
 
@@ -98,8 +96,7 @@ plot.cytoeffect = function(obj, type = "distribution") {
     ggplot(cor_long, aes(corr, group = name)) +
       geom_line(color = "black", stat = "density", alpha = 0.3) +
       theme(legend.position="none") +
-      ggtitle(title_str) +
-      theme_few()
+      ggtitle(title_str)
 
   } else if (type == "uc") {
 
@@ -126,15 +123,14 @@ plot.cytoeffect = function(obj, type = "distribution") {
     tb$celltype %<>% as.factor
     xlab_str = paste(conditions,collapse = " <-> ")
     ggplot(tb, aes(x = mid, y = protein_name, color = protein_name)) +
-      geom_vline(xintercept = 0,color = "gray") +
+      geom_vline(xintercept = 0,color = "black") +
       geom_point(size = 2) +
       geom_errorbarh(aes(xmin = low, xmax = high)) +
       ggtitle("Cell Type Random Effects") +
       xlab(xlab_str) +
       theme(legend.position="none",
             axis.title.y = element_blank()) +
-      facet_wrap(~celltype,nrow = 2) +
-      scale_colour_hue()
+      facet_wrap(~celltype,nrow = 2)
 
   } else {
 
