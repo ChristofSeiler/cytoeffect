@@ -20,9 +20,6 @@ plot.cytoeffect = function(obj, type = "distribution") {
   conditions = obj$conditions
   celltypes = obj$celltypes
 
-  current_theme = theme_get()
-  theme_set(theme_few())
-
   if(type == "beta") {
 
     tb_beta = summary(obj, "beta")
@@ -36,7 +33,8 @@ plot.cytoeffect = function(obj, type = "distribution") {
       geom_errorbarh(aes(xmin = low, xmax = high)) +
       ggtitle("Fixed Effects") +
       xlab(xlab_str) +
-      theme(axis.title.y = element_blank())
+      theme(axis.title.y = element_blank()) +
+      theme_few()
 
   } else if (type == "sigma") {
 
@@ -73,7 +71,8 @@ plot.cytoeffect = function(obj, type = "distribution") {
                outline.col = "lightgray",
                colors = c("#6D9EC1", "white", "#E46726"),
                p.mat = p_mat, insig = "blank") +
-      ggtitle(title_str)
+      ggtitle(title_str) +
+      theme_few()
 
   } else if (type == "Corc_all" || type == "Cord_all") {
 
@@ -99,7 +98,8 @@ plot.cytoeffect = function(obj, type = "distribution") {
     ggplot(cor_long, aes(corr, group = name)) +
       geom_line(color = "black", stat = "density", alpha = 0.3) +
       theme(legend.position="none") +
-      ggtitle(title_str)
+      ggtitle(title_str) +
+      theme_few()
 
   } else if (type == "uc") {
 
@@ -141,7 +141,5 @@ plot.cytoeffect = function(obj, type = "distribution") {
     stop("Plotting for this type is not yet implemented.")
 
   }
-
-  theme_set(current_theme)
 
 }
