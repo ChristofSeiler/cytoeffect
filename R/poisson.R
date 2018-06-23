@@ -59,7 +59,7 @@ poisson = function(df_samples_subset,
   run_sampling = function(seed) {
 
     # compile model
-    stan_file = system.file("exec", "multi_poisson.stan", package = "cytoeffect")
+    stan_file = system.file("exec", "poisson.stan", package = "cytoeffect")
     model = stan_model(file = stan_file, model_name = "poisson")
 
     # run sampler
