@@ -66,7 +66,9 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
                outline.col = "lightgray",
                colors = c("#6D9EC1", "white", "#E46726"),
                p.mat = p_mat, insig = "blank") +
-      ggtitle(paste0("Marker Correlations (",type,")"))
+      ggtitle(paste0("Marker Correlations (",type,")")) +
+      theme(panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank())
 
   } else {
 
