@@ -2,8 +2,9 @@
 
 export(glmm)
 export(plot.cytoeffect)
+export(plot.cytoeffect_poisson)
+export(poisson)
 export(summary.cytoeffect)
-export(traceplot)
 import(batchtools)
 import(dplyr)
 import(ggcorrplot)

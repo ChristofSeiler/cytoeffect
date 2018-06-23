@@ -2,11 +2,11 @@
 % Please edit documentation in R/glmm.R
 \name{glmm}
 \alias{glmm}
-\title{HMC sampling.}
+\title{HMC sampling for GLMM with Multivariate Random Effects.}
 \usage{
 glmm(df_samples_subset, protein_names, condition, group, iter = 325,
   warmup = 200, num_chains = 4, eta = 1)
 }
 \description{
-HMC sampling.
+HMC sampling for GLMM with Multivariate Random Effects.
 }

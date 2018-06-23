@@ -1,4 +1,4 @@
-#' HMC sampling.
+#' HMC sampling for GLMM with Multivariate Random Effects.
 #'
 #' @import rstan
 #' @import ggplot2
