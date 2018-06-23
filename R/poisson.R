@@ -37,7 +37,7 @@ poisson = function(df_samples_subset,
   k = length(unique(df_samples_subset$group_condition))
   donor = as.integer(as.factor(df_samples_subset$group_condition))
   stan_data = list(Y = Y, X = X, n = n, d = d, p = p,
-                   k = k, donor = donor)
+                   k = k, donor = donor, eta = eta)
 
   # prepare starting point for sampler
   beta = lapply(1:ncol(Y), function(j) {

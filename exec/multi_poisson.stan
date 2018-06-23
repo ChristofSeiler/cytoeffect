@@ -10,6 +10,7 @@ data {
   row_vector[p] X[n]; // design matrix
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
+  real<lower=0> eta; // parameter of lkj prior
 }
 parameters {
   vector[p] beta[d]; // fixed coefficients
@@ -42,8 +43,8 @@ model {
   //  beta[j] ~ normal(0, 5);
   sigma ~ cauchy(0, 2.5);
   sigma_donor ~ cauchy(0, 2.5);
-  L ~ lkj_corr_cholesky(1);
-  L_donor ~ lkj_corr_cholesky(1);
+  L ~ lkj_corr_cholesky(eta);
+  L_donor ~ lkj_corr_cholesky(eta);
   for (i in 1:n)
     z[i] ~ normal(0, 1);
   for (i in 1:k)
