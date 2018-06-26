@@ -61,6 +61,7 @@ glmm = function(df_samples_subset,
       Cord = apply(pars["Cord"][[1]],MARGIN = c(2,3),FUN = median),
       Corc = apply(pars["Corc"][[1]],MARGIN = c(2,3),FUN = median)
     )
+    stan_init = rep(list(stan_init), num_chains)
 
   } else {
     stan_init = 'random'
@@ -81,7 +82,7 @@ glmm = function(df_samples_subset,
                         chains = num_chains,
                         cores = num_chains,
                         seed = seed,
-                        init = rep(list(stan_init), num_chains))
+                        init = stan_init)
     fit_mcmc
   }
 
