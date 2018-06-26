@@ -14,7 +14,8 @@ glmm = function(df_samples_subset,
                 iter = 325,
                 warmup = 200,
                 num_chains = 4,
-                eta = 1.0) {
+                eta = 1.0,
+                init = NULL) {
 
   # some checks
   if(sum(names(df_samples_subset) == condition) == 0)
@@ -44,6 +45,27 @@ glmm = function(df_samples_subset,
     eta = eta
   )
 
+  # initialize sampler with previous simulation
+  if(class(init) == "cytoeffect") {
+    pars = rstan::extract(init$fit_mcmc)
+    stan_init = list(
+      beta = apply(pars["beta"][[1]],MARGIN = 2,FUN = median),
+      Ld = apply(pars["Ld"][[1]],MARGIN = c(2,3),FUN = median),
+      sigmad = apply(pars["sigmad"][[1]],MARGIN = 2,FUN = median),
+      zd = apply(pars["zd"][[1]],MARGIN = c(2,3),FUN = median),
+      Lc = apply(pars["Lc"][[1]],MARGIN = c(2,3),FUN = median),
+      sigmac = apply(pars["sigmac"][[1]],MARGIN = 2,FUN = median),
+      zc = apply(pars["zc"][[1]],MARGIN = c(2,3),FUN = median),
+      ud = apply(pars["ud"][[1]],MARGIN = c(2,3),FUN = median),
+      uc = apply(pars["uc"][[1]],MARGIN = c(2,3),FUN = median),
+      Cord = apply(pars["Cord"][[1]],MARGIN = c(2,3),FUN = median),
+      Corc = apply(pars["Corc"][[1]],MARGIN = c(2,3),FUN = median)
+    )
+
+  } else {
+    stan_init = 'random'
+  }
+
   # cluster function
   run_sampling = function(seed) {
 
@@ -58,7 +80,8 @@ glmm = function(df_samples_subset,
                         warmup = warmup,
                         chains = num_chains,
                         cores = num_chains,
-                        seed = seed)
+                        seed = seed,
+                        init = rep(list(stan_init), num_chains))
     fit_mcmc
   }
 

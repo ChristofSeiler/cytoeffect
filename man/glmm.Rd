@@ -5,7 +5,7 @@
 \title{HMC sampling for GLMM with Multivariate Random Effects.}
 \usage{
 glmm(df_samples_subset, protein_names, condition, group, iter = 325,
-  warmup = 200, num_chains = 4, eta = 1)
+  warmup = 200, num_chains = 4, eta = 1, init = NULL)
 }
 \description{
 HMC sampling for GLMM with Multivariate Random Effects.
