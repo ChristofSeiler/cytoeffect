@@ -42,6 +42,8 @@ model {
   // priors
   Ld ~ lkj_corr_cholesky(eta);
   Lc ~ lkj_corr_cholesky(eta);
+  sigmad ~ cauchy(0, 2.5);
+  sigmac ~ cauchy(0, 2.5);
   for (j in 1:J)
     zd[j] ~ normal(0,1);
   for (k in 1:K)
