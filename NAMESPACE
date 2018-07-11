@@ -3,7 +3,7 @@
 export(glmm)
 export(plot.cytoeffect)
 export(plot.cytoeffect_poisson)
-export(poisson)
+export(poisson_lognormal)
 export(summary.cytoeffect)
 import(batchtools)
 import(dplyr)

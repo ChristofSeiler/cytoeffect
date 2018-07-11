@@ -7,14 +7,14 @@
 #' @import batchtools
 #' @export
 #'
-poisson = function(df_samples_subset,
-                   protein_names,
-                   condition,
-                   group,
-                   iter = 325,
-                   warmup = 200,
-                   num_chains = 4,
-                   eta = 1.0) {
+poisson_lognormal = function(df_samples_subset,
+                             protein_names,
+                             condition,
+                             group,
+                             iter = 325,
+                             warmup = 200,
+                             num_chains = 4,
+                             eta = 1.0) {
 
   # some checks
   if(sum(names(df_samples_subset) == condition) == 0)
