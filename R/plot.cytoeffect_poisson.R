@@ -26,8 +26,8 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
     tb_beta = tb_beta$summary[,c("2.5%","50%","97.5%")]
     tb_beta %<>% as.tibble(rownames = "name")
     #tb_beta = tb_beta[seq(2,nrow(tb_beta),2),]
-    tb_beta %<>% add_column(protein_name = rep(protein_names, each = p))
-    tb_beta %<>% add_column(covariate = rep(covariates, d))
+    tb_beta %<>% add_column(protein_name = rep(protein_names, each = length(covariates)))
+    tb_beta %<>% add_column(covariate = rep(covariates, length(protein_names)))
     #ind = sort.int(tb_beta$`50%`,index.return=TRUE)$ix
     #reordered_names = tb_beta$covariate[ind]
     #tb_beta$covariate %<>% factor(levels = reordered_names)
