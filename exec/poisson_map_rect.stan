@@ -2,6 +2,15 @@
  * Multivariate Poisson-log Normal model
  * Author: Christof Seiler
  */
+functions {
+  vector reduce(vector beta , vector theta, real[] xr, int[] xi) {
+    vector[2] mu = mu_sigma[1:2];
+    vector[2] sigma = mu_sigma[3:4];
+    real lp = normal_lpdf(beta | mu, sigma);
+    real ll = bernoulli_logit_lpmf(y | beta[1] + beta[2] * to_vector(x));
+    return [lp + ll]';
+ }
+}
 data {
   int<lower=1> n; // num of cells
   int<lower=1> d; // num of markers
@@ -53,6 +62,7 @@ model {
   for (i in 1:n) {
     for (j in 1:d) {
       target += poisson_log_lpmf(Y[i,j] | X[i] * beta[j] + b[i,j] + b_donor[donor[i],j]);
+      target += sum(map_rect(reduce, beta, theta, xs, ys));
     }
   }
 }
