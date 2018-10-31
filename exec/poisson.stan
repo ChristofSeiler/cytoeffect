@@ -7,7 +7,8 @@ data {
   int<lower=1> d; // num of markers
   int<lower=1> p; // num of explanatory variables (including intercept)
   int<lower=0> Y[n,d]; // observed cell counts
-  row_vector[p] X[n]; // design matrix
+  //row_vector[p] X[n]; // design matrix
+  matrix[n,p] X; // design matrix
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
   real<lower=0> eta; // parameter of lkj prior
@@ -39,8 +40,8 @@ transformed parameters {
 }
 model {
   // priors
-  //for (j in 1:d)
-  //  beta[j] ~ normal(0, 5);
+  for (j in 1:d)
+    beta[j] ~ normal(0, 7);
   sigma ~ cauchy(0, 2.5);
   sigma_donor ~ cauchy(0, 2.5);
   L ~ lkj_corr_cholesky(eta);
@@ -50,11 +51,12 @@ model {
   for (i in 1:k)
     z_donor[i] ~ normal(0, 1);
   // likelihood
-  for (i in 1:n) {
-    for (j in 1:d) {
-      Y[i,j] ~ poisson_log(X[i] * beta[j] + b[i,j] + b_donor[donor[i],j]);
-    }
+  //for (i in 1:n) {
+  for (j in 1:d) {
+    //Y[i,j] ~ poisson_log(X[i] * beta[j] + b[i,j] + b_donor[donor[i],j]);
+    Y[,j] ~ poisson_log(X * beta[j] + to_vector(b[,j]) + to_vector(b_donor[donor,j]));
   }
+  //}
 }
 generated quantities {
   // correlation matrix

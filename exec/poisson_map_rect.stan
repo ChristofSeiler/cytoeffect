@@ -3,12 +3,16 @@
  * Author: Christof Seiler
  */
 functions {
-  vector reduce(vector beta , vector theta, real[] xr, int[] xi) {
-    vector[2] mu = mu_sigma[1:2];
-    vector[2] sigma = mu_sigma[3:4];
-    real lp = normal_lpdf(beta | mu, sigma);
-    real ll = bernoulli_logit_lpmf(y | beta[1] + beta[2] * to_vector(x));
-    return [lp + ll]';
+  vector reduce(vector beta_b , vector b_donor, real[] x_r, int[] x_i) {
+    // work in progress (not working yet)
+    vector[p] beta[d];
+    vector[d] b[n];
+    beta = to_matrix(beta_b[1:(d*p)], d, p);
+    b = to_matrix(beta_b[((d*p)+1):(d*n)], d, n);
+    int<lower=0> Y_donor[n,d] = to_matrix(x_i, J, d);
+    matrix[J,p] X_donor = to_matrix(x_r, J, p);
+    real lp = poisson_log_lpmf(Y_donor[,j] | X_donor * beta[j] + to_vector(b[,j]) + to_vector(b_donor[donor,j]));
+    return [lp]';
  }
 }
 data {
@@ -16,10 +20,20 @@ data {
   int<lower=1> d; // num of markers
   int<lower=1> p; // num of explanatory variables (including intercept)
   int<lower=0> Y[n,d]; // observed cell counts
-  row_vector[p] X[n]; // design matrix
+  //row_vector[p] X[n]; // design matrix
+  matrix[n,p] X; // design matrix
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
   real<lower=0> eta; // parameter of lkj prior
+}
+transformed data {
+  int<lower = 0> J = n / k;
+  int<lower = 0> x_i[k, J*d];
+  real x_r[k, J*p];
+  for (i in 1:k) {
+    x_i[k] = to_array(Y[donor[i],])
+    x_r[k] = to_array(X[donor[i],]);
+  }
 }
 parameters {
   vector[p] beta[d]; // fixed coefficients
@@ -59,12 +73,7 @@ model {
   for (i in 1:k)
     z_donor[i] ~ normal(0, 1);
   // likelihood
-  for (i in 1:n) {
-    for (j in 1:d) {
-      target += poisson_log_lpmf(Y[i,j] | X[i] * beta[j] + b[i,j] + b_donor[donor[i],j]);
-      target += sum(map_rect(reduce, beta, theta, xs, ys));
-    }
-  }
+  target += sum(map_rect(reduce, append_row(to_vector(beta), to_vector(b)), b_donor, xs, ys));
 }
 generated quantities {
   // correlation matrix
