@@ -40,20 +40,20 @@ poisson_lognormal = function(df_samples_subset,
                    k = k, donor = donor, eta = eta)
 
   # prepare starting point for sampler
-  # beta = lapply(1:ncol(Y), function(j) {
-  #   df = data.frame(y = Y[,j], x = X[,2])
-  #   coefs = coef(glm(y ~ x, family = stats::poisson(), data = df))
-  #   tibble(x0 = coefs[1], x1 = coefs[2])
-  # }) %>% bind_rows()
-  # logY = log(Y + 1)
-  # sigma = sqrt(diag(cov(logY)))
-  # L = t(chol(cor(logY)))
-  # z = matrix(0, nrow = n, ncol = d)
-  # z_donor = matrix(0, nrow = k, ncol = d)
-  # stan_init = list(beta = beta,
-  #                  sigma = sigma, sigma_donor = sigma,
-  #                  L = L, L_donor = L,
-  #                  z = z, z_donor = z_donor)
+  beta = lapply(1:ncol(Y), function(j) {
+    df = data.frame(y = Y[,j], x = X[,2])
+    coefs = coef(glm(y ~ x, family = stats::poisson(), data = df))
+    tibble(x0 = coefs[1], x1 = coefs[2])
+  }) %>% bind_rows()
+  logY = log(Y + 1)
+  sigma = sqrt(diag(cov(logY)))
+  L = t(chol(cor(logY)))
+  z = matrix(0, nrow = n, ncol = d)
+  z_donor = matrix(0, nrow = k, ncol = d)
+  stan_init = list(beta = beta,
+                   sigma = sigma, sigma_donor = sigma,
+                   L = L, L_donor = L,
+                   z = z, z_donor = z_donor)
 
   # cluster function
   run_sampling = function(seed) {
@@ -73,8 +73,8 @@ poisson_lognormal = function(df_samples_subset,
                         warmup = warmup,
                         chains = num_chains,
                         cores = num_chains,
-                        seed = seed)#,
-                        #init = rep(list(stan_init), num_chains))
+                        seed = seed,
+                        init = rep(list(stan_init), num_chains))
     fit_mcmc
   }
 
