@@ -27,22 +27,27 @@ poisson_lognormal = function(df_samples_subset,
     stop("eta needs to be positive")
 
   # prepare input data
-  df_samples_subset$group_condition = paste0(pull(df_samples_subset, group), "_",
-                                        pull(df_samples_subset, condition))
+  #df_samples_subset$group_condition = paste0(pull(df_samples_subset, group), "_",
+  #                                      pull(df_samples_subset, condition))
   Y = df_samples_subset %>% dplyr::select(protein_names) %>% as.matrix()
-  X = model.matrix(formula(paste("~",condition,"*celltype")), data = df_samples_subset)
+  #X = model.matrix(formula(paste("~",condition,"*celltype")), data = df_samples_subset)
+  X = model.matrix(formula(paste("~",condition)), data = df_samples_subset)
   n = nrow(Y)
   d = ncol(Y)
   p = ncol(X)
-  k = length(unique(df_samples_subset$group_condition))
-  donor = as.integer(as.factor(df_samples_subset$group_condition))
+  #k = length(unique(df_samples_subset$group_condition))
+  #donor = as.integer(as.factor(df_samples_subset$group_condition))
+  donor = df_samples_subset %>%
+    pull(group) %>%
+    as.factor() %>%
+    as.integer()
+  k = length(table(donor))
   stan_data = list(Y = Y, X = X, n = n, d = d, p = p,
                    k = k, donor = donor, eta = eta)
 
   # prepare starting point for sampler
   beta = lapply(1:ncol(Y), function(j) {
-    df = data.frame(y = Y[,j], x = X[,2])
-    coefs = coef(glm(y ~ x, family = stats::poisson(), data = df))
+    coefs = glm.fit(X, Y[,j], family = stats::poisson())$coefficients
     tibble(x0 = coefs[1], x1 = coefs[2])
   }) %>% bind_rows()
   logY = log(Y + 1)
