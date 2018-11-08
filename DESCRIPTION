@@ -17,8 +17,7 @@ Imports:
     tibble,
     tidyr,
     rstan,
+    Rcpp,
     ggcorrplot,
     batchtools
-Depends:
-    Rcpp
 RoxygenNote: 6.0.1
