@@ -1,7 +1,6 @@
 #' HMC sampling for Poisson Log-Normal Model.
 #'
 #' @import rstan
-#' @import ggplot2
 #' @import reshape2
 #' @import dplyr
 #' @import batchtools

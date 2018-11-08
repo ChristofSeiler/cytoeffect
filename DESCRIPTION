@@ -20,4 +20,6 @@ Imports:
     Rcpp,
     ggcorrplot,
     batchtools
+Depends:
+    Rcpp
 RoxygenNote: 6.0.1
