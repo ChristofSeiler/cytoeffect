@@ -59,9 +59,14 @@ model {
   //}
 }
 generated quantities {
+  // in-sample prediction
+  int<lower=0> Y_hat[n,d];
   // correlation matrix
   matrix[d,d] Cor;
   matrix[d,d] Cor_donor;
   Cor = L * L';
   Cor_donor = L_donor * L_donor';
+  for (j in 1:d) {
+    Y_hat[,j] = poisson_log_rng(X * beta[j] + to_vector(b[,j]) + to_vector(b_donor[donor,j]));
+  }
 }
