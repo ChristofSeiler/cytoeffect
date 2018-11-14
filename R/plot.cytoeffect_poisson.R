@@ -19,6 +19,7 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
   conditions = obj$conditions
   celltypes = obj$celltypes
   covariates = obj$covariates
+  Y = obj$Y
 
   if(type == "beta") {
 
@@ -72,6 +73,22 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
       ggtitle(paste0("Marker Correlations (",type,")")) +
       theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank())
+
+  } else if (type == "Y_hat") {
+
+    Y_hat = rstan::extract(fit_mcmc, pars = type)[[1]]
+    Y_hat_mean = apply(X = Y_hat, MARGIN = c(2,3), FUN = mean)
+    # Standard residuals
+    #Y_residual = Y - Y_hat_mean
+    # Pearson residuals
+    #Y_residual = (Y - Y_hat_mean)/sd(Y_hat_mean)
+    # Deviance residuals
+    Y_residual = sign(Y - Y_hat_mean)*sqrt(2*(Y*log(Y/Y_hat_mean) - (Y-Y_hat_mean)))
+    Y_residual %<>% as.tibble
+    ggplot(Y_residual %>% gather(marker, expr, protein_names), aes(expr)) +
+      geom_histogram(bins = 30) +
+      facet_wrap(~marker) +
+      ggtitle("Deviance Residuals")
 
   } else {
 
