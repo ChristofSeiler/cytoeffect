@@ -89,6 +89,14 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
       geom_histogram(bins = 30) +
       facet_wrap(~marker) +
       ggtitle("Deviance Residuals")
+    # plot residuals correlations
+    # Y_residual = Y - Y_hat_mean
+    # ggcorrplot(cor(Y_residual), hc.order = TRUE, type = "lower",
+    #            outline.col = "lightgray",
+    #            colors = c("#6D9EC1", "white", "#E46726")) +
+    #   ggtitle(paste0("Marker Correlations (",type,")")) +
+    #   theme(panel.grid.major = element_blank(),
+    #         panel.grid.minor = element_blank())
 
   } else {
 
