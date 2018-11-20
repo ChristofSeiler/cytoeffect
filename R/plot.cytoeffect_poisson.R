@@ -26,21 +26,16 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
     tb_beta = summary(fit_mcmc, pars = "beta", probs = c(0.025, 0.5, 0.975))
     tb_beta = tb_beta$summary[,c("2.5%","50%","97.5%")]
     tb_beta %<>% as.tibble(rownames = "name")
-    #tb_beta = tb_beta[seq(2,nrow(tb_beta),2),]
     tb_beta %<>% add_column(protein_name = rep(protein_names, each = length(covariates)))
     tb_beta %<>% add_column(covariate = rep(covariates, length(protein_names)))
-    #ind = sort.int(tb_beta$`50%`,index.return=TRUE)$ix
-    #reordered_names = tb_beta$covariate[ind]
-    #tb_beta$covariate %<>% factor(levels = reordered_names)
-    #xlab_str = paste(conditions,collapse = " <-> ")
+    tb_beta %<>% dplyr::filter(covariate == covariates[2])
     ggplot(tb_beta, aes(x = `50%`, y = protein_name)) +
       geom_vline(xintercept = 0,color = "red") +
       geom_point(size = 2) +
       geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`)) +
       ggtitle("Regression Coefficients") +
-      #xlab(xlab_str) +
-      theme(axis.title.y = element_blank(), axis.title.x = element_blank()) +
-      facet_wrap(~ covariate, ncol = 4)
+      xlab(covariates[2]) +
+      theme(axis.title.y = element_blank())
 
   } else if (type == "sigma" || type == "sigma_donor") {
 
