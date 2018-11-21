@@ -43,9 +43,6 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
     tb_sigma = tb_sigma$summary[,c("2.5%","50%","97.5%")]
     tb_sigma %<>% as.tibble(rownames = "name")
     tb_sigma %<>% add_column(protein_name = protein_names)
-    ind = sort.int(tb_sigma$`50%`,index.return=TRUE)$ix
-    reordered_names = tb_sigma$protein_name[ind]
-    tb_sigma$protein_name %<>% factor(levels = reordered_names)
     ggplot(tb_sigma, aes(x = `50%`, y = protein_name)) +
       geom_point(size = 2) +
       geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`)) +
@@ -63,8 +60,7 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
     colnames(cor_median) = rownames(cor_median) = protein_names
     ggcorrplot(cor_median, hc.order = TRUE, type = "lower",
                outline.col = "lightgray",
-               colors = c("#6D9EC1", "white", "#E46726"),
-               p.mat = p_mat, insig = "blank") +
+               colors = c("#6D9EC1", "white", "#E46726")) +
       ggtitle(paste0("Marker Correlations (",type,")")) +
       theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank())

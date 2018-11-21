@@ -77,7 +77,8 @@ glmm = function(df_samples_subset,
   obj = list(fit_mcmc = fit_mcmc,
              protein_names = protein_names,
              conditions = levels(pull(df_samples_subset, condition)),
-             celltypes = levels(as.factor(df_samples_subset$celltype)))
+             celltypes = levels(as.factor(df_samples_subset$celltype)),
+             covariates = colnames(X))
   class(obj) = "cytoeffect"
   obj
 

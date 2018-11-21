@@ -21,42 +21,35 @@ plot.cytoeffect = function(obj, type = "distribution") {
 
   if(type == "beta") {
 
-    tb_beta = summary(obj, "beta")
-    ind = sort.int(tb_beta$median,index.return=TRUE)$ix
-    reordered_names = tb_beta$protein_name[ind]
-    tb_beta$protein_name %<>% factor(levels = reordered_names)
-    xlab_str = paste(conditions,collapse = " <-> ")
-    ggplot(tb_beta, aes(x = median, y = protein_name)) +
+    tb_beta = summary(fit_mcmc, pars = "beta", probs = c(0.025, 0.5, 0.975))
+    tb_beta = tb_beta$summary[,c("2.5%","50%","97.5%")]
+    tb_beta %<>% as.tibble(rownames = "name")
+    tb_beta %<>% filter(name != "beta[1]") # remove intercept
+    tb_beta %<>% add_column(protein_name = protein_names)
+    ggplot(tb_beta, aes(x = `50%`, y = protein_name)) +
       geom_vline(xintercept = 0,color = "red") +
       geom_point(size = 2) +
-      geom_errorbarh(aes(xmin = low, xmax = high)) +
-      ggtitle("Fixed Effects") +
-      xlab(xlab_str) +
+      geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`)) +
+      ggtitle("Regression Coefficients") +
+      xlab(conditions[2]) +
       theme(axis.title.y = element_blank())
 
-  } else if (type == "sigma") {
+  } else if (type == "sigma_donor") {
 
-    tb_random_donor = summary(obj,"sigmad") %>% mutate(effect = "donor")
-    tb_random_celltype = summary(obj,"sigmac") %>% mutate(effect = "celltype")
-    ind = sort.int(tb_random_celltype$median,index.return=TRUE)$ix
-    reordered_names = tb_random_celltype$protein_name[ind]
-    tb_random = bind_rows(tb_random_celltype, tb_random_donor)
-    tb_random$protein_name %<>% factor(levels = reordered_names)
-    ggplot(tb_random, aes(x = median, y = protein_name, color = effect)) +
-      geom_errorbarh(aes(xmin = low, xmax = high)) +
+    tb_sigma = summary(fit_mcmc, pars = type, probs = c(0.025, 0.5, 0.975))
+    tb_sigma = tb_sigma$summary[,c("2.5%","50%","97.5%")]
+    tb_sigma %<>% as.tibble(rownames = "name")
+    tb_sigma %<>% filter(name != "sigma_donor[1]") # remove intercept
+    tb_sigma %<>% add_column(protein_name = protein_names)
+    ggplot(tb_sigma, aes(x = `50%`, y = protein_name)) +
       geom_point(size = 2) +
-      ggtitle("Standard Deviations") +
-      theme(axis.title.y = element_blank()) +
-      facet_wrap(~effect, ncol = 2)
+      geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`)) +
+      ggtitle("Marker Standard Deviations") +
+      xlab(type) +
+      theme(axis.title.y = element_blank())
 
-  } else if (type == "Corc" || type == "Cord") {
+  } else if (type == "Cor_donor") {
 
-    if(type == "Corc") {
-      title_str = "Cell Correlations"
-    } else {
-      title_str = "Donor Correlations"
-    }
-    # compute median correlations
     cor = rstan::extract(fit_mcmc, pars = type)[[1]]
     cor = cor[,-1,-1] # remove intercept
     cor_median = apply(X = cor, MARGIN = c(2,3), FUN = median)
@@ -66,20 +59,14 @@ plot.cytoeffect = function(obj, type = "distribution") {
     colnames(cor_median) = rownames(cor_median) = protein_names
     ggcorrplot(cor_median, hc.order = TRUE, type = "lower",
                outline.col = "lightgray",
-               colors = c("#6D9EC1", "white", "#E46726"),
-               p.mat = p_mat, insig = "blank") +
-      ggtitle(title_str) +
+               colors = c("#6D9EC1", "white", "#E46726")) +
+      ggtitle(paste0("Marker Correlations (",type,")")) +
       theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank())
 
-  } else if (type == "Corc_all" || type == "Cord_all") {
+  } else if (type == "Cor_donor_all") {
 
-    if(type == "Corc_all") {
-      title_str = "Cell Correlations"
-    } else {
-      title_str = "Donor Correlations"
-    }
-    type = strsplit(type, split = "_")[[1]][1]
+    type = strsplit(type, split = "_all")[[1]][1]
     cor = rstan::extract(fit_mcmc, pars = type)[[1]]
     cor = cor[,-1,-1] # remove intercept
     pairs = combn(protein_names, m = 2)
@@ -96,41 +83,41 @@ plot.cytoeffect = function(obj, type = "distribution") {
     ggplot(cor_long, aes(corr, group = name)) +
       geom_line(color = "black", stat = "density", alpha = 0.3) +
       theme(legend.position="none") +
-      ggtitle(title_str)
+      ggtitle(paste0("Marker Correlations (",type,")"))
 
-  } else if (type == "uc") {
+  # } else if (type == "uc") {
 
-    reordered_names = protein_names[order(summary(obj, "sigmac")$median)]
-    uc = rstan::extract(fit_mcmc,pars = "uc")[[1]]
-    uc = uc[,,-1] # remove intercept
-    # rehape posterior samples
-    convert = function(qt) {
-      tb = as.tibble(qt)
-      names(tb) = protein_names
-      tb %>% mutate(celltype = celltypes)
-    }
-    tb_mid = convert(qt = apply(uc,c(2,3),median)) %>%
-      gather(protein_name, mid, -celltype)
-    tb_low = convert(qt = apply(uc,c(2,3),
-                                function(x) quantile(x,probs = 0.025))) %>%
-      gather(protein_name, low, -celltype)
-    tb_high = convert(qt = apply(uc,c(2,3),
-                                 function(x) quantile(x,probs = 0.975))) %>%
-      gather(protein_name, high, -celltype)
-    tb = bind_cols(tb_mid,tb_low,tb_high) %>%
-      select(protein_name,celltype,mid,low,high)
-    tb$protein_name %<>% factor(levels = reordered_names)
-    tb$celltype %<>% as.factor
-    xlab_str = paste(conditions,collapse = " <-> ")
-    ggplot(tb, aes(x = mid, y = protein_name, color = protein_name)) +
-      geom_vline(xintercept = 0,color = "black") +
-      geom_point(size = 2) +
-      geom_errorbarh(aes(xmin = low, xmax = high)) +
-      ggtitle("Cell Type Random Effects") +
-      xlab(xlab_str) +
-      theme(legend.position="none",
-            axis.title.y = element_blank()) +
-      facet_wrap(~celltype,nrow = 2)
+    # reordered_names = protein_names[order(summary(obj, "sigmac")$median)]
+    # uc = rstan::extract(fit_mcmc,pars = "uc")[[1]]
+    # uc = uc[,,-1] # remove intercept
+    # # rehape posterior samples
+    # convert = function(qt) {
+    #   tb = as.tibble(qt)
+    #   names(tb) = protein_names
+    #   tb %>% mutate(celltype = celltypes)
+    # }
+    # tb_mid = convert(qt = apply(uc,c(2,3),median)) %>%
+    #   gather(protein_name, mid, -celltype)
+    # tb_low = convert(qt = apply(uc,c(2,3),
+    #                             function(x) quantile(x,probs = 0.025))) %>%
+    #   gather(protein_name, low, -celltype)
+    # tb_high = convert(qt = apply(uc,c(2,3),
+    #                              function(x) quantile(x,probs = 0.975))) %>%
+    #   gather(protein_name, high, -celltype)
+    # tb = bind_cols(tb_mid,tb_low,tb_high) %>%
+    #   select(protein_name,celltype,mid,low,high)
+    # tb$protein_name %<>% factor(levels = reordered_names)
+    # tb$celltype %<>% as.factor
+    # xlab_str = paste(conditions,collapse = " <-> ")
+    # ggplot(tb, aes(x = mid, y = protein_name, color = protein_name)) +
+    #   geom_vline(xintercept = 0,color = "black") +
+    #   geom_point(size = 2) +
+    #   geom_errorbarh(aes(xmin = low, xmax = high)) +
+    #   ggtitle("Cell Type Random Effects") +
+    #   xlab(xlab_str) +
+    #   theme(legend.position="none",
+    #         axis.title.y = element_blank()) +
+    #   facet_wrap(~celltype,nrow = 2)
 
   } else {
 
