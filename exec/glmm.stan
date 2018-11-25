@@ -33,8 +33,12 @@ model {
   for (j in 1:J)
     z_donor[j] ~ normal(0,1);
   // likelihood
-  for (i in 1:N)
-    treatment[i] ~ bernoulli_logit(X[i] * beta + X[i] * b_donor[donor[i]]);
+  {
+    vector[N] x_beta_b_donor;
+    for (i in 1:N)
+      x_beta_b_donor[i] = X[i] * beta + X[i] * b_donor[donor[i]];
+    treatment ~ bernoulli_logit(x_beta_b_donor);
+  }
 }
 generated quantities {
   // donor correlation matrix
