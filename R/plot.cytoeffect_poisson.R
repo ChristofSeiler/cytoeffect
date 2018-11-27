@@ -50,6 +50,22 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
       xlab(type) +
       theme(axis.title.y = element_blank())
 
+  } else if (type == "sigma_all") {
+
+    tb_sigma = summary(fit_mcmc, pars = c("sigma","sigma_donor"),
+                       probs = c(0.025, 0.5, 0.975))
+    tb_sigma = tb_sigma$summary[,c("2.5%","50%","97.5%")]
+    tb_sigma %<>% as.tibble(rownames = "name")
+    tb_sigma %<>% add_column(protein_name = rep(protein_names, 2))
+    tb_sigma %<>% add_column(type = c(rep("cell", length(protein_names)),
+                                      rep("donor", length(protein_names))))
+    ggplot(tb_sigma, aes(x = `50%`, y = protein_name, color = type)) +
+      geom_point(size = 2) +
+      geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`)) +
+      ggtitle("Marker Standard Deviations") +
+      xlab("sigma") +
+      theme(axis.title.y = element_blank())
+
   } else if (type == "Cor" || type == "Cor_donor") {
 
     cor = rstan::extract(fit_mcmc, pars = type)[[1]]
