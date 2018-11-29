@@ -70,9 +70,6 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
 
     cor = rstan::extract(fit_mcmc, pars = type)[[1]]
     cor_median = apply(X = cor, MARGIN = c(2,3), FUN = median)
-    cor_pos = apply(X = cor, MARGIN = c(2,3), FUN = function(x) mean(x > 0))
-    cor_neg = apply(X = cor, MARGIN = c(2,3), FUN = function(x) mean(x < 0))
-    p_mat = 1-pmax(cor_pos, cor_neg)
     colnames(cor_median) = rownames(cor_median) = protein_names
     ggcorrplot(cor_median, hc.order = TRUE, type = "lower",
                outline.col = "lightgray",
