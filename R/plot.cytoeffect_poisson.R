@@ -32,12 +32,12 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
     ggplot(tb_beta, aes(x = `50%`, y = protein_name)) +
       geom_vline(xintercept = 0,color = "red") +
       geom_point(size = 2) +
-      geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`)) +
+      geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`), height = 0.5) +
       ggtitle("Regression Coefficients") +
       xlab(covariates[2]) +
       theme(axis.title.y = element_blank())
 
-  } else if (type == "sigma" || type == "sigma_donor") {
+  } else if (type == "sigma" || type == "sigma_term" || type == "sigma_donor") {
 
     tb_sigma = summary(fit_mcmc, pars = type, probs = c(0.025, 0.5, 0.975))
     tb_sigma = tb_sigma$summary[,c("2.5%","50%","97.5%")]
@@ -52,21 +52,27 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
 
   } else if (type == "sigma_all") {
 
-    tb_sigma = summary(fit_mcmc, pars = c("sigma","sigma_donor"),
+    tb_sigma = summary(fit_mcmc, pars = c("sigma","sigma_term","sigma_donor"),
                        probs = c(0.025, 0.5, 0.975))
     tb_sigma = tb_sigma$summary[,c("2.5%","50%","97.5%")]
     tb_sigma %<>% as.tibble(rownames = "name")
-    tb_sigma %<>% add_column(protein_name = rep(protein_names, 2))
+    tb_sigma %<>% add_column(protein_name = rep(protein_names, 3))
     tb_sigma %<>% add_column(type = c(rep("cell", length(protein_names)),
+                                      rep("term", length(protein_names)),
                                       rep("donor", length(protein_names))))
-    ggplot(tb_sigma, aes(x = `50%`, y = protein_name, color = type)) +
-      geom_point(size = 2) +
-      geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`)) +
+    tb_sigma$type %<>% factor(levels = c("cell","term","donor"))
+    dodge = position_dodge(width = 0.9)
+    ggplot(tb_sigma, aes(x = protein_name, y = `50%`, color = type)) +
+      geom_point(size = 2,
+                 position = dodge) +
+      geom_errorbar(aes(ymin = `2.5%`, ymax = `97.5%`),
+                    position = dodge) +
       ggtitle("Marker Standard Deviations") +
-      xlab("sigma") +
-      theme(axis.title.y = element_blank())
+      ylab("sigma") +
+      theme(axis.title.y = element_blank()) +
+      coord_flip()
 
-  } else if (type == "Cor" || type == "Cor_donor") {
+  } else if (type == "Cor" || type == "Cor_term" || type == "Cor_donor") {
 
     cor = rstan::extract(fit_mcmc, pars = type)[[1]]
     cor_median = apply(X = cor, MARGIN = c(2,3), FUN = median)
