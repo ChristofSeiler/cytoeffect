@@ -68,10 +68,10 @@ poisson_lognormal = function(df_samples_subset,
 
     # run sampler
     fit_mcmc = sampling(model,
-                        pars = c("beta","beta_cov",
-                                 "sigma","sigma_donor","sigma_inter","sigma_term",
+                        pars = c("beta",
+                                 "sigma","sigma_donor",
                                  "L","L_donor",
-                                 "Cor","Cor_donor","Cor_inter","Cor_term",
+                                 "Cor","Cor_donor",
                                  "b_donor",
                                  "Y_hat"
                                  ),
