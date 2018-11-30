@@ -46,6 +46,8 @@ model {
   // priors
   for (j in 1:d)
     beta[j] ~ normal(0, 7);
+  for (j in 1:d)
+    beta_cov[j] ~ normal(0, 7);
   sigma ~ cauchy(0, 2.5);
   sigma_donor ~ cauchy(0, 2.5);
   L ~ lkj_corr_cholesky(eta);
