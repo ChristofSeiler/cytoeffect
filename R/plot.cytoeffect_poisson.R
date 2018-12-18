@@ -28,14 +28,15 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
     tb_beta %<>% as.tibble(rownames = "name")
     tb_beta %<>% add_column(protein_name = rep(protein_names, each = length(covariates)))
     tb_beta %<>% add_column(covariate = rep(covariates, length(protein_names)))
-    tb_beta %<>% dplyr::filter(covariate == covariates[2])
+    #tb_beta %<>% dplyr::filter(covariate == covariates[2])
     ggplot(tb_beta, aes(x = `50%`, y = protein_name)) +
       geom_vline(xintercept = 0,color = "red") +
       geom_point(size = 2) +
       geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`), height = 0.5) +
       ggtitle("Regression Coefficients") +
-      xlab(covariates[2]) +
-      theme(axis.title.y = element_blank())
+      xlab("log expected count") +
+      theme(axis.title.y = element_blank()) +
+      facet_wrap(~covariate)
 
   } else if (type == "sigma" || type == "sigma_term" || type == "sigma_donor") {
 
