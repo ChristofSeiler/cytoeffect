@@ -29,9 +29,10 @@ poisson_lognormal = function(df_samples_subset,
   #df_samples_subset$group_condition = paste0(pull(df_samples_subset, group), "_",
   #                                      pull(df_samples_subset, condition))
   Y = df_samples_subset %>% dplyr::select(protein_names) %>% as.matrix()
+  X = model.matrix(formula(paste("~",condition)), data = df_samples_subset)
   #X = model.matrix(formula(paste("~",condition,"*celltype")), data = df_samples_subset)
-  X = model.matrix(formula(paste("~",condition,"*CD56_tfm*CD16_tfm")),
-                   data = df_samples_subset)
+  #X = model.matrix(formula(paste("~",condition,"*CD56_tfm*CD16_tfm")),
+  #                 data = df_samples_subset)
   n = nrow(Y)
   d = ncol(Y)
   p = ncol(X)
