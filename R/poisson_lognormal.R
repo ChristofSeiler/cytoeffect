@@ -10,6 +10,7 @@ poisson_lognormal = function(df_samples_subset,
                              protein_names,
                              condition,
                              group,
+                             Dmat,
                              iter = 325,
                              warmup = 200,
                              num_chains = 4,
@@ -43,8 +44,14 @@ poisson_lognormal = function(df_samples_subset,
     as.factor() %>%
     as.integer()
   k = length(table(donor))
+  subtype = df_samples_subset %>%
+    pull(subtype) %>%
+    as.factor() %>%
+    as.integer()
+  s = length(table(subtype))
   stan_data = list(Y = Y, X = X, n = n, d = d, p = p,
-                   k = k, donor = donor, eta = eta)
+                   k = k, donor = donor, eta = eta,
+                   s = s, subtype = subtype, Dmat = Dmat)
 
   # prepare starting point for sampler
   beta = lapply(1:ncol(Y), function(j) {

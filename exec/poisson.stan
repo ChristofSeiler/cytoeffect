@@ -2,6 +2,22 @@
  * Multivariate Poisson-log Normal model
  * Author: Christof Seiler
  */
+ functions {
+   matrix L_cov_exp_quad(matrix Dmat, real alphasq, real rhosq, real delta) {
+    int s = dims(Dmat)[1];
+    matrix[s,s] exp_Dmat = exp(-rhosq*square(Dmat));
+    matrix[s,s] K;
+    for (i in 1:(s-1)) {
+      K[i,i] = alphasq + delta;
+      for (j in (i + 1):s) {
+        K[i,j] = alphasq * exp_Dmat[i,j];
+        K[j,i] = K[i,j];
+      }
+    }
+    K[s,s] = alphasq + delta;
+    return cholesky_decompose(K);
+  }
+}
 data {
   int<lower=1> n; // num of cells
   int<lower=1> d; // num of markers
@@ -11,6 +27,12 @@ data {
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
   real<lower=0> eta; // parameter of lkj prior
+  int<lower=1> s; // spatial locations
+  int<lower=1,upper=s> subtype[n]; // cell subtype indicator
+  matrix[s,s] Dmat;
+}
+transformed data {
+  real delta = 1e-9;
 }
 parameters {
   vector[p] beta[d]; // fixed coefficients
@@ -23,11 +45,15 @@ parameters {
   vector[d] z[n]; // random effects
   vector[d] z_term[n]; // random effects
   vector[d] z_donor[k]; // random effects
+  vector[s] z_spatial; // random effects
+  real<lower=0> alphasq;
+  real<lower=0> rhosq;
 }
 transformed parameters {
   vector[d] b[n]; // random effects
   vector[d] b_term[n]; // random effects
   vector[d] b_donor[k]; // random effects
+  vector[s] b_spatial; // random effects
   {
     matrix[d,d] Sigma; // random effects cov matrix
     Sigma = diag_pre_multiply(sigma, L);
@@ -46,6 +72,11 @@ transformed parameters {
     for (i in 1:k)
       b_donor[i] = Sigma * z_donor[i];
   }
+  {
+    matrix[s,s] Sigma; // random effects cov matrix
+    Sigma = L_cov_exp_quad(Dmat, alphasq, rhosq, delta);
+    b_spatial = Sigma * z_spatial;
+  }
 }
 model {
   // priors
@@ -63,6 +94,10 @@ model {
     z_term[i] ~ normal(0, 1);
   for (i in 1:k)
     z_donor[i] ~ normal(0, 1);
+  for (i in 1:k)
+    z_spatial[i] ~ normal(0, 1);
+  alphasq ~ cauchy(0, 1);
+  rhosq ~ cauchy(0, 1);
   // likelihood
   for (j in 1:d) {
     // Y[i,j] ~ poisson_log(
@@ -75,7 +110,8 @@ model {
       X * beta[j] +
       to_vector(b[,j]) +
       to_vector(b_term[,j]) +
-      to_vector(b_donor[donor,j])
+      to_vector(b_donor[donor,j]) +
+      b_spatial[subtype[s]]
     );
   }
 }
@@ -95,7 +131,8 @@ generated quantities {
       X * beta[j] +
       to_vector(b[,j]) +
       to_vector(b_term[,j]) +
-      to_vector(b_donor[donor,j])
+      to_vector(b_donor[donor,j]) +
+      b_spatial[subtype[s]]
     );
   }
 }
