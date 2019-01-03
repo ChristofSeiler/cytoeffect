@@ -48,7 +48,9 @@ poisson_lognormal = function(df_samples_subset,
     pull(subtype) %>%
     as.factor() %>%
     as.integer()
-  s = length(table(subtype))
+  s = df_samples_subset %>%
+    pull(subtype) %>%
+    nlevels
   stan_data = list(Y = Y, X = X, n = n, d = d, p = p,
                    k = k, donor = donor, eta = eta,
                    s = s, subtype = subtype, Dmat = Dmat)
@@ -110,8 +112,10 @@ poisson_lognormal = function(df_samples_subset,
   obj = list(fit_mcmc = fit_mcmc,
              protein_names = protein_names,
              conditions = levels(pull(df_samples_subset, condition)),
-             celltypes = levels(as.factor(df_samples_subset$celltype)),
+             #celltypes = levels(as.factor(df_samples_subset$celltype)),
              covariates = colnames(X),
+             subtype = subtype,
+             Dmat = Dmat,
              Y = Y)
   class(obj) = "cytoeffect_poisson"
   obj

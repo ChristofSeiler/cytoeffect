@@ -9,7 +9,7 @@
     matrix[s,s] K;
     for (i in 1:(s-1)) {
       K[i,i] = alphasq + delta;
-      for (j in (i + 1):s) {
+      for (j in (i+1):s) {
         K[i,j] = alphasq * exp_Dmat[i,j];
         K[j,i] = K[i,j];
       }
@@ -89,15 +89,14 @@ model {
   L_term ~ lkj_corr_cholesky(eta);
   L_donor ~ lkj_corr_cholesky(eta);
   for (i in 1:n)
-    z[i] ~ normal(0, 1);
+    z[i] ~ std_normal();
   for (i in 1:n)
-    z_term[i] ~ normal(0, 1);
+    z_term[i] ~ std_normal();
   for (i in 1:k)
-    z_donor[i] ~ normal(0, 1);
-  for (i in 1:k)
-    z_spatial[i] ~ normal(0, 1);
-  alphasq ~ cauchy(0, 1);
-  rhosq ~ cauchy(0, 1);
+    z_donor[i] ~ std_normal();
+  z_spatial ~ std_normal();
+  alphasq ~ cauchy(0, 2.5);
+  rhosq ~ cauchy(0, 2.5);
   // likelihood
   for (j in 1:d) {
     // Y[i,j] ~ poisson_log(
