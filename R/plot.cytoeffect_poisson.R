@@ -87,6 +87,7 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
 
   } else if (type == "Y_hat") {
 
+    Y = obj$Y
     Y_hat = rstan::extract(obj$fit_mcmc, pars = type)[[1]]
     Y_hat_mean = apply(X = Y_hat, MARGIN = c(2,3), FUN = mean)
     # Standard residuals
@@ -122,6 +123,7 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
     # plot 100 draws from joint posterior
     set.seed(0xdada)
     draw_ids = sample(length(alphasq), 100)
+    tb_pars = data.frame(alphasq, rhosq)
     tb_curves = apply(tb_pars[draw_ids,], 1,
                       function(pars) distfun(x, pars[1], pars[2]))
     tb_curves %<>% as.tibble
