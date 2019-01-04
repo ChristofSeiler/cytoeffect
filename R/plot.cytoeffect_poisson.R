@@ -115,6 +115,11 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
     alphasq = rstan::extract(obj$fit_mcmc, pars = "alphasq")[[1]]
     rhosq = rstan::extract(obj$fit_mcmc, pars = "rhosq")[[1]]
 
+    # select marker
+    marker_id = 4
+    alphasq = alphasq[,marker_id]
+    rhosq = rhosq[,marker_id]
+
     # define covariance function
     x = seq(0,5,0.01)
     distfun = function(x, alphasq, rhosq)
@@ -131,7 +136,7 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
     tb_curves %<>% gather(curve, covariance, -x)
     p1 = ggplot(tb_curves, aes(x, covariance, group = curve)) +
       geom_line(alpha = 0.2) +
-      ggtitle("Joint Posterior") +
+      ggtitle(paste("Joint Posterior:",protein_names[marker_id])) +
       xlab("distance")
 
     # plot quantiles
@@ -148,7 +153,7 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
     p2 = ggplot(tb, aes(x)) +
       geom_ribbon(aes(ymin = q5, ymax = q95), fill = "grey70") +
       geom_line(aes(y = covariance)) +
-      ggtitle("Median and 95% Credible Interval") +
+      ggtitle(paste("Median and 95% Credible Interval:",protein_names[marker_id])) +
       xlab("distance")
 
     list(p1,p2)

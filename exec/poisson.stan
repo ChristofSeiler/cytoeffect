@@ -45,15 +45,15 @@ parameters {
   vector[d] z[n]; // random effects
   vector[d] z_term[n]; // random effects
   vector[d] z_donor[k]; // random effects
-  vector[s] z_spatial; // random effects
-  real<lower=0> alphasq;
-  real<lower=0> rhosq;
+  vector[s] z_spatial[d]; // random effects
+  vector<lower=0>[d] alphasq;
+  vector<lower=0>[d] rhosq;
 }
 transformed parameters {
   vector[d] b[n]; // random effects
   vector[d] b_term[n]; // random effects
   vector[d] b_donor[k]; // random effects
-  vector[s] b_spatial; // random effects
+  vector[s] b_spatial[d]; // random effects
   {
     matrix[d,d] Sigma; // random effects cov matrix
     Sigma = diag_pre_multiply(sigma, L);
@@ -74,8 +74,10 @@ transformed parameters {
   }
   {
     matrix[s,s] Sigma; // random effects cov matrix
-    Sigma = L_cov_exp_quad(Dmat, alphasq, rhosq, delta);
-    b_spatial = Sigma * z_spatial;
+    for (j in 1:d) {
+      Sigma = L_cov_exp_quad(Dmat, alphasq[j], rhosq[j], delta);
+      b_spatial[j] = Sigma * z_spatial[j];
+    }
   }
 }
 model {
@@ -88,15 +90,16 @@ model {
   L ~ lkj_corr_cholesky(eta);
   L_term ~ lkj_corr_cholesky(eta);
   L_donor ~ lkj_corr_cholesky(eta);
-  for (i in 1:n)
+  for (i in 1:n) {
     z[i] ~ std_normal();
-  for (i in 1:n)
     z_term[i] ~ std_normal();
+  }
   for (i in 1:k)
     z_donor[i] ~ std_normal();
-  z_spatial ~ std_normal();
-  alphasq ~ cauchy(0, 2.5);
-  rhosq ~ cauchy(0, 2.5);
+  for (j in 1:d)
+    z_spatial[j] ~ std_normal();
+  alphasq ~ cauchy(0, 1);
+  rhosq ~ cauchy(0, 1);
   // likelihood
   for (j in 1:d) {
     // Y[i,j] ~ poisson_log(
@@ -110,7 +113,7 @@ model {
       to_vector(b[,j]) +
       to_vector(b_term[,j]) +
       to_vector(b_donor[donor,j]) +
-      b_spatial[subtype[s]]
+      to_vector(b_spatial[j,subtype])
     );
   }
 }
@@ -131,7 +134,7 @@ generated quantities {
       to_vector(b[,j]) +
       to_vector(b_term[,j]) +
       to_vector(b_donor[donor,j]) +
-      b_spatial[subtype[s]]
+      to_vector(b_spatial[j,subtype])
     );
   }
 }
