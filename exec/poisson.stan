@@ -3,18 +3,18 @@
  * Author: Christof Seiler
  */
  functions {
-   matrix L_cov_exp_quad(matrix Dmat, real alphasq, real rhosq, real delta) {
+   matrix L_cov_exp_quad(matrix Dmat, real alphasq, real rhosq, real sigmasq) {
     int s = dims(Dmat)[1];
     matrix[s,s] exp_Dmat = exp(-rhosq*square(Dmat));
     matrix[s,s] K;
     for (i in 1:(s-1)) {
-      K[i,i] = alphasq + delta;
+      K[i,i] = alphasq + sigmasq;
       for (j in (i+1):s) {
         K[i,j] = alphasq * exp_Dmat[i,j];
         K[j,i] = K[i,j];
       }
     }
-    K[s,s] = alphasq + delta;
+    K[s,s] = alphasq + sigmasq;
     return cholesky_decompose(K);
   }
 }
@@ -31,9 +31,6 @@ data {
   int<lower=1,upper=s> subtype[n]; // cell subtype indicator
   matrix[s,s] Dmat;
 }
-transformed data {
-  real delta = 1e-9;
-}
 parameters {
   vector[p] beta[d]; // fixed coefficients
   vector<lower=0>[d] sigma; // random effects std
@@ -48,6 +45,7 @@ parameters {
   vector[s] z_spatial[d]; // random effects
   vector<lower=0>[d] alphasq;
   vector<lower=0>[d] rhosq;
+  vector<lower=0>[d] sigmasq;
 }
 transformed parameters {
   vector[d] b[n]; // random effects
@@ -75,7 +73,7 @@ transformed parameters {
   {
     matrix[s,s] Sigma; // random effects cov matrix
     for (j in 1:d) {
-      Sigma = L_cov_exp_quad(Dmat, alphasq[j], rhosq[j], delta);
+      Sigma = L_cov_exp_quad(Dmat, alphasq[j], rhosq[j], sigmasq[j]);
       b_spatial[j] = Sigma * z_spatial[j];
     }
   }
@@ -100,6 +98,7 @@ model {
     z_spatial[j] ~ std_normal();
   alphasq ~ cauchy(0, 1);
   rhosq ~ cauchy(0, 1);
+  sigmasq ~ cauchy(0, 1);
   // likelihood
   for (j in 1:d) {
     // Y[i,j] ~ poisson_log(
@@ -124,7 +123,6 @@ generated quantities {
   matrix[d,d] Cor;
   matrix[d,d] Cor_term;
   matrix[d,d] Cor_donor;
-  //matrix[d,d] Cor_term;
   Cor = L * L';
   Cor_term = L_term * L_term';
   Cor_donor = L_donor * L_donor';

@@ -84,7 +84,7 @@ poisson_lognormal = function(df_samples_subset,
                                  "L","L_term","L_donor",
                                  "Cor","Cor_term","Cor_donor",
                                  "b_donor",
-                                 "b_spatial","alphasq","rhosq",
+                                 "b_spatial","alphasq","rhosq","sigmasq",
                                  "Y_hat"
                                  ),
                         data = stan_data,
