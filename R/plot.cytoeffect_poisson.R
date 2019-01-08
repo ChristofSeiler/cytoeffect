@@ -39,14 +39,16 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
     tb_beta %<>% bind_rows(beta_diff)
 
     # combined plot
-    ggplot(tb_beta, aes(x = `50%`, y = protein_name)) +
-      geom_vline(xintercept = 0,color = "grey") +
-      geom_point(size = 2) +
-      geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`), height = 0.5) +
+    dodge = position_dodge(width = 0.9)
+    ggplot(tb_beta, aes(x = protein_name, y = `50%`, color = condition)) +
+      geom_hline(yintercept = 0,color = "grey") +
+      geom_point(size = 2, position = dodge) +
+      geom_errorbar(aes(ymin = `2.5%`, ymax = `97.5%`),
+                    position = dodge) +
       ggtitle("Regression Coefficients") +
-      xlab("log expected count") +
+      ylab("log expected count") +
       theme(axis.title.y = element_blank()) +
-      facet_wrap(~condition)
+      coord_flip()
 
   } else if (type == "sigma") {
 
@@ -61,8 +63,7 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
     tb_sigma$type %<>% factor(levels = c(conditions,"donor"))
     dodge = position_dodge(width = 0.9)
     ggplot(tb_sigma, aes(x = protein_name, y = `50%`, color = type)) +
-      geom_point(size = 2,
-                 position = dodge) +
+      geom_point(size = 2, position = dodge) +
       geom_errorbar(aes(ymin = `2.5%`, ymax = `97.5%`),
                     position = dodge) +
       ggtitle("Marker Standard Deviations") +
