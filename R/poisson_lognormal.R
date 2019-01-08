@@ -21,6 +21,8 @@ poisson_lognormal = function(df_samples_subset,
     stop("group column missing")
   if(nrow(df_samples_subset) == 0)
     stop("no observations")
+  if(df_samples_subset %>% pull(condition) %>% nlevels != 2)
+    stop("condition variables should have two levels")
 
   # prepare input data
   #df_samples_subset$group_condition = paste0(pull(df_samples_subset, group), "_",
@@ -46,19 +48,41 @@ poisson_lognormal = function(df_samples_subset,
                    k = k, donor = donor, term = term)
 
   # prepare starting point for sampler
-  # beta = lapply(1:ncol(Y), function(j) {
-  #   coefs = glm.fit(X, Y[,j], family = stats::poisson())$coefficients
-  #   tibble(x0 = coefs[1], x1 = coefs[2])
-  # }) %>% bind_rows()
-  logY = log(Y + 1)
-  sigma = sqrt(diag(cov(logY)))
-  L = t(chol(cor(logY)))
+
+  # log mean per condition (same as Poisson regression)
+  beta = df_samples_subset %>%
+    group_by_(condition) %>%
+    summarise_at(protein_names, function(x) log(mean(x))) %>%
+    select(protein_names) %>%
+    t
+
+  # covariance matrix per condition
+  initcov = function(tfmY) {
+    sigma = sqrt(diag(cov(tfmY)))
+    L = t(chol(cor(tfmY)))
+    list(sigma=sigma,L=L)
+  }
+  tfm = function(x) asinh(x/5)
+  cov1 = initcov(tfm(Y[term == 1,]))
+  cov2 = initcov(tfm(Y[term == 2,]))
+
+  # covariance matrix across donors
+  Y_donor = df_samples_subset %>%
+    group_by(donor) %>%
+    summarise_at(protein_names, median) %>%
+    select(protein_names)
+  cov_donor = initcov(tfm(Y_donor))
+
+  # set random effects to zero
   z = matrix(0, nrow = n, ncol = d)
+  z_term = matrix(0, nrow = n, ncol = d)
   z_donor = matrix(0, nrow = k, ncol = d)
-  stan_init = list(#beta = beta,
-                   sigma = sigma, sigma_donor = sigma,
-                   L = L, L_donor = L,
-                   z = z, z_donor = z_donor)
+  stan_init = list(
+    beta = beta,
+    sigma = cov1$sigma, sigma_term = cov2$sigma, sigma_donor = cov_donor$sigma,
+    L = cov1$L, L_term = cov2$L, L_donor = cov_donor$L,
+    z = z, z_term = z_term, z_donor = z_donor
+  )
 
   # cluster function
   run_sampling = function(seed) {
