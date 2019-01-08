@@ -7,10 +7,13 @@ data {
   int<lower=1> d; // num of markers
   int<lower=1> p; // num of explanatory variables (including intercept)
   int<lower=0> Y[n,d]; // observed cell counts
-  matrix[n,p] X; // design matrix
+  //matrix[n,p] X; // design matrix
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
-  real<lower=0> eta; // parameter of lkj prior
+  int<lower=1,upper=p> term[n]; // donor indicator
+}
+transformed data {
+  real eta = 1.0; // parameter of lkj prior
 }
 parameters {
   vector[p] beta[d]; // fixed coefficients
@@ -26,20 +29,26 @@ parameters {
 }
 transformed parameters {
   vector[d] b[n]; // random effects
-  vector[d] b_term[n]; // random effects
+  //vector[d] b_term[n]; // random effects
   vector[d] b_donor[k]; // random effects
   {
     matrix[d,d] Sigma; // random effects cov matrix
+    matrix[d,d] Sigma_term; // random effects cov matrix
     Sigma = diag_pre_multiply(sigma, L);
-    for (i in 1:n)
-      b[i] = Sigma * z[i];
+    Sigma_term = diag_pre_multiply(sigma_term, L_term);
+    for (i in 1:n) {
+      if (term[i] == 1)
+        b[i] = Sigma * z[i];
+      else
+        b[i] = Sigma_term * z_term[i];
+    }
   }
-  {
-    matrix[d,d] Sigma; // random effects cov matrix
-    Sigma = diag_pre_multiply(sigma_term, L_term);
-    for (i in 1:n)
-      b_term[i] = X[i,2] * Sigma * z_term[i];
-  }
+  // {
+  //   matrix[d,d] Sigma; // random effects cov matrix
+  //   Sigma = diag_pre_multiply(sigma_term, L_term);
+  //   for (i in 1:n)
+  //     b_term[i] = X[i,2] * Sigma * z_term[i];
+  // }
   {
     matrix[d,d] Sigma; // random effects cov matrix
     Sigma = diag_pre_multiply(sigma_donor, L_donor);
@@ -72,9 +81,10 @@ model {
     //   b_donor[donor[i],j]
     // );
     Y[,j] ~ poisson_log(
-      X * beta[j] +
+      //X * beta[j] +
+      beta[j,term] +
       to_vector(b[,j]) +
-      to_vector(b_term[,j]) +
+      //to_vector(b_term[,j]) +
       to_vector(b_donor[donor,j])
     );
   }
@@ -92,9 +102,10 @@ generated quantities {
   Cor_donor = L_donor * L_donor';
   for (j in 1:d) {
     Y_hat[,j] = poisson_log_rng(
-      X * beta[j] +
+      //X * beta[j] +
+      beta[j,term] +
       to_vector(b[,j]) +
-      to_vector(b_term[,j]) +
+      //to_vector(b_term[,j]) +
       to_vector(b_donor[donor,j])
     );
   }

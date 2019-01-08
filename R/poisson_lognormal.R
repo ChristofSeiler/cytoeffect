@@ -12,8 +12,7 @@ poisson_lognormal = function(df_samples_subset,
                              group,
                              iter = 325,
                              warmup = 200,
-                             num_chains = 4,
-                             eta = 1.0) {
+                             num_chains = 4) {
 
   # some checks
   if(sum(names(df_samples_subset) == condition) == 0)
@@ -22,20 +21,20 @@ poisson_lognormal = function(df_samples_subset,
     stop("group column missing")
   if(nrow(df_samples_subset) == 0)
     stop("no observations")
-  if(!eta > 0)
-    stop("eta needs to be positive")
 
   # prepare input data
   #df_samples_subset$group_condition = paste0(pull(df_samples_subset, group), "_",
   #                                      pull(df_samples_subset, condition))
   Y = df_samples_subset %>% dplyr::select(protein_names) %>% as.matrix()
-  X = model.matrix(formula(paste("~",condition)), data = df_samples_subset)
-  #X = model.matrix(formula(paste("~",condition,"*celltype")), data = df_samples_subset)
-  #X = model.matrix(formula(paste("~",condition,"*CD56_tfm*CD16_tfm")),
-  #                 data = df_samples_subset)
+  #X = model.matrix(formula(paste("~",condition)), data = df_samples_subset)
+  term = df_samples_subset %>%
+    pull(condition) %>%
+    as.factor() %>%
+    as.integer()
+  p = length(table(term))
   n = nrow(Y)
   d = ncol(Y)
-  p = ncol(X)
+  #p = ncol(X)
   #k = length(unique(df_samples_subset$group_condition))
   #donor = as.integer(as.factor(df_samples_subset$group_condition))
   donor = df_samples_subset %>%
@@ -43,20 +42,20 @@ poisson_lognormal = function(df_samples_subset,
     as.factor() %>%
     as.integer()
   k = length(table(donor))
-  stan_data = list(Y = Y, X = X, n = n, d = d, p = p,
-                   k = k, donor = donor, eta = eta)
+  stan_data = list(Y = Y, n = n, d = d, p = p,
+                   k = k, donor = donor, term = term)
 
   # prepare starting point for sampler
-  beta = lapply(1:ncol(Y), function(j) {
-    coefs = glm.fit(X, Y[,j], family = stats::poisson())$coefficients
-    tibble(x0 = coefs[1], x1 = coefs[2])
-  }) %>% bind_rows()
+  # beta = lapply(1:ncol(Y), function(j) {
+  #   coefs = glm.fit(X, Y[,j], family = stats::poisson())$coefficients
+  #   tibble(x0 = coefs[1], x1 = coefs[2])
+  # }) %>% bind_rows()
   logY = log(Y + 1)
   sigma = sqrt(diag(cov(logY)))
   L = t(chol(cor(logY)))
   z = matrix(0, nrow = n, ncol = d)
   z_donor = matrix(0, nrow = k, ncol = d)
-  stan_init = list(beta = beta,
+  stan_init = list(#beta = beta,
                    sigma = sigma, sigma_donor = sigma,
                    L = L, L_donor = L,
                    z = z, z_donor = z_donor)
@@ -102,7 +101,7 @@ poisson_lognormal = function(df_samples_subset,
   obj = list(fit_mcmc = fit_mcmc,
              protein_names = protein_names,
              conditions = levels(pull(df_samples_subset, condition)),
-             covariates = colnames(X),
+             #covariates = colnames(X),
              Y = Y)
   class(obj) = "cytoeffect_poisson"
   obj
