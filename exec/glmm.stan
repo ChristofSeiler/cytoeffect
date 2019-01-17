@@ -28,6 +28,7 @@ transformed parameters {
 }
 model {
   // priors
+  beta ~ normal(0, 10);
   L_donor ~ lkj_corr_cholesky(eta);
   sigma_donor ~ cauchy(0, 2.5);
   for (j in 1:J)
