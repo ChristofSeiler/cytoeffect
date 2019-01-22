@@ -29,7 +29,7 @@ plot.cytoeffect = function(obj, type = "distribution") {
     ggplot(tb_beta, aes(x = `50%`, y = protein_name)) +
       geom_vline(xintercept = 0,color = "red") +
       geom_point(size = 2) +
-      geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`)) +
+      geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`, height = 0.3)) +
       ggtitle("Regression Coefficients") +
       xlab(conditions[2]) +
       theme(axis.title.y = element_blank())
@@ -43,7 +43,7 @@ plot.cytoeffect = function(obj, type = "distribution") {
     tb_sigma %<>% add_column(protein_name = protein_names)
     ggplot(tb_sigma, aes(x = `50%`, y = protein_name)) +
       geom_point(size = 2) +
-      geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`)) +
+      geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`, height = 0.3)) +
       ggtitle("Marker Standard Deviations") +
       xlab(type) +
       theme(axis.title.y = element_blank())
