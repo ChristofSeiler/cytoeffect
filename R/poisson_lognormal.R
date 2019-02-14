@@ -95,10 +95,10 @@ poisson_lognormal = function(df_samples_subset,
     fit_mcmc = sampling(model,
                         pars = c("beta",
                                  "sigma","sigma_term","sigma_donor",
-                                 "L","L_term","L_donor",
-                                 "Cor","Cor_term","Cor_donor",
-                                 "b_donor",
-                                 "Y_hat"
+                                 # "L","L_term","L_donor",
+                                 "Cor","Cor_term","Cor_donor"#,
+                                 # "b_donor",
+                                 # "Y_hat"
                                  ),
                         data = stan_data,
                         iter = iter,
@@ -106,7 +106,8 @@ poisson_lognormal = function(df_samples_subset,
                         chains = num_chains,
                         cores = num_chains,
                         seed = seed,
-                        init = rep(list(stan_init), num_chains))
+                        init = rep(list(stan_init), num_chains),
+                        save_warmup = FALSE)
     fit_mcmc
   }
 
