@@ -1,5 +1,15 @@
 # cytoeffect
 
+## Goal
+
+Regression analysis for mass cytometric experiments.
+
 ## Installation
 
-You need to install the rstan package following the instructions [here](https://github.com/stan-dev/rstan/wiki/Installing-RStan-on-Mac-or-Linux).
+Our R package is available from github:
+
+``` r
+# install development version from GitHub
+install.packages("devtools")
+devtools::install_github("ChristofSeiler/cytoeffect")
+```
