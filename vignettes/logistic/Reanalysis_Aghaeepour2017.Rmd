@@ -235,8 +235,8 @@ save(obj,file = paste0("cytoeffect_ncells_collider",ncells,".Rdata"))
 p_reduced = plot(obj, type = "beta") + 
   ggtitle(expression("Reduced Fixed Effects"~beta)) +
   xlab("log-odds of 3rd/1st trimester")
-ggsave(plot_grid(p_full, p_reduced, labels = "AUTO"), 
-       filename = "beta_glmm.pdf", width = 8, height = 3)
+plot_grid(p_full, p_reduced, labels = "AUTO")
+ggsave(filename = "beta_glmm.pdf", width = 8, height = 3)
 ```
 
 # Session Info {.unnumbered}
