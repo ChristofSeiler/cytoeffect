@@ -130,7 +130,7 @@ visualize_data = function(tb_sim) {
     geom_hex(bins = 16) +
     colorscale +
     coord_fixed()
-  list(p1, p2)
+  plot_grid(p1, p2)
 }
 ```
 
@@ -155,7 +155,8 @@ fit_plot_prediction_model = function(tb_sim) {
   ggplot(tb_pred, aes(estimate, term)) +
     geom_point() +
     geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
-    geom_vline(xintercept = 0, linetype = "dashed")
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    theme(axis.title.y = element_blank())
 }
 ```
 
@@ -180,7 +181,8 @@ fit_plot_response_model = function(tb_sim) {
   ggplot(tb_resp, aes(estimate, term)) +
     geom_point() +
     geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
-    geom_vline(xintercept = 0, linetype = "dashed")
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    theme(axis.title.y = element_blank())
 }
 ```
 
@@ -190,8 +192,10 @@ Fit both models and plot results.
 
 ```{r analysis_no_confounders}
 visualize_data(tb_sim)
-fit_plot_prediction_model(tb_sim)
-fit_plot_response_model(tb_sim)
+plot_grid(
+  fit_plot_prediction_model(tb_sim),
+  fit_plot_response_model(tb_sim)  
+)
 ```
 
 ## Pipe
@@ -200,8 +204,10 @@ Fit both models and plot results.
 
 ```{r analysis_pipe}
 visualize_data(tb_sim_pipe)
-fit_plot_prediction_model(tb_sim_pipe)
-fit_plot_response_model(tb_sim_pipe)
+plot_grid(
+  fit_plot_prediction_model(tb_sim_pipe),
+  fit_plot_response_model(tb_sim_pipe)
+)
 ```
 
 ## Collider
@@ -210,8 +216,10 @@ Fit both models and plot results.
 
 ```{r analysis_collider}
 visualize_data(tb_sim_collider)
-fit_plot_prediction_model(tb_sim_collider)
-fit_plot_response_model(tb_sim_collider)
+plot_grid(
+  fit_plot_prediction_model(tb_sim_collider),
+  fit_plot_response_model(tb_sim_collider)
+)
 ```
 
 # Session Info {.unnumbered}

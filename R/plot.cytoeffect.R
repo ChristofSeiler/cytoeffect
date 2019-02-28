@@ -17,7 +17,6 @@ plot.cytoeffect = function(obj, type = "distribution") {
   protein_names = obj$protein_names
   warmup = fit_mcmc@stan_args[[1]]$warmup
   conditions = obj$conditions
-  celltypes = obj$celltypes
 
   if(type == "beta") {
 

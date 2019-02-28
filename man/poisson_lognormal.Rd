@@ -7,6 +7,28 @@
 poisson_lognormal(df_samples_subset, protein_names, condition, group,
   iter = 325, warmup = 200, num_chains = 4)
 }
+\arguments{
+\item{df_samples_subset}{Data frame or tibble with proteins counts, cell condition, and group information.}
+
+\item{protein_names}{A vector of column names of protein to use in the analysis.}
+
+\item{condition}{The column name of the condition variable.}
+
+\item{group}{The column name of the group variable.}
+
+\item{iter}{Number of iteration per chain for the HMC sampler.}
+
+\item{warmup}{Number of warm up steps per chain for the HMC sampler.}
+
+\item{num_chains}{Number of HMC chains to run in parallel.}
+}
+\value{
+A list of class \emph{cytoeffect_poisson} containing
+  \item{fit_mcmc}{Stan fit}
+  \item{protein_names}{input protein names}
+  \item{conditions}{input condition variable}
+  \item{Y}{input orignal count matrix}
+}
 \description{
 HMC sampling for Poisson Log-Normal Model.
 }

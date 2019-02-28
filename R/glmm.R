@@ -7,6 +7,19 @@
 #' @import batchtools
 #' @export
 #'
+#' @param df_samples_subset Data frame or tibble with proteins counts, cell condition, and group information.
+#' @param protein_names A vector of column names of protein to use in the analysis.
+#' @param condition The column name of the condition variable.
+#' @param group The column name of the group variable.
+#' @param iter Number of iteration per chain for the HMC sampler.
+#' @param warmup Number of warm up steps per chain for the HMC sampler.
+#' @param num_chains Number of HMC chains to run in parallel.
+#' @return A list of class \emph{cytoeffect_poisson} containing
+#'   \item{fit_mcmc}{Stan fit}
+#'   \item{protein_names}{input protein names}
+#'   \item{conditions}{input condition variable}
+#'   \item{X}{prediction design matrix}
+#'
 glmm = function(df_samples_subset,
                 protein_names,
                 condition,
@@ -77,8 +90,7 @@ glmm = function(df_samples_subset,
   obj = list(fit_mcmc = fit_mcmc,
              protein_names = protein_names,
              conditions = levels(pull(df_samples_subset, condition)),
-             celltypes = levels(as.factor(df_samples_subset$celltype)),
-             covariates = colnames(X))
+             X = X)
   class(obj) = "cytoeffect"
   obj
 
