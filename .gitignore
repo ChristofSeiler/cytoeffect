@@ -6,3 +6,15 @@
 dag_no_confounder.pdf
 dag_collider.pdf
 dag_pipe.pdf
+vignettes/reanalysis/se_aghaeepour2017immune.Rdata
+vignettes/reanalysis/cytoeffect_poisson_ncellsInf.Rdata
+vignettes/poisson/se_aghaeepour2017immune.Rdata
+vignettes/poisson/cytoeffect_poisson_ncellsInf.Rdata
+vignettes/logistic/sigma_glmm.pdf
+vignettes/logistic/se_aghaeepour2017immune.Rdata
+vignettes/logistic/posterior_summary_cor_glmm.pdf
+vignettes/logistic/cytoeffect_ncellsInf.Rdata
+vignettes/logistic/cytoeffect_ncells_colliderInf.Rdata
+vignettes/logistic/beta_glmm.pdf
+vignettes/poisson/goodness_of_fit.pdf
+vignettes/poisson/posterior_summary_plmm.pdf

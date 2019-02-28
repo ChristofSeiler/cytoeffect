@@ -1,0 +1,248 @@
+---
+title: "Logistic Linear Mixed Effects Model"
+author:
+  name: Christof Seiler
+  affiliation: Department of Statistics, Stanford University
+output:
+  BiocStyle::html_document:
+    toc_float: true
+bibliography: bibliography.bib
+params:
+  ncells: "Inf"
+  seed: "0xdada"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Goal
+
+Reanalysis of mass cytometry data from @aghaeepour2017immune using GLMM with multivariate donor and cell type random effects.
+
+# Prerequisites
+
+Parse input parameters.
+
+```{r parse_input_parameters}
+ncells = floor(as.numeric(params$ncells))
+ncells
+seed = params$seed
+seed
+ncores = 8
+```
+
+Install packages.
+
+```{r install_packages, warning=FALSE, message=FALSE, eval=FALSE}
+pkgs_needed = c("devtools","tidyverse","magrittr","SummarizedExperiment",
+                "ggthemes","cowplot")
+letsinstall = setdiff(pkgs_needed, installed.packages())
+if (length(letsinstall) > 0) {
+  source("http://bioconductor.org/biocLite.R")
+  biocLite(letsinstall)
+}
+devtools::install_github("ChristofSeiler/cytoeffect")
+```
+
+Load packages.
+
+```{r load_packages}
+library("cytoeffect")
+library("tidyverse")
+library("magrittr")
+library("SummarizedExperiment")
+library("ggthemes")
+library("cowplot")
+theme_set(theme_few())
+```
+
+# Load Data
+
+Load ``SummarizedExperiment`` object from CytoGLMM workflow.
+
+```{r load_summarized_experiment}
+load("se_aghaeepour2017immune.Rdata")
+exprs = assay(se_aghaeepour2017immune)
+sample_info = rowData(se_aghaeepour2017immune)
+sample_info_names = names(sample_info)
+df_samples = cbind(as.data.frame(exprs), as.data.frame(sample_info))
+df_samples %<>% as.tibble
+protein_names = colData(se_aghaeepour2017immune) %>% 
+  as.data.frame %>% 
+  dplyr::filter(type == "function") %>%
+  .$protein_name
+```
+
+Transform counts.
+
+```{r transform_counts}
+df_samples %<>% mutate_at(colData(se_aghaeepour2017immune)$protein_name, 
+                          function(x) asinh(x/5))
+```
+
+# Fit Model
+
+Cells count of subsets:
+
+```{r cell_count}
+df_samples %>% 
+  group_by(term,celltype,donor) %>% 
+  tally %>% 
+  arrange(n)
+df_samples %>% 
+  group_by(term,celltype,donor) %>% 
+  tally %>% 
+  arrange(desc(n))
+```
+
+## Subsampling
+
+Subsample to only one cell type and one donor.
+
+```{r one_donor_one_cell_subset}
+df_samples_subset = df_samples %>% dplyr::filter(celltype == "NK")
+df_samples_subset %<>% dplyr::select(protein_names,sample_info_names)
+#df_samples_subset = df_samples %>% dplyr::select(protein_names,sample_info_names)
+```
+
+Subsample cells so that to a maximum number of cells per celltype and donor.
+
+```{r subsample_cells}
+if(nrow(df_samples_subset) > ncells) {
+  set.seed(seed)
+  # subsample depending on max cell count
+  df_count = df_samples_subset %>% group_by(donor) %>% tally() %>%
+    mutate(nnew = ifelse(n > ncells,ncells,n))
+  # create table with a data frame in one column
+  df_nested = df_samples_subset %>% group_by(donor) %>% nest() %>%
+    left_join(df_count,by = "donor")
+  # subsample per donor
+  df_samples_subset = df_nested %>%
+    mutate(samp = map2(data, nnew, sample_n)) %>%
+    dplyr::select(donor, samp) %>%
+    unnest()
+}
+```
+
+Subset cells count.
+
+```{r cell_count_subsample}
+df_samples_subset %>% group_by(term,celltype,donor) %>% tally %>% 
+  arrange(n)
+df_samples_subset %>% group_by(term,celltype,donor) %>% tally %>% 
+  arrange(desc(n))
+```
+
+## HMC Sampling
+
+Sample from posterior distribution (initialization details in paper).
+
+```{r set_reference}
+df_samples_subset$term %<>% factor(levels = c("1st trimester",
+                                              "3rd trimester"))
+```
+
+```{r poisson_sampling_load, echo=FALSE, eval=TRUE}
+load(file = paste0("cytoeffect_ncells",ncells,".Rdata"))
+```
+
+```{r bayesian_glmm_celltype, eval=FALSE}
+obj = cytoeffect::glmm(df_samples_subset, protein_names, 
+                       condition = "term", group = "donor",
+                       iter = 325, warmup = 200, num_chains = ncores, 
+                       eta = 1.0)
+save(obj,file = paste0("cytoeffect_ncells",ncells,".Rdata"))
+```
+
+Traceplot of posterior samples.
+
+```{r post_sampling, fig.wide=TRUE}
+rstan::traceplot(obj$fit_mcmc, inc_warmup = TRUE)
+rstan::traceplot(obj$fit_mcmc, inc_warmup = FALSE)
+```
+
+Some more MCMC diagnostics. According to empirically findings, Rhat > 1.1 is usually indicative of problems in the fit.
+
+```{r mcmc_diagnostics}
+pars = c("beta","sigma_donor","L_donor","z_donor")
+tb = summary(obj$fit_mcmc, 
+             pars = pars)$summary %>% 
+  as.tibble(rownames = "pars", .before = 1) %>% 
+  select(pars, n_eff, Rhat)
+tb %<>% na.omit() # Stan fills upper triangle with zeros
+tb %>% arrange(n_eff)
+tb %>% arrange(desc(Rhat))
+tb %>% summarize(min = min(n_eff), max = max(n_eff))
+tb %>% summarize(min = min(Rhat), max = max(Rhat))
+```
+
+## Results
+
+Plot fixed effects.
+
+```{r fixed_effects, fig.small=TRUE}
+p_full = plot(obj, type = "beta") + 
+  ggtitle(expression("Fixed Effects"~beta)) +
+  xlab("log-odds of 3rd/1st trimester")
+p_full
+```
+
+Extract log-odds for pSTAT1.
+
+```{r fixed_effects_pSTAT1}
+post_beta = rstan::extract(obj$fit_mcmc, pars = "beta")[[1]]
+post_beta %<>% as.tibble
+names(post_beta) = c("intercept",obj$protein_names)
+quantile(post_beta$pSTAT1, probs = c(0.025, 0.975))
+quantile(exp(post_beta$pSTAT1), probs = c(0.025, 0.975))
+```
+
+Plot random effects.
+
+```{r random_effects}
+plot(obj, type = "sigma_donor") + 
+  ggtitle("Marker Standard Deviation"~sigma)
+ggsave("sigma_glmm.pdf", width = 4, height = 3)
+```
+
+Plot posterior correlations.
+
+```{r posterior_correlations, fig.small=TRUE}
+plot(obj, type = "Cor_donor") + 
+  ggtitle(expression("Marker Correlations"~Omega~"(donor)"))
+ggsave("posterior_summary_cor_glmm.pdf", width = 4, height = 4)
+```
+
+## Refit Without pSTAT1
+
+Refit model to test potentional collider confounding.
+
+```{r poisson_sampling_load_refit, echo=FALSE, eval=TRUE}
+load(file = paste0("cytoeffect_ncells_collider",ncells,".Rdata"))
+```
+
+```{r refit, eval=FALSE}
+protein_names = protein_names[-which(protein_names == "pSTAT1")]
+obj = cytoeffect::glmm(df_samples_subset, protein_names, 
+                       condition = "term", group = "donor",
+                       iter = 325, warmup = 200, num_chains = ncores, 
+                       eta = 1.0)
+save(obj,file = paste0("cytoeffect_ncells_collider",ncells,".Rdata"))
+```
+
+```{r plot_refit}
+p_reduced = plot(obj, type = "beta") + 
+  ggtitle(expression("Reduced Fixed Effects"~beta)) +
+  xlab("log-odds of 3rd/1st trimester")
+ggsave(plot_grid(p_full, p_reduced, labels = "AUTO"), 
+       filename = "beta_glmm.pdf", width = 8, height = 3)
+```
+
+# Session Info {.unnumbered}
+
+```{r session_info}
+sessionInfo()
+```
+
+# References {.unnumbered}
