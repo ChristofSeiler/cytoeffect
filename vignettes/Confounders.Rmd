@@ -137,6 +137,7 @@ visualize_data = function(tb_sim) {
 Prepare fit logistic model function.
 
 ```{r predictor_model}
+writeLines(readLines("multivariate_predictor.stan"))
 fit_plot_prediction_model = function(tb_sim) {
   stan_data = list(
     p = nlevels(factor(tb_sim$X)),
@@ -163,6 +164,7 @@ fit_plot_prediction_model = function(tb_sim) {
 Prepare fit multivariate poisson response model function.
 
 ```{r response_model}
+writeLines(readLines("multivariate_response.stan"))
 fit_plot_response_model = function(tb_sim) {
   stan_data = list(
     d = 2,
