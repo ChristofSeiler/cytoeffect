@@ -89,6 +89,9 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
 
   } else if (type == "Y_hat") {
 
+    if(sum(str_detect(names(obj$fit_mcmc), type)) == 0)
+      stop("Y_hat not available")
+
     Y = obj$Y
     Y_hat = rstan::extract(obj$fit_mcmc, pars = type)[[1]]
     Y_hat_mean = apply(X = Y_hat, MARGIN = c(2,3), FUN = mean)

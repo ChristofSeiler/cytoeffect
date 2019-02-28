@@ -1,0 +1,169 @@
+---
+title: "Confounders"
+author:
+  name: Christof Seiler
+  affiliation: Maastricht University
+output:
+  BiocStyle::html_document:
+    toc_float: true
+params:
+  type: "no_confounder"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Goal
+
+Compare resonse and predictor models with respect to confounders.
+
+# Prerequisites
+
+Install packages.
+
+```{r install_packages, warning=FALSE, message=FALSE, eval=TRUE}
+pkgs_needed = c("devtools","tidyverse","magrittr",
+                "RColorBrewer", "cowplot", "ggthemes","dagitty","MASS",
+                "rstan","ggdag")
+letsinstall = setdiff(pkgs_needed, installed.packages())
+if (length(letsinstall) > 0) {
+  source("http://bioconductor.org/biocLite.R")
+  biocLite(letsinstall)
+}
+```
+
+Load packages.
+
+```{r load_packages}
+library("tidyverse")
+library("magrittr")
+library("broom")
+library("RColorBrewer")
+library("cowplot")
+library("ggthemes")
+library("dagitty")
+library("MASS")
+library("rstan")
+library("ggdag")
+theme_set(theme_few())
+```
+
+# Confounders
+
+Generate data and plot DAG for a given confounder. Currently the following confounders are implemented:
+
+* Collider: ```type = 'collider'```
+* Pipe: ```type = 'pipe'```
+* If no type is provided then we assume the option ```type = 'no_confounders'```.
+
+```{r plot_dag_no_confounders}
+set.seed(0xdada)
+params$type
+tb_sim = tibble(
+  X = c(rep(1,500), rep(2,500))
+)
+if(params$type == "pipe") {
+  dag = dagify(Y2 ~ X, Y1 ~ Y2)
+  p = ggdag(dag, layout = "circle") + theme_dag()
+  tb_sim %<>% mutate(Y2 = X + rnorm(1000))
+  tb_sim %<>% mutate(Y1 = Y2 + rnorm(1000))
+  title_str = "Pipe"
+} else if(params$type == "collider") {
+  dag = dagify(Y1 ~ X, Y2 ~ X, Y1 ~ Y2)
+  p = ggdag(dag, layout = "circle")
+  tb_sim %<>% mutate(Y2 = X + rnorm(1000))
+  tb_sim %<>% mutate(Y1 = X + rnorm(1000) + if_else(Y2 > 2, tb_sim$Y2, 0))
+  title_str = "Collider"
+} else {
+  dag = dagify(Y1 ~ X, Y2 ~ X)
+  p = ggdag(dag, layout = "circle")
+  tb_sim %<>% mutate(Y2 = X + rnorm(1000))
+  tb_sim %<>% mutate(Y1 = X + rnorm(1000))
+  title_str = "No Confounders"
+}
+expand_plot = function(expand_x = expand_scale(c(.1, .1)),
+                        expand_y = expand_scale(c(.1, .1))) {
+  list(
+      ggplot2::scale_x_continuous(expand = expand_x),
+      ggplot2::scale_y_continuous(expand = expand_y)
+    )
+}
+ggdag(dag, layout = "circle") + 
+  geom_dag_point() +
+  geom_dag_text() +
+  theme_dag_blank() +
+  expand_plot(expand_x = expand_scale(c(.4, .4)), 
+              expand_y = expand_scale(c(.4, .4))) +
+  ggtitle(title_str) +
+  theme(plot.title = element_text(hjust = 0.5))
+ggsave(filename = paste0("dag_",params$type,".pdf"), width = 3, height = 2.5)
+```
+
+Visualize data.
+
+```{r visualize_data}
+tb_long = tb_sim %>% gather(key, value, Y1, Y2)
+ggplot(tb_long, aes(value, fill = factor(X))) + 
+  geom_histogram(bins = 50, alpha= 0.5, position = "identity") +
+  facet_wrap(~key, nrow = 2)
+colorscale = scale_fill_gradientn(
+  colors = rev(brewer.pal(9, "YlGnBu")), 
+  values = c(0, exp(seq(-5, 0, length.out = 100)))
+)
+ggplot(tb_sim, aes(Y1, Y2)) +
+  geom_hex(bins = 16) +
+  colorscale
+```
+
+Fit logistic model.
+
+```{r predictor_model}
+stan_data = list(
+  p = nlevels(factor(tb_sim$X)),
+  n = nrow(tb_sim),
+  y = tb_sim$X-1,
+  x = tb_sim %>% dplyr::select(c(Y1, Y2))
+)
+model = stan_model(file = "multivariate_predictor.stan",
+                   model_name = "multivariate_predictor_index")
+fit_mcmc = sampling(model, pars = "beta",
+                    data = stan_data, iter = 1000, warmup = 500, 
+                    chains = 4, cores = 4, seed = 0xdada)
+fit_mcmc
+tb_pred = tidy(fit_mcmc, conf.int = TRUE, conf.level = 0.95)
+tb_pred
+ggplot(tb_pred, aes(estimate, term)) +
+  geom_point() +
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
+  geom_vline(xintercept = 0, linetype = "dashed")
+```
+
+Fit multivariate poisson response model.
+
+```{r response_model}
+stan_data = list(
+  d = 2,
+  p = nlevels(factor(tb_sim$X)),
+  n = nrow(tb_sim),
+  y = tb_sim %>% dplyr::select(c(Y1, Y2)),
+  x = tb_sim$X
+)
+model = stan_model(file = "multivariate_response.stan",
+                   model_name = "multivariate_response_index")
+fit_mcmc = sampling(model, pars = c("beta", "sigma", "Cor"),
+                    data = stan_data, iter = 1000, warmup = 500, 
+                    chains = 4, cores = 4, seed = 0xdada)
+fit_mcmc
+tb_resp = tidy(fit_mcmc, conf.int = TRUE, conf.level = 0.95)
+ggplot(tb_resp, aes(estimate, term)) +
+  geom_point() +
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
+  geom_vline(xintercept = 0, linetype = "dashed")
+```
+
+# Session Info {.unnumbered}
+
+```{r session_info}
+sessionInfo()
+```
