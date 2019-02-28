@@ -19,6 +19,7 @@ Imports:
     dplyr,
     tibble,
     tidyr,
+    stringr,
     rstan (>= 2.17.3),
     ggcorrplot,
     batchtools

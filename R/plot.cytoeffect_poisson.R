@@ -6,6 +6,7 @@
 #' @import magrittr
 #' @import dplyr
 #' @import tidyr
+#' @import stringr
 #' @export
 #'
 plot.cytoeffect_poisson = function(obj, type = "distribution") {
