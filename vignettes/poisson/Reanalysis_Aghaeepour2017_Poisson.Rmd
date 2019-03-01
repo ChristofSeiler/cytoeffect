@@ -141,7 +141,8 @@ ggplot(df_gate_nk %>%
          gather(protein_name, value, -donor, -file_name, -term), 
        aes(value, fill = term)) + 
   geom_histogram(bins = 30, alpha= 0.5, position = "identity") +
-  facet_wrap(~protein_name)
+  facet_wrap(~protein_name) +
+  scale_color_few()
 ```
 
 NK subset analysis.
@@ -162,8 +163,7 @@ ggplot(tb_fit, # %>% dplyr::filter(term != "(Intercept)"),
   geom_point() + 
   geom_errorbarh(aes(xmax = estimate + 1.96*std.error, 
                      xmin = estimate - 1.96*std.error)) +
-  facet_wrap(~term) +
-  scale_color_few()
+  facet_wrap(~term)
 ```
 
 Subsample cells so that to a maximum number of cells per celltype and donor.
@@ -250,7 +250,11 @@ p1 = plot(obj, type = "beta") +
   guides(col = guide_legend(ncol = 1)) + 
   scale_color_few()
 p1
-plot(obj, type = "beta") + facet_wrap(~condition, scales = "free_x")
+plot(obj, type = "beta") + 
+  facet_wrap(~condition, scales = "free_x") +
+  theme(legend.position = "bottom") +
+  guides(col = guide_legend(ncol = 1)) + 
+  scale_color_few()
 ```
 
 Extract expected count difference for pSTAT1.
