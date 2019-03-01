@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Posterior summary. — summary.cytoeffect • cytoeffect</title>
+<title>Posterior Summary for Poisson Log-Normal Mixed Model — summary.cytoeffect • cytoeffect</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,9 @@
 
 
 
-<meta property="og:title" content="Posterior summary. — summary.cytoeffect" />
+<meta property="og:title" content="Posterior Summary for Poisson Log-Normal Mixed Model — summary.cytoeffect" />
 
-<meta property="og:description" content="Posterior summary." />
+<meta property="og:description" content="Posterior Summary for Poisson Log-Normal Mixed Model" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -89,10 +89,10 @@
       <a href="../articles/Confounders.html">Confounders and Biases</a>
     </li>
     <li>
-      <a href="../articles/logistic/Reanalysis_Aghaeepour2017.html">Logistic Linear Mixed Effects Model</a>
+      <a href="../articles/logistic/Reanalysis_Aghaeepour2017.html">Logistic Linear Mixed Model</a>
     </li>
     <li>
-      <a href="../articles/poisson/Reanalysis_Aghaeepour2017_Poisson.html">Poisson Log-Normal Model</a>
+      <a href="../articles/poisson/Reanalysis_Aghaeepour2017_Poisson.html">Poisson Log-Normal Mixed Model</a>
     </li>
   </ul>
 </li>
@@ -117,25 +117,51 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Posterior summary.</h1>
+    <h1>Posterior Summary for Poisson Log-Normal Mixed Model</h1>
     <small class="dont-index">Source: <a href='https://github.com/ChristofSeiler/cytoeffect/blob/master/R/summary.cytoeffect.R'><code>R/summary.cytoeffect.R</code></a></small>
     <div class="hidden name"><code>summary.cytoeffect.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Posterior summary.</p>
+    <p>Posterior Summary for Poisson Log-Normal Mixed Model</p>
     
     </div>
 
     <pre class="usage"><span class='fu'>summary.cytoeffect</span>(<span class='no'>obj</span>, <span class='no'>par</span>)</pre>
-        
+    
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>obj</th>
+      <td><p>Object of class <code>cytoeffect</code> computed using <code><a href='glmm.html'>glmm</a></code></p></td>
+    </tr>
+    <tr>
+      <th>type</th>
+      <td><p>A string with the variable name to plot: <code>par = "beta"</code>, <code>par = "sigma"</code>, or <code>par = "Cor"</code></p></td>
+    </tr>
+    </table>
+    
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
+    <p><code><a href='https://tibble.tidyverse.org/reference/tibble.html'>tibble</a></code> object</p>
+    
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'># fit = cytoeffect::glmm(...)
+# summary(fit)
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-                </ul>
+      <li><a href="#arguments">Arguments</a></li>
+      
+      <li><a href="#value">Value</a></li>
+      
+      <li><a href="#examples">Examples</a></li>
+    </ul>
 
   </div>
 </div>

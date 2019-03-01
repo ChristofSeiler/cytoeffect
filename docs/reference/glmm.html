@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>HMC sampling for GLMM with Multivariate Random Effects. — glmm • cytoeffect</title>
+<title>HMC Sampling for Logistic Linear Mixed Model — glmm • cytoeffect</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,11 @@
 
 
 
-<meta property="og:title" content="HMC sampling for GLMM with Multivariate Random Effects. — glmm" />
+<meta property="og:title" content="HMC Sampling for Logistic Linear Mixed Model — glmm" />
 
-<meta property="og:description" content="HMC sampling for GLMM with Multivariate Random Effects." />
+<meta property="og:description" content="glmm uses Hamiltonion Monte Carlo to sample form an extend logistic
+linear mixed model. We predict the experimental condition from protein
+marker expressions." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -89,10 +91,10 @@
       <a href="../articles/Confounders.html">Confounders and Biases</a>
     </li>
     <li>
-      <a href="../articles/logistic/Reanalysis_Aghaeepour2017.html">Logistic Linear Mixed Effects Model</a>
+      <a href="../articles/logistic/Reanalysis_Aghaeepour2017.html">Logistic Linear Mixed Model</a>
     </li>
     <li>
-      <a href="../articles/poisson/Reanalysis_Aghaeepour2017_Poisson.html">Poisson Log-Normal Model</a>
+      <a href="../articles/poisson/Reanalysis_Aghaeepour2017_Poisson.html">Poisson Log-Normal Mixed Model</a>
     </li>
   </ul>
 </li>
@@ -117,14 +119,16 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>HMC sampling for GLMM with Multivariate Random Effects.</h1>
+    <h1>HMC Sampling for Logistic Linear Mixed Model</h1>
     <small class="dont-index">Source: <a href='https://github.com/ChristofSeiler/cytoeffect/blob/master/R/glmm.R'><code>R/glmm.R</code></a></small>
     <div class="hidden name"><code>glmm.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>HMC sampling for GLMM with Multivariate Random Effects.</p>
+    <p><code>glmm</code> uses Hamiltonion Monte Carlo to sample form an extend logistic
+linear mixed model. We predict the experimental condition from protein
+marker expressions.</p>
     
     </div>
 
@@ -136,38 +140,39 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>df_samples_subset</th>
-      <td><p>Data frame or tibble with proteins counts, cell condition, and group information.</p></td>
+      <td><p>Data frame or tibble with proteins counts,
+cell condition, and group information</p></td>
     </tr>
     <tr>
       <th>protein_names</th>
-      <td><p>A vector of column names of protein to use in the analysis.</p></td>
+      <td><p>A vector of column names of protein to use in the analysis</p></td>
     </tr>
     <tr>
       <th>condition</th>
-      <td><p>The column name of the condition variable.</p></td>
+      <td><p>The column name of the condition variable</p></td>
     </tr>
     <tr>
       <th>group</th>
-      <td><p>The column name of the group variable.</p></td>
+      <td><p>The column name of the group variable</p></td>
     </tr>
     <tr>
       <th>iter</th>
-      <td><p>Number of iteration per chain for the HMC sampler.</p></td>
+      <td><p>Number of iteration per chain for the HMC sampler</p></td>
     </tr>
     <tr>
       <th>warmup</th>
-      <td><p>Number of warm up steps per chain for the HMC sampler.</p></td>
+      <td><p>Number of warm up steps per chain for the HMC sampler</p></td>
     </tr>
     <tr>
       <th>num_chains</th>
-      <td><p>Number of HMC chains to run in parallel.</p></td>
+      <td><p>Number of HMC chains to run in parallel</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list of class <em>cytoeffect_poisson</em> containing</p>
-<dt>fit_mcmc</dt><dd><p>Stan fit</p></dd>
+    <p>A list of class <em>cytoeffect</em> containing</p>
+<dt>fit_mcmc</dt><dd><p><code><a href='https://www.rdocumentation.org/packages/rstan/topics/rstan'>rstan</a></code> object</p></dd>
   <dt>protein_names</dt><dd><p>input protein names</p></dd>
   <dt>conditions</dt><dd><p>input condition variable</p></dd>
   <dt>X</dt><dd><p>prediction design matrix</p></dd>

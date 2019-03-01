@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>HMC sampling for Poisson Log-Normal Model. — poisson_lognormal • cytoeffect</title>
+<title>HMC Sampling for Poisson Log-Normal Mixed Model — poisson_lognormal • cytoeffect</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,11 @@
 
 
 
-<meta property="og:title" content="HMC sampling for Poisson Log-Normal Model. — poisson_lognormal" />
+<meta property="og:title" content="HMC Sampling for Poisson Log-Normal Mixed Model — poisson_lognormal" />
 
-<meta property="og:description" content="HMC sampling for Poisson Log-Normal Model." />
+<meta property="og:description" content="poisson_lognormal uses Hamiltonion Monte Carlo to sample form an extend
+Poisson log-normal mixed model. Each cell and protein marker has its own rate
+parameter following a linear model." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -89,10 +91,10 @@
       <a href="../articles/Confounders.html">Confounders and Biases</a>
     </li>
     <li>
-      <a href="../articles/logistic/Reanalysis_Aghaeepour2017.html">Logistic Linear Mixed Effects Model</a>
+      <a href="../articles/logistic/Reanalysis_Aghaeepour2017.html">Logistic Linear Mixed Model</a>
     </li>
     <li>
-      <a href="../articles/poisson/Reanalysis_Aghaeepour2017_Poisson.html">Poisson Log-Normal Model</a>
+      <a href="../articles/poisson/Reanalysis_Aghaeepour2017_Poisson.html">Poisson Log-Normal Mixed Model</a>
     </li>
   </ul>
 </li>
@@ -117,14 +119,16 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>HMC sampling for Poisson Log-Normal Model.</h1>
+    <h1>HMC Sampling for Poisson Log-Normal Mixed Model</h1>
     <small class="dont-index">Source: <a href='https://github.com/ChristofSeiler/cytoeffect/blob/master/R/poisson_lognormal.R'><code>R/poisson_lognormal.R</code></a></small>
     <div class="hidden name"><code>poisson_lognormal.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>HMC sampling for Poisson Log-Normal Model.</p>
+    <p><code>poisson_lognormal</code> uses Hamiltonion Monte Carlo to sample form an extend
+Poisson log-normal mixed model. Each cell and protein marker has its own rate
+parameter following a linear model.</p>
     
     </div>
 
@@ -136,38 +140,39 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>df_samples_subset</th>
-      <td><p>Data frame or tibble with proteins counts, cell condition, and group information.</p></td>
+      <td><p>Data frame or tibble with proteins counts,
+cell condition, and group information</p></td>
     </tr>
     <tr>
       <th>protein_names</th>
-      <td><p>A vector of column names of protein to use in the analysis.</p></td>
+      <td><p>A vector of column names of protein to use in the analysis</p></td>
     </tr>
     <tr>
       <th>condition</th>
-      <td><p>The column name of the condition variable.</p></td>
+      <td><p>The column name of the condition variable</p></td>
     </tr>
     <tr>
       <th>group</th>
-      <td><p>The column name of the group variable.</p></td>
+      <td><p>The column name of the group variable</p></td>
     </tr>
     <tr>
       <th>iter</th>
-      <td><p>Number of iteration per chain for the HMC sampler.</p></td>
+      <td><p>Number of iteration per chain for the HMC sampler</p></td>
     </tr>
     <tr>
       <th>warmup</th>
-      <td><p>Number of warm up steps per chain for the HMC sampler.</p></td>
+      <td><p>Number of warm up steps per chain for the HMC sampler</p></td>
     </tr>
     <tr>
       <th>num_chains</th>
-      <td><p>Number of HMC chains to run in parallel.</p></td>
+      <td><p>Number of HMC chains to run in parallel</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A list of class <em>cytoeffect_poisson</em> containing</p>
-<dt>fit_mcmc</dt><dd><p>Stan fit</p></dd>
+    <p>A list of class <code>cytoeffect_poisson</code> containing</p>
+<dt>fit_mcmc</dt><dd><p><code><a href='https://www.rdocumentation.org/packages/rstan/topics/rstan'>rstan</a></code> object</p></dd>
   <dt>protein_names</dt><dd><p>input protein names</p></dd>
   <dt>conditions</dt><dd><p>input condition variable</p></dd>
   <dt>Y</dt><dd><p>input orignal count matrix</p></dd>

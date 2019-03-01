@@ -5,11 +5,11 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Logistic Linear Mixed Effects Model • cytoeffect</title>
+<title>Logistic Linear Mixed Model • cytoeffect</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../../pkgdown.css" rel="stylesheet">
-<script src="../../pkgdown.js"></script><meta property="og:title" content="Logistic Linear Mixed Effects Model">
+<script src="../../pkgdown.js"></script><meta property="og:title" content="Logistic Linear Mixed Model">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -56,10 +56,10 @@
       <a href="../../articles/Confounders.html">Confounders and Biases</a>
     </li>
     <li>
-      <a href="../../articles/logistic/Reanalysis_Aghaeepour2017.html">Logistic Linear Mixed Effects Model</a>
+      <a href="../../articles/logistic/Reanalysis_Aghaeepour2017.html">Logistic Linear Mixed Model</a>
     </li>
     <li>
-      <a href="../../articles/poisson/Reanalysis_Aghaeepour2017_Poisson.html">Poisson Log-Normal Model</a>
+      <a href="../../articles/poisson/Reanalysis_Aghaeepour2017_Poisson.html">Poisson Log-Normal Mixed Model</a>
     </li>
   </ul>
 </li>
@@ -83,7 +83,7 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1>Logistic Linear Mixed Effects Model</h1>
+      <h1>Logistic Linear Mixed Model</h1>
                         <h4 class="author">Christof Seiler</h4>
             <address class="author_afil">
       Department of Statistics, Stanford University<br><small class="dont-index">Source: <a href="https://github.com/ChristofSeiler/cytoeffect/blob/master/vignettes/logistic/Reanalysis_Aghaeepour2017.Rmd"><code>vignettes/logistic/Reanalysis_Aghaeepour2017.Rmd</code></a></small>
@@ -149,7 +149,7 @@
 <div id="fit-model" class="section level1">
 <h1 class="hasAnchor">
 <a href="#fit-model" class="anchor"></a>Fit Model</h1>
-<p>Cells count of subsets:</p>
+<p>Tally cell count.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1">df_samples <span class="op">%&gt;%</span><span class="st"> </span></a>
 <a class="sourceLine" id="cb10-2" title="2"><span class="st">  </span><span class="kw">group_by</span>(term,celltype,donor) <span class="op">%&gt;%</span><span class="st"> </span></a>
 <a class="sourceLine" id="cb10-3" title="3"><span class="st">  </span>tally <span class="op">%&gt;%</span><span class="st"> </span></a>
@@ -188,31 +188,31 @@
 ##  9 3rd trimester CD4+Tnaive PTLG022 25901
 ## 10 3rd trimester CD4+Tnaive PTLG001 24423
 ## # ... with 369 more rows</code></pre>
-<div id="subsampling" class="section level2">
-<h2 class="hasAnchor">
-<a href="#subsampling" class="anchor"></a>Subsampling</h2>
-<p>Subsample to only one cell type and one donor.</p>
+<p>Subset to NK cells.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">df_samples_subset =<span class="st"> </span>df_samples <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(celltype <span class="op">==</span><span class="st"> "NK"</span>)</a>
-<a class="sourceLine" id="cb14-2" title="2">df_samples_subset <span class="op">%&lt;&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(protein_names,sample_info_names)</a>
-<a class="sourceLine" id="cb14-3" title="3"><span class="co">#df_samples_subset = df_samples %&gt;% dplyr::select(protein_names,sample_info_names)</span></a></code></pre></div>
-<p>Subsample cells so that to a maximum number of cells per celltype and donor.</p>
+<a class="sourceLine" id="cb14-2" title="2">df_samples_subset <span class="op">%&lt;&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(protein_names,sample_info_names)</a></code></pre></div>
+<p>Subsample cells to a maximum number of cells per donor.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1"><span class="cf">if</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/nrow">nrow</a></span>(df_samples_subset) <span class="op">&gt;</span><span class="st"> </span>ncells) {</a>
-<a class="sourceLine" id="cb15-2" title="2">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(seed)</a>
-<a class="sourceLine" id="cb15-3" title="3">  <span class="co"># subsample depending on max cell count</span></a>
-<a class="sourceLine" id="cb15-4" title="4">  df_count =<span class="st"> </span>df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(donor) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">tally</span>() <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb15-5" title="5"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">nnew =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/ifelse">ifelse</a></span>(n <span class="op">&gt;</span><span class="st"> </span>ncells,ncells,n))</a>
-<a class="sourceLine" id="cb15-6" title="6">  <span class="co"># create table with a data frame in one column</span></a>
-<a class="sourceLine" id="cb15-7" title="7">  df_nested =<span class="st"> </span>df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(donor) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">nest</span>() <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb15-8" title="8"><span class="st">    </span><span class="kw">left_join</span>(df_count,<span class="dt">by =</span> <span class="st">"donor"</span>)</a>
-<a class="sourceLine" id="cb15-9" title="9">  <span class="co"># subsample per donor</span></a>
-<a class="sourceLine" id="cb15-10" title="10">  df_samples_subset =<span class="st"> </span>df_nested <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb15-11" title="11"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">samp =</span> <span class="kw">map2</span>(data, nnew, sample_n)) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb15-12" title="12"><span class="st">    </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(donor, samp) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb15-13" title="13"><span class="st">    </span><span class="kw">unnest</span>()</a>
-<a class="sourceLine" id="cb15-14" title="14">}</a></code></pre></div>
-<p>Subset cells count.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1">df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(term,celltype,donor) <span class="op">%&gt;%</span><span class="st"> </span>tally <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb16-2" title="2"><span class="st">  </span><span class="kw">arrange</span>(n)</a></code></pre></div>
+<a class="sourceLine" id="cb15-2" title="2">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste</a></span>(<span class="st">"subsampled to"</span>,ncells,<span class="st">"per donor"</span>))</a>
+<a class="sourceLine" id="cb15-3" title="3">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(seed)</a>
+<a class="sourceLine" id="cb15-4" title="4">  <span class="co"># subsample depending on max cell count</span></a>
+<a class="sourceLine" id="cb15-5" title="5">  df_count =<span class="st"> </span>df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(donor) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">tally</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb15-6" title="6"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">nnew =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/ifelse">ifelse</a></span>(n <span class="op">&gt;</span><span class="st"> </span>ncells,ncells,n))</a>
+<a class="sourceLine" id="cb15-7" title="7">  <span class="co"># create table with a data frame in one column</span></a>
+<a class="sourceLine" id="cb15-8" title="8">  df_nested =<span class="st"> </span>df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(donor) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">nest</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb15-9" title="9"><span class="st">    </span><span class="kw">left_join</span>(df_count,<span class="dt">by =</span> <span class="st">"donor"</span>)</a>
+<a class="sourceLine" id="cb15-10" title="10">  <span class="co"># subsample per donor</span></a>
+<a class="sourceLine" id="cb15-11" title="11">  df_samples_subset =<span class="st"> </span>df_nested <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb15-12" title="12"><span class="st">    </span><span class="kw">mutate</span>(<span class="dt">samp =</span> <span class="kw">map2</span>(data, nnew, sample_n)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb15-13" title="13"><span class="st">    </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(donor, samp) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb15-14" title="14"><span class="st">    </span><span class="kw">unnest</span>()</a>
+<a class="sourceLine" id="cb15-15" title="15">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb15-16" title="16">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(<span class="st">"no subsampling done"</span>)</a>
+<a class="sourceLine" id="cb15-17" title="17">}</a></code></pre></div>
+<pre><code>## [1] "no subsampling done"</code></pre>
+<p>Tally cell count.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1">df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(term,celltype,donor) <span class="op">%&gt;%</span><span class="st"> </span>tally <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb17-2" title="2"><span class="st">  </span><span class="kw">arrange</span>(n)</a></code></pre></div>
 <pre><code>## # A tibble: 32 x 4
 ## # Groups:   term, celltype [2]
 ##    term          celltype donor       n
@@ -228,8 +228,8 @@
 ##  9 1st trimester NK       PTLG010  4273
 ## 10 3rd trimester NK       PTLG019  4542
 ## # ... with 22 more rows</code></pre>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1">df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(term,celltype,donor) <span class="op">%&gt;%</span><span class="st"> </span>tally <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb18-2" title="2"><span class="st">  </span><span class="kw">arrange</span>(<span class="kw">desc</span>(n))</a></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1">df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">group_by</span>(term,celltype,donor) <span class="op">%&gt;%</span><span class="st"> </span>tally <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb19-2" title="2"><span class="st">  </span><span class="kw">arrange</span>(<span class="kw">desc</span>(n))</a></code></pre></div>
 <pre><code>## # A tibble: 32 x 4
 ## # Groups:   term, celltype [2]
 ##    term          celltype donor       n
@@ -245,31 +245,34 @@
 ##  9 3rd trimester NK       PTLG004  6501
 ## 10 3rd trimester NK       PTLG002  6120
 ## # ... with 22 more rows</code></pre>
-</div>
 <div id="hmc-sampling" class="section level2">
 <h2 class="hasAnchor">
 <a href="#hmc-sampling" class="anchor"></a>HMC Sampling</h2>
 <p>Sample from posterior distribution (initialization details in paper).</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1">df_samples_subset<span class="op">$</span>term <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/factor">factor</a></span>(<span class="dt">levels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"1st trimester"</span>,</a>
-<a class="sourceLine" id="cb20-2" title="2">                                              <span class="st">"3rd trimester"</span>))</a></code></pre></div>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1">obj =<span class="st"> </span>cytoeffect<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/cytoeffect/topics/glmm">glmm</a></span>(df_samples_subset, protein_names, </a>
-<a class="sourceLine" id="cb21-2" title="2">                       <span class="dt">condition =</span> <span class="st">"term"</span>, <span class="dt">group =</span> <span class="st">"donor"</span>,</a>
-<a class="sourceLine" id="cb21-3" title="3">                       <span class="dt">iter =</span> <span class="dv">325</span>, <span class="dt">warmup =</span> <span class="dv">200</span>, <span class="dt">num_chains =</span> ncores, </a>
-<a class="sourceLine" id="cb21-4" title="4">                       <span class="dt">eta =</span> <span class="fl">1.0</span>)</a>
-<a class="sourceLine" id="cb21-5" title="5"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/save">save</a></span>(obj,<span class="dt">file =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"cytoeffect_ncells"</span>,ncells,<span class="st">".Rdata"</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1">df_samples_subset<span class="op">$</span>term <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/factor">factor</a></span>(<span class="dt">levels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"1st trimester"</span>,</a>
+<a class="sourceLine" id="cb21-2" title="2">                                              <span class="st">"3rd trimester"</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1">obj =<span class="st"> </span>cytoeffect<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/cytoeffect/topics/glmm">glmm</a></span>(df_samples_subset, protein_names, </a>
+<a class="sourceLine" id="cb22-2" title="2">                       <span class="dt">condition =</span> <span class="st">"term"</span>, <span class="dt">group =</span> <span class="st">"donor"</span>,</a>
+<a class="sourceLine" id="cb22-3" title="3">                       <span class="dt">iter =</span> <span class="dv">325</span>, <span class="dt">warmup =</span> <span class="dv">200</span>, <span class="dt">num_chains =</span> ncores, </a>
+<a class="sourceLine" id="cb22-4" title="4">                       <span class="dt">eta =</span> <span class="fl">1.0</span>)</a>
+<a class="sourceLine" id="cb22-5" title="5"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/save">save</a></span>(obj,<span class="dt">file =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"cytoeffect_ncells"</span>,ncells,<span class="st">".Rdata"</span>))</a></code></pre></div>
+</div>
+<div id="hmc-diagnostics" class="section level2">
+<h2 class="hasAnchor">
+<a href="#hmc-diagnostics" class="anchor"></a>HMC Diagnostics</h2>
 <p>Traceplot of posterior samples.</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1">rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-traceplot">traceplot</a></span>(obj<span class="op">$</span>fit_mcmc, <span class="dt">inc_warmup =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1">rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-traceplot">traceplot</a></span>(obj<span class="op">$</span>fit_mcmc, <span class="dt">inc_warmup =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <p><img src="Reanalysis_Aghaeepour2017_files/figure-html/post_sampling-1.png" width="700"></p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1">rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-traceplot">traceplot</a></span>(obj<span class="op">$</span>fit_mcmc, <span class="dt">inc_warmup =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1">rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-traceplot">traceplot</a></span>(obj<span class="op">$</span>fit_mcmc, <span class="dt">inc_warmup =</span> <span class="ot">FALSE</span>)</a></code></pre></div>
 <p><img src="Reanalysis_Aghaeepour2017_files/figure-html/post_sampling-2.png" width="700"></p>
 <p>Some more MCMC diagnostics. According to empirically findings, Rhat &gt; 1.1 is usually indicative of problems in the fit.</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1">pars =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"beta"</span>,<span class="st">"sigma_donor"</span>,<span class="st">"L_donor"</span>,<span class="st">"z_donor"</span>)</a>
-<a class="sourceLine" id="cb24-2" title="2">tb =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(obj<span class="op">$</span>fit_mcmc, </a>
-<a class="sourceLine" id="cb24-3" title="3">             <span class="dt">pars =</span> pars)<span class="op">$</span>summary <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb24-4" title="4"><span class="st">  </span><span class="kw">as.tibble</span>(<span class="dt">rownames =</span> <span class="st">"pars"</span>, <span class="dt">.before =</span> <span class="dv">1</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb24-5" title="5"><span class="st">  </span><span class="kw">select</span>(pars, n_eff, Rhat)</a>
-<a class="sourceLine" id="cb24-6" title="6">tb <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/na.fail">na.omit</a></span>() <span class="co"># Stan fills upper triangle with zeros</span></a>
-<a class="sourceLine" id="cb24-7" title="7">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(n_eff)</a></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" title="1">pars =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"beta"</span>,<span class="st">"sigma_donor"</span>,<span class="st">"L_donor"</span>,<span class="st">"z_donor"</span>)</a>
+<a class="sourceLine" id="cb25-2" title="2">tb =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(obj<span class="op">$</span>fit_mcmc, </a>
+<a class="sourceLine" id="cb25-3" title="3">             <span class="dt">pars =</span> pars)<span class="op">$</span>summary <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb25-4" title="4"><span class="st">  </span><span class="kw">as.tibble</span>(<span class="dt">rownames =</span> <span class="st">"pars"</span>, <span class="dt">.before =</span> <span class="dv">1</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb25-5" title="5"><span class="st">  </span><span class="kw">select</span>(pars, n_eff, Rhat)</a>
+<a class="sourceLine" id="cb25-6" title="6">tb <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/na.fail">na.omit</a></span>() <span class="co"># Stan fills upper triangle with zeros</span></a>
+<a class="sourceLine" id="cb25-7" title="7">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(n_eff)</a></code></pre></div>
 <pre><code>## # A tibble: 263 x 3
 ##    pars          n_eff  Rhat
 ##    &lt;chr&gt;         &lt;dbl&gt; &lt;dbl&gt;
@@ -284,7 +287,7 @@
 ##  9 z_donor[9,1]   281.  1.02
 ## 10 z_donor[13,1]  287.  1.02
 ## # ... with 253 more rows</code></pre>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" title="1">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(<span class="kw">desc</span>(Rhat))</a></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">arrange</span>(<span class="kw">desc</span>(Rhat))</a></code></pre></div>
 <pre><code>## # A tibble: 263 x 3
 ##    pars          n_eff  Rhat
 ##    &lt;chr&gt;         &lt;dbl&gt; &lt;dbl&gt;
@@ -299,69 +302,69 @@
 ##  9 z_donor[12,2]  323.  1.02
 ## 10 z_donor[3,1]   274.  1.02
 ## # ... with 253 more rows</code></pre>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" title="1">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">summarize</span>(<span class="dt">min =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">min</a></span>(n_eff), <span class="dt">max =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">max</a></span>(n_eff))</a></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" title="1">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">summarize</span>(<span class="dt">min =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">min</a></span>(n_eff), <span class="dt">max =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">max</a></span>(n_eff))</a></code></pre></div>
 <pre><code>## # A tibble: 1 x 2
 ##     min   max
 ##   &lt;dbl&gt; &lt;dbl&gt;
 ## 1  256. 2488.</code></pre>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" title="1">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">summarize</span>(<span class="dt">min =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">min</a></span>(Rhat), <span class="dt">max =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">max</a></span>(Rhat))</a></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" title="1">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">summarize</span>(<span class="dt">min =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">min</a></span>(Rhat), <span class="dt">max =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">max</a></span>(Rhat))</a></code></pre></div>
 <pre><code>## # A tibble: 1 x 2
 ##     min   max
 ##   &lt;dbl&gt; &lt;dbl&gt;
 ## 1 0.994  1.02</code></pre>
 </div>
-<div id="results" class="section level2">
-<h2 class="hasAnchor">
-<a href="#results" class="anchor"></a>Results</h2>
+</div>
+<div id="results" class="section level1">
+<h1 class="hasAnchor">
+<a href="#results" class="anchor"></a>Results</h1>
 <p>Plot fixed effects.</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" title="1">p_full =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(obj, <span class="dt">type =</span> <span class="st">"beta"</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb32-2" title="2"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/expression">expression</a></span>(<span class="st">"Fixed Effects"</span><span class="op">~</span>beta)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb32-3" title="3"><span class="st">  </span><span class="kw">xlab</span>(<span class="st">"log-odds of 3rd/1st trimester"</span>)</a>
-<a class="sourceLine" id="cb32-4" title="4">p_full</a></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" title="1">p_full =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(obj, <span class="dt">type =</span> <span class="st">"beta"</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb33-2" title="2"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/expression">expression</a></span>(<span class="st">"Fixed Effects"</span><span class="op">~</span>beta)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb33-3" title="3"><span class="st">  </span><span class="kw">xlab</span>(<span class="st">"log-odds of 3rd/1st trimester"</span>)</a>
+<a class="sourceLine" id="cb33-4" title="4">p_full</a></code></pre></div>
 <p><img src="Reanalysis_Aghaeepour2017_files/figure-html/fixed_effects-1.png" width="700"></p>
 <p>Extract log-odds for pSTAT1.</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" title="1">post_beta =<span class="st"> </span>rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-extract">extract</a></span>(obj<span class="op">$</span>fit_mcmc, <span class="dt">pars =</span> <span class="st">"beta"</span>)[[<span class="dv">1</span>]]</a>
-<a class="sourceLine" id="cb33-2" title="2">post_beta <span class="op">%&lt;&gt;%</span><span class="st"> </span>as.tibble</a>
-<a class="sourceLine" id="cb33-3" title="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(post_beta) =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"intercept"</span>,obj<span class="op">$</span>protein_names)</a>
-<a class="sourceLine" id="cb33-4" title="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/quantile">quantile</a></span>(post_beta<span class="op">$</span>pSTAT1, <span class="dt">probs =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb34-1" title="1">post_beta =<span class="st"> </span>rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-extract">extract</a></span>(obj<span class="op">$</span>fit_mcmc, <span class="dt">pars =</span> <span class="st">"beta"</span>)[[<span class="dv">1</span>]]</a>
+<a class="sourceLine" id="cb34-2" title="2">post_beta <span class="op">%&lt;&gt;%</span><span class="st"> </span>as.tibble</a>
+<a class="sourceLine" id="cb34-3" title="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(post_beta) =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"intercept"</span>,obj<span class="op">$</span>protein_names)</a>
+<a class="sourceLine" id="cb34-4" title="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/quantile">quantile</a></span>(post_beta<span class="op">$</span>pSTAT1, <span class="dt">probs =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</a></code></pre></div>
 <pre><code>##     2.5%    97.5% 
 ## 0.923023 1.525243</code></pre>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/quantile">quantile</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Log">exp</a></span>(post_beta<span class="op">$</span>pSTAT1), <span class="dt">probs =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/quantile">quantile</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Log">exp</a></span>(post_beta<span class="op">$</span>pSTAT1), <span class="dt">probs =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</a></code></pre></div>
 <pre><code>##     2.5%    97.5% 
 ## 2.516887 4.596260</code></pre>
 <p>Plot random effects.</p>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(obj, <span class="dt">type =</span> <span class="st">"sigma_donor"</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb37-2" title="2"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">"Marker Standard Deviation"</span><span class="op">~</span>sigma)</a></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb38-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(obj, <span class="dt">type =</span> <span class="st">"sigma_donor"</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb38-2" title="2"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">"Marker Standard Deviation"</span><span class="op">~</span>sigma)</a></code></pre></div>
 <p><img src="Reanalysis_Aghaeepour2017_files/figure-html/random_effects-1.png" width="700"></p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb38-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/ggsave">ggsave</a></span>(<span class="st">"sigma_glmm.pdf"</span>, <span class="dt">width =</span> <span class="dv">4</span>, <span class="dt">height =</span> <span class="dv">3</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/ggsave">ggsave</a></span>(<span class="st">"sigma_glmm.pdf"</span>, <span class="dt">width =</span> <span class="dv">4</span>, <span class="dt">height =</span> <span class="dv">3</span>)</a></code></pre></div>
 <p>Plot posterior correlations.</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(obj, <span class="dt">type =</span> <span class="st">"Cor_donor"</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb39-2" title="2"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/expression">expression</a></span>(<span class="st">"Marker Correlations"</span><span class="op">~</span>Omega<span class="op">~</span><span class="st">"(donor)"</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(obj, <span class="dt">type =</span> <span class="st">"Cor_donor"</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb40-2" title="2"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/expression">expression</a></span>(<span class="st">"Marker Correlations"</span><span class="op">~</span>Omega<span class="op">~</span><span class="st">"(donor)"</span>))</a></code></pre></div>
 <p><img src="Reanalysis_Aghaeepour2017_files/figure-html/posterior_correlations-1.png" width="700"></p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/ggsave">ggsave</a></span>(<span class="st">"posterior_summary_cor_glmm.pdf"</span>, <span class="dt">width =</span> <span class="dv">4</span>, <span class="dt">height =</span> <span class="dv">4</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/ggsave">ggsave</a></span>(<span class="st">"posterior_summary_cor_glmm.pdf"</span>, <span class="dt">width =</span> <span class="dv">4</span>, <span class="dt">height =</span> <span class="dv">4</span>)</a></code></pre></div>
 </div>
-<div id="refit-without-pstat1" class="section level2">
-<h2 class="hasAnchor">
-<a href="#refit-without-pstat1" class="anchor"></a>Refit Without pSTAT1</h2>
+<div id="refit-without-pstat1" class="section level1">
+<h1 class="hasAnchor">
+<a href="#refit-without-pstat1" class="anchor"></a>Refit Without pSTAT1</h1>
 <p>Refit model to test potentional collider confounding.</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" title="1">protein_names =<span class="st"> </span>protein_names[<span class="op">-</span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(protein_names <span class="op">==</span><span class="st"> "pSTAT1"</span>)]</a>
-<a class="sourceLine" id="cb41-2" title="2">obj =<span class="st"> </span>cytoeffect<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/cytoeffect/topics/glmm">glmm</a></span>(df_samples_subset, protein_names, </a>
-<a class="sourceLine" id="cb41-3" title="3">                       <span class="dt">condition =</span> <span class="st">"term"</span>, <span class="dt">group =</span> <span class="st">"donor"</span>,</a>
-<a class="sourceLine" id="cb41-4" title="4">                       <span class="dt">iter =</span> <span class="dv">325</span>, <span class="dt">warmup =</span> <span class="dv">200</span>, <span class="dt">num_chains =</span> ncores, </a>
-<a class="sourceLine" id="cb41-5" title="5">                       <span class="dt">eta =</span> <span class="fl">1.0</span>)</a>
-<a class="sourceLine" id="cb41-6" title="6"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/save">save</a></span>(obj,<span class="dt">file =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"cytoeffect_ncells_collider"</span>,ncells,<span class="st">".Rdata"</span>))</a></code></pre></div>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" title="1">p_reduced =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(obj, <span class="dt">type =</span> <span class="st">"beta"</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb42-2" title="2"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/expression">expression</a></span>(<span class="st">"Reduced Fixed Effects"</span><span class="op">~</span>beta)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb42-3" title="3"><span class="st">  </span><span class="kw">xlab</span>(<span class="st">"log-odds of 3rd/1st trimester"</span>)</a>
-<a class="sourceLine" id="cb42-4" title="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/plot_grid">plot_grid</a></span>(p_full, p_reduced, <span class="dt">labels =</span> <span class="st">"AUTO"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" title="1">protein_names =<span class="st"> </span>protein_names[<span class="op">-</span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(protein_names <span class="op">==</span><span class="st"> "pSTAT1"</span>)]</a>
+<a class="sourceLine" id="cb42-2" title="2">obj =<span class="st"> </span>cytoeffect<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/cytoeffect/topics/glmm">glmm</a></span>(df_samples_subset, protein_names, </a>
+<a class="sourceLine" id="cb42-3" title="3">                       <span class="dt">condition =</span> <span class="st">"term"</span>, <span class="dt">group =</span> <span class="st">"donor"</span>,</a>
+<a class="sourceLine" id="cb42-4" title="4">                       <span class="dt">iter =</span> <span class="dv">325</span>, <span class="dt">warmup =</span> <span class="dv">200</span>, <span class="dt">num_chains =</span> ncores, </a>
+<a class="sourceLine" id="cb42-5" title="5">                       <span class="dt">eta =</span> <span class="fl">1.0</span>)</a>
+<a class="sourceLine" id="cb42-6" title="6"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/save">save</a></span>(obj,<span class="dt">file =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"cytoeffect_ncells_collider"</span>,ncells,<span class="st">".Rdata"</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" title="1">p_reduced =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(obj, <span class="dt">type =</span> <span class="st">"beta"</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb43-2" title="2"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/expression">expression</a></span>(<span class="st">"Reduced Fixed Effects"</span><span class="op">~</span>beta)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb43-3" title="3"><span class="st">  </span><span class="kw">xlab</span>(<span class="st">"log-odds of 3rd/1st trimester"</span>)</a>
+<a class="sourceLine" id="cb43-4" title="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/plot_grid">plot_grid</a></span>(p_full, p_reduced, <span class="dt">labels =</span> <span class="st">"AUTO"</span>)</a></code></pre></div>
 <p><img src="Reanalysis_Aghaeepour2017_files/figure-html/plot_refit-1.png" width="700"></p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/ggsave">ggsave</a></span>(<span class="dt">filename =</span> <span class="st">"beta_glmm.pdf"</span>, <span class="dt">width =</span> <span class="dv">8</span>, <span class="dt">height =</span> <span class="dv">3</span>)</a></code></pre></div>
-</div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/ggsave">ggsave</a></span>(<span class="dt">filename =</span> <span class="st">"beta_glmm.pdf"</span>, <span class="dt">width =</span> <span class="dv">8</span>, <span class="dt">height =</span> <span class="dv">3</span>)</a></code></pre></div>
 </div>
 <div id="session-info" class="section level1 unnumbered">
 <h1 class="hasAnchor">
 <a href="#session-info" class="anchor"></a>Session Info</h1>
-<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/sessionInfo">sessionInfo</a></span>()</a></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/sessionInfo">sessionInfo</a></span>()</a></code></pre></div>
 <pre><code>## R version 3.5.1 (2018-07-02)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
 ## Running under: macOS  10.14.3
@@ -442,12 +445,12 @@
       <li><a href="#load-data">Load Data</a></li>
       <li>
 <a href="#fit-model">Fit Model</a><ul class="nav nav-pills nav-stacked">
-<li><a href="#subsampling">Subsampling</a></li>
-      <li><a href="#hmc-sampling">HMC Sampling</a></li>
-      <li><a href="#results">Results</a></li>
-      <li><a href="#refit-without-pstat1">Refit Without pSTAT1</a></li>
+<li><a href="#hmc-sampling">HMC Sampling</a></li>
+      <li><a href="#hmc-diagnostics">HMC Diagnostics</a></li>
       </ul>
 </li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#refit-without-pstat1">Refit Without pSTAT1</a></li>
       <li><a href="#session-info">Session Info</a></li>
       <li><a href="#references">References</a></li>
       </ul>
