@@ -12,6 +12,9 @@
 #' @param type A string with the variable name to plot: \code{type = "beta"}, \code{type = "sigma_donor"}, or \code{type = "Cor_donor"}
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
+#' @examples
+#' # fit = cytoeffect::glmm(...)
+#' # plot(fit)
 plot.cytoeffect = function(obj, type = "distribution") {
 
   if (class(obj) != "cytoeffect")

@@ -17,3 +17,7 @@ plot.cytoeffect(obj, type = "distribution")
 \description{
 Plot Posterior Summaries of Logistic Linear Mixed Model
 }
+\examples{
+# fit = cytoeffect::glmm(...)
+# plot(fit)
+}

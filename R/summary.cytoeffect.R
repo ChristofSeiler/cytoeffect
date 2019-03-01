@@ -5,10 +5,13 @@
 #' @import tibble
 #' @export
 #'
-#' @param obj Object of class \code{cytoeffect_poisson} computed using \code{\link{poisson_lognormal}}
+#' @param obj Object of class \code{cytoeffect} computed using \code{\link{glmm}}
 #' @param type A string with the variable name to plot: \code{par = "beta"}, \code{par = "sigma"}, or \code{par = "Cor"}
 #' @return \code{\link[tibble]{tibble}} object
 #'
+#' @examples
+#' # fit = cytoeffect::glmm(...)
+#' # summary(fit)
 summary.cytoeffect = function(obj, par) {
 
   if (class(obj) != "cytoeffect")

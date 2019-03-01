@@ -1,5 +1,5 @@
 ---
-title: "Poisson Log-Normal Model"
+title: "Poisson Log-Normal Mixed Model"
 author:
   name: Christof Seiler
   affiliation: Department of Statistics, Stanford University
@@ -90,86 +90,25 @@ gate_protein_names = colData(se_aghaeepour2017immune) %>%
 
 # Fit Model
 
-Cells count of subsets.
+Tally cell count.
 
 ```{r cell_count}
 df_samples %>% group_by(term,celltype,donor) %>% tally %>% arrange(n)
 df_samples %>% group_by(term,celltype,donor) %>% tally %>% arrange(desc(n))
 ```
 
-## Subsampling
-
-Subsample to only one cell type and one donor.
+Subset to NK cells.
 
 ```{r one_donor_one_cell_subset}
 df_samples_subset = df_samples %>% dplyr::filter(celltype == "NK")
 df_samples_subset %<>% dplyr::select(protein_names,gate_protein_names,sample_info_names)
 ```
 
-Count gating proteins.
-
-```{r count_gating_proteins}
-df_samples_subset %<>% 
-  mutate_(cell_size = paste(gate_protein_names,collapse = "+"))
-ggplot(df_samples_subset, aes(cell_size)) + 
-  geom_histogram(bins = 100) + 
-  facet_wrap(~term, ncol = 1)
-```
-
-Explore possible NK cells heterogeneity as a function of CD16 and CD56 expression levels.
-
-```{r gating_markers}
-tfm = function(x) asinh(x/5)
-colorscale = scale_fill_gradientn(
-  colors = rev(brewer.pal(9, "YlGnBu")), 
-  values = c(0, exp(seq(-5, 0, length.out = 100)))
-)
-gate_nk = c("CD16","CD56")
-df_gate_nk = df_samples_subset %>% dplyr::select(donor, file_name, term, gate_nk)
-df_gate_nk %<>% mutate_at(gate_nk, tfm)
-ggplot(df_gate_nk, aes(x = CD16, y = CD56)) +
-  geom_hex(bins = 16) +
-  coord_fixed() +
-  facet_wrap(~term) + 
-  colorscale
-ggplot(df_gate_nk, aes(x = CD16, y = CD56)) +
-  geom_hex(bins = 16) +
-  coord_fixed() +
-  facet_wrap(~donor, ncol = 6) + 
-  colorscale
-ggplot(df_gate_nk %>% 
-         gather(protein_name, value, -donor, -file_name, -term), 
-       aes(value, fill = term)) + 
-  geom_histogram(bins = 30, alpha= 0.5, position = "identity") +
-  facet_wrap(~protein_name) +
-  scale_color_few()
-```
-
-NK subset analysis.
-
-```{r nk_subset_analysis}
-df_samples_subset %<>% mutate(CD56_tfm = tfm(CD56))
-df_samples_subset %<>% mutate(CD56_tfm = (CD56_tfm-mean(CD56_tfm))/sd(CD56_tfm))
-df_samples_subset %<>% mutate(CD16_tfm = tfm(CD16))
-df_samples_subset %<>% mutate(CD16_tfm = (CD16_tfm-mean(CD16_tfm))/sd(CD16_tfm))
-tb_fit = lapply(protein_names, function(y) {
-  fit = glm(paste(y, "~ term + CD56_tfm + CD16_tfm"), data = df_samples_subset)
-  tidy(fit) %>% 
-    add_column(protein_name = y)
-  }) %>% bind_rows()
-ggplot(tb_fit, # %>% dplyr::filter(term != "(Intercept)"),
-       aes(x = estimate, y = protein_name)) +
-  geom_vline(xintercept = 0, alpha = 0.5) +
-  geom_point() + 
-  geom_errorbarh(aes(xmax = estimate + 1.96*std.error, 
-                     xmin = estimate - 1.96*std.error)) +
-  facet_wrap(~term)
-```
-
-Subsample cells so that to a maximum number of cells per celltype and donor.
+Subsample cells to a maximum number of cells per donor.
 
 ```{r subsample_cells}
 if(nrow(df_samples_subset) > ncells) {
+  print(paste("subsampled to",ncells,"per donor"))
   set.seed(seed)
   # subsample depending on max cell count
   df_count = df_samples_subset %>% group_by(donor) %>% tally() %>%
@@ -182,10 +121,12 @@ if(nrow(df_samples_subset) > ncells) {
     mutate(samp = map2(data, nnew, sample_n)) %>%
     dplyr::select(donor, samp) %>%
     unnest()
+} else {
+  print("no subsampling done")
 }
 ```
 
-Subset cells count.
+Tally cell count.
 
 ```{r cell_count_subsample}
 df_samples_subset %>% group_by(term,celltype,donor) %>% tally %>% 
@@ -214,6 +155,8 @@ obj = cytoeffect::poisson_lognormal(df_samples_subset, protein_names,
                                     num_chains = ncores)
 save(obj,file = paste0("cytoeffect_poisson_ncells",ncells,".Rdata"))
 ```
+
+## HMC Diagnostics
 
 Postprocessing of posterior samples. Traceplot of posterior samples.
 

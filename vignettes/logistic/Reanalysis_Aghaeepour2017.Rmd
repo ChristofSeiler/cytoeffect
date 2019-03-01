@@ -1,5 +1,5 @@
 ---
-title: "Logistic Linear Mixed Effects Model"
+title: "Logistic Linear Mixed Model"
 author:
   name: Christof Seiler
   affiliation: Department of Statistics, Stanford University
@@ -83,7 +83,7 @@ df_samples %<>% mutate_at(colData(se_aghaeepour2017immune)$protein_name,
 
 # Fit Model
 
-Cells count of subsets:
+Tally cell count.
 
 ```{r cell_count}
 df_samples %>% 
@@ -96,20 +96,18 @@ df_samples %>%
   arrange(desc(n))
 ```
 
-## Subsampling
-
-Subsample to only one cell type and one donor.
+Subset to NK cells.
 
 ```{r one_donor_one_cell_subset}
 df_samples_subset = df_samples %>% dplyr::filter(celltype == "NK")
 df_samples_subset %<>% dplyr::select(protein_names,sample_info_names)
-#df_samples_subset = df_samples %>% dplyr::select(protein_names,sample_info_names)
 ```
 
-Subsample cells so that to a maximum number of cells per celltype and donor.
+Subsample cells to a maximum number of cells per donor.
 
 ```{r subsample_cells}
 if(nrow(df_samples_subset) > ncells) {
+  print(paste("subsampled to",ncells,"per donor"))
   set.seed(seed)
   # subsample depending on max cell count
   df_count = df_samples_subset %>% group_by(donor) %>% tally() %>%
@@ -122,10 +120,12 @@ if(nrow(df_samples_subset) > ncells) {
     mutate(samp = map2(data, nnew, sample_n)) %>%
     dplyr::select(donor, samp) %>%
     unnest()
+} else {
+  print("no subsampling done")
 }
 ```
 
-Subset cells count.
+Tally cell count.
 
 ```{r cell_count_subsample}
 df_samples_subset %>% group_by(term,celltype,donor) %>% tally %>% 
@@ -155,6 +155,8 @@ obj = cytoeffect::glmm(df_samples_subset, protein_names,
 save(obj,file = paste0("cytoeffect_ncells",ncells,".Rdata"))
 ```
 
+## HMC Diagnostics
+
 Traceplot of posterior samples.
 
 ```{r post_sampling, fig.wide=TRUE}
@@ -177,7 +179,7 @@ tb %>% summarize(min = min(n_eff), max = max(n_eff))
 tb %>% summarize(min = min(Rhat), max = max(Rhat))
 ```
 
-## Results
+# Results
 
 Plot fixed effects.
 
@@ -214,7 +216,7 @@ plot(obj, type = "Cor_donor") +
 ggsave("posterior_summary_cor_glmm.pdf", width = 4, height = 4)
 ```
 
-## Refit Without pSTAT1
+# Refit Without pSTAT1
 
 Refit model to test potentional collider confounding.
 

@@ -17,3 +17,7 @@ plot.cytoeffect_poisson(obj, type = "distribution")
 \description{
 Plot Posterior Summaries for Poisson Log-Normal Mixed Model
 }
+\examples{
+# fit = cytoeffect::poisson_lognormal(...)
+# plot(fit)
+}

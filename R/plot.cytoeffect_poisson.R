@@ -13,6 +13,9 @@
 #' @param type A string with the variable name to plot: \code{type = "beta"}, \code{type = "sigma"}, or \code{type = "Cor"}
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
+#' @examples
+#' # fit = cytoeffect::poisson_lognormal(...)
+#' # plot(fit)
 plot.cytoeffect_poisson = function(obj, type = "distribution") {
 
   if (class(obj) != "cytoeffect_poisson")
