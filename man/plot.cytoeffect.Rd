@@ -2,10 +2,18 @@
 % Please edit documentation in R/plot.cytoeffect.R
 \name{plot.cytoeffect}
 \alias{plot.cytoeffect}
-\title{Plot posterior summaries.}
+\title{Plot Posterior Summaries of Logistic Linear Mixed Model}
 \usage{
 plot.cytoeffect(obj, type = "distribution")
 }
+\arguments{
+\item{obj}{Object of class \code{cytoeffect} computed using \code{\link{glmm}}}
+
+\item{type}{A string with the variable name to plot: \code{type = "beta"}, \code{type = "sigma_donor"}, or \code{type = "Cor_donor"}}
+}
+\value{
+\code{\link[ggplot2]{ggplot2}} object
+}
 \description{
-Plot posterior summaries.
+Plot Posterior Summaries of Logistic Linear Mixed Model
 }

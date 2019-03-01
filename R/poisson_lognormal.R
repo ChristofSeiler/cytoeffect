@@ -1,4 +1,8 @@
-#' HMC sampling for Poisson Log-Normal Model.
+#' HMC Sampling for Poisson Log-Normal Mixed Model
+#'
+#' \code{poisson_lognormal} uses Hamiltonion Monte Carlo to sample form an extend
+#' Poisson log-normal mixed model. Each cell and protein marker has its own rate
+#' parameter following a linear model.
 #'
 #' @import rstan
 #' @import reshape2
@@ -6,15 +10,16 @@
 #' @import batchtools
 #' @export
 #'
-#' @param df_samples_subset Data frame or tibble with proteins counts, cell condition, and group information.
-#' @param protein_names A vector of column names of protein to use in the analysis.
-#' @param condition The column name of the condition variable.
-#' @param group The column name of the group variable.
-#' @param iter Number of iteration per chain for the HMC sampler.
-#' @param warmup Number of warm up steps per chain for the HMC sampler.
-#' @param num_chains Number of HMC chains to run in parallel.
-#' @return A list of class \emph{cytoeffect_poisson} containing
-#'   \item{fit_mcmc}{Stan fit}
+#' @param df_samples_subset Data frame or tibble with proteins counts,
+#'   cell condition, and group information
+#' @param protein_names A vector of column names of protein to use in the analysis
+#' @param condition The column name of the condition variable
+#' @param group The column name of the group variable
+#' @param iter Number of iteration per chain for the HMC sampler
+#' @param warmup Number of warm up steps per chain for the HMC sampler
+#' @param num_chains Number of HMC chains to run in parallel
+#' @return A list of class \code{cytoeffect_poisson} containing
+#'   \item{fit_mcmc}{\code{\link[rstan]{rstan}} object}
 #'   \item{protein_names}{input protein names}
 #'   \item{conditions}{input condition variable}
 #'   \item{Y}{input orignal count matrix}

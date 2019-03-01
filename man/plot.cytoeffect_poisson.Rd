@@ -2,10 +2,18 @@
 % Please edit documentation in R/plot.cytoeffect_poisson.R
 \name{plot.cytoeffect_poisson}
 \alias{plot.cytoeffect_poisson}
-\title{Plot posterior summaries.}
+\title{Plot Posterior Summaries for Poisson Log-Normal Mixed Model}
 \usage{
 plot.cytoeffect_poisson(obj, type = "distribution")
 }
+\arguments{
+\item{obj}{Object of class \code{cytoeffect_poisson} computed using \code{\link{poisson_lognormal}}}
+
+\item{type}{A string with the variable name to plot: \code{type = "beta"}, \code{type = "sigma"}, or \code{type = "Cor"}}
+}
+\value{
+\code{\link[ggplot2]{ggplot2}} object
+}
 \description{
-Plot posterior summaries.
+Plot Posterior Summaries for Poisson Log-Normal Mixed Model
 }

@@ -1,4 +1,4 @@
-#' Plot posterior summaries.
+#' Plot Posterior Summaries for Poisson Log-Normal Mixed Model
 #'
 #' @import rstan
 #' @import ggplot2
@@ -8,6 +8,10 @@
 #' @import tidyr
 #' @import stringr
 #' @export
+#'
+#' @param obj Object of class \code{cytoeffect_poisson} computed using \code{\link{poisson_lognormal}}
+#' @param type A string with the variable name to plot: \code{type = "beta"}, \code{type = "sigma"}, or \code{type = "Cor"}
+#' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 plot.cytoeffect_poisson = function(obj, type = "distribution") {
 

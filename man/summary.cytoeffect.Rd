@@ -2,10 +2,18 @@
 % Please edit documentation in R/summary.cytoeffect.R
 \name{summary.cytoeffect}
 \alias{summary.cytoeffect}
-\title{Posterior summary.}
+\title{Posterior Summary for Poisson Log-Normal Mixed Model}
 \usage{
 summary.cytoeffect(obj, par)
 }
+\arguments{
+\item{obj}{Object of class \code{cytoeffect_poisson} computed using \code{\link{poisson_lognormal}}}
+
+\item{type}{A string with the variable name to plot: \code{par = "beta"}, \code{par = "sigma"}, or \code{par = "Cor"}}
+}
+\value{
+\code{\link[tibble]{tibble}} object
+}
 \description{
-Posterior summary.
+Posterior Summary for Poisson Log-Normal Mixed Model
 }

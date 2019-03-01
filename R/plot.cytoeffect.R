@@ -1,4 +1,4 @@
-#' Plot posterior summaries.
+#' Plot Posterior Summaries of Logistic Linear Mixed Model
 #'
 #' @import rstan
 #' @import ggplot2
@@ -7,6 +7,10 @@
 #' @import dplyr
 #' @import tidyr
 #' @export
+#'
+#' @param obj Object of class \code{cytoeffect} computed using \code{\link{glmm}}
+#' @param type A string with the variable name to plot: \code{type = "beta"}, \code{type = "sigma_donor"}, or \code{type = "Cor_donor"}
+#' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 plot.cytoeffect = function(obj, type = "distribution") {
 
