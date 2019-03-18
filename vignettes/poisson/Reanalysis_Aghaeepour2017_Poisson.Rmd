@@ -435,6 +435,7 @@ term = df_samples_subset %>%
     as.integer()
 # kth posterior draw
 sample_y_hat = function(k = 1) {
+  set.seed(seed)
   lapply(1:2, function(cond) {
     n_cells_cond = table(term)[cond]
     beta = stan_pars$beta[k,,]
