@@ -18,3 +18,7 @@ vignettes/logistic/cytoeffect_ncells_colliderInf.Rdata
 vignettes/logistic/beta_glmm.pdf
 vignettes/poisson/goodness_of_fit.pdf
 vignettes/poisson/posterior_summary_plmm.pdf
+vignettes/poisson/posterior_multivariate_plmm.pdf
+vignettes/poisson/cytoeffect_plmm_ncells_Inf.Rdata
+vignettes/logistic/cytoeffect_llmm_ncells_Inf_reduced.Rdata
+vignettes/logistic/cytoeffect_llmm_ncells_Inf.Rdata

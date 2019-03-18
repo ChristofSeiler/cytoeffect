@@ -97,71 +97,78 @@
 <div id="goal" class="section level1">
 <h1 class="hasAnchor">
 <a href="#goal" class="anchor"></a>Goal</h1>
-<p>Reanalysis of mass cytometry data from <span class="citation">Aghaeepour et al. (2017)</span> using the Poisson Log-Normal Model.</p>
+<p>Reanalysis of mass cytometry data from <span class="citation">Aghaeepour et al. (2017)</span> using the Poisson Log-Normal Mixed Model.</p>
 </div>
 <div id="prerequisites" class="section level1">
 <h1 class="hasAnchor">
 <a href="#prerequisites" class="anchor"></a>Prerequisites</h1>
 <p>Parse input parameters.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">ncells =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Round">floor</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/numeric">as.numeric</a></span>(params<span class="op">$</span>ncells))</a>
-<a class="sourceLine" id="cb1-2" title="2">ncells</a></code></pre></div>
-<pre><code>## [1] Inf</code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">seed =<span class="st"> </span>params<span class="op">$</span>seed</a>
-<a class="sourceLine" id="cb3-2" title="2">seed</a></code></pre></div>
-<pre><code>## [1] "0xdada"</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">ncores =<span class="st"> </span><span class="dv">8</span></a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">ncells =<span class="st"> </span><span class="ot">Inf</span></a>
+<a class="sourceLine" id="cb1-2" title="2">seed =<span class="st"> </span><span class="dv">0xdada</span></a>
+<a class="sourceLine" id="cb1-3" title="3">ncores =<span class="st"> </span><span class="dv">8</span></a>
+<a class="sourceLine" id="cb1-4" title="4">zenodo_url =<span class="st"> "https://zenodo.org/record/2597291/files/"</span></a>
+<a class="sourceLine" id="cb1-5" title="5">cytof_data =<span class="st"> "se_aghaeepour2017immune.Rdata"</span></a>
+<a class="sourceLine" id="cb1-6" title="6">prefit =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"cytoeffect_plmm_ncells_"</span>,ncells,<span class="st">".Rdata"</span>)</a>
+<a class="sourceLine" id="cb1-7" title="7">prefit</a></code></pre></div>
+<pre><code>## [1] "cytoeffect_plmm_ncells_Inf.Rdata"</code></pre>
 <p>Install packages.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">pkgs_needed =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"devtools"</span>,<span class="st">"tidyverse"</span>,<span class="st">"magrittr"</span>,<span class="st">"SummarizedExperiment"</span>,</a>
-<a class="sourceLine" id="cb6-2" title="2">                <span class="st">"ggthemes"</span>,<span class="st">"cowplot"</span>,<span class="st">"RColorBrewer"</span>,<span class="st">"broom"</span>,<span class="st">"hexbin"</span>,</a>
-<a class="sourceLine" id="cb6-3" title="3">                <span class="st">"intergraph"</span>,<span class="st">"igraph"</span>,<span class="st">"ggnetwork"</span>,<span class="st">"ggcorrplot"</span>,<span class="st">"MASS"</span>,</a>
-<a class="sourceLine" id="cb6-4" title="4">                <span class="st">"parallel"</span>,<span class="st">"dplyr"</span>)</a>
-<a class="sourceLine" id="cb6-5" title="5">letsinstall =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/sets">setdiff</a></span>(pkgs_needed, <span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/installed.packages">installed.packages</a></span>())</a>
-<a class="sourceLine" id="cb6-6" title="6"><span class="cf">if</span> (<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(letsinstall) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) {</a>
-<a class="sourceLine" id="cb6-7" title="7">  BiocManager<span class="op">::</span><span class="kw">install</span>(letsinstall)</a>
-<a class="sourceLine" id="cb6-8" title="8">}</a>
-<a class="sourceLine" id="cb6-9" title="9">devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"ChristofSeiler/cytoeffect"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">pkgs_needed =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"devtools"</span>,<span class="st">"tidyverse"</span>,<span class="st">"magrittr"</span>,<span class="st">"SummarizedExperiment"</span>,</a>
+<a class="sourceLine" id="cb3-2" title="2">                <span class="st">"ggthemes"</span>,<span class="st">"cowplot"</span>,<span class="st">"RColorBrewer"</span>,<span class="st">"broom"</span>,<span class="st">"hexbin"</span>,</a>
+<a class="sourceLine" id="cb3-3" title="3">                <span class="st">"intergraph"</span>,<span class="st">"igraph"</span>,<span class="st">"ggnetwork"</span>,<span class="st">"ggcorrplot"</span>,<span class="st">"MASS"</span>,</a>
+<a class="sourceLine" id="cb3-4" title="4">                <span class="st">"parallel"</span>,<span class="st">"dplyr"</span>)</a>
+<a class="sourceLine" id="cb3-5" title="5">letsinstall =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/sets">setdiff</a></span>(pkgs_needed, <span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/installed.packages">installed.packages</a></span>())</a>
+<a class="sourceLine" id="cb3-6" title="6"><span class="cf">if</span> (<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(letsinstall) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) {</a>
+<a class="sourceLine" id="cb3-7" title="7">  BiocManager<span class="op">::</span><span class="kw">install</span>(letsinstall)</a>
+<a class="sourceLine" id="cb3-8" title="8">}</a>
+<a class="sourceLine" id="cb3-9" title="9">devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"ChristofSeiler/cytoeffect"</span>)</a></code></pre></div>
 <p>Load packages.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"cytoeffect"</span>)</a>
-<a class="sourceLine" id="cb7-2" title="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"tidyverse"</span>)</a>
-<a class="sourceLine" id="cb7-3" title="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"magrittr"</span>)</a>
-<a class="sourceLine" id="cb7-4" title="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"SummarizedExperiment"</span>)</a>
-<a class="sourceLine" id="cb7-5" title="5"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"ggthemes"</span>)</a>
-<a class="sourceLine" id="cb7-6" title="6"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"cowplot"</span>)</a>
-<a class="sourceLine" id="cb7-7" title="7"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"RColorBrewer"</span>)</a>
-<a class="sourceLine" id="cb7-8" title="8"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"broom"</span>)</a>
-<a class="sourceLine" id="cb7-9" title="9"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"intergraph"</span>)</a>
-<a class="sourceLine" id="cb7-10" title="10"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"igraph"</span>)</a>
-<a class="sourceLine" id="cb7-11" title="11"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"ggnetwork"</span>)</a>
-<a class="sourceLine" id="cb7-12" title="12"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"ggcorrplot"</span>)</a>
-<a class="sourceLine" id="cb7-13" title="13"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"MASS"</span>)</a>
-<a class="sourceLine" id="cb7-14" title="14"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"parallel"</span>)</a>
-<a class="sourceLine" id="cb7-15" title="15"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"dplyr"</span>)</a>
-<a class="sourceLine" id="cb7-16" title="16"><span class="kw">theme_set</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/ggthemes/topics/theme_few">theme_few</a></span>())</a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"cytoeffect"</span>)</a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"tidyverse"</span>)</a>
+<a class="sourceLine" id="cb4-3" title="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"magrittr"</span>)</a>
+<a class="sourceLine" id="cb4-4" title="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"SummarizedExperiment"</span>)</a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"ggthemes"</span>)</a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"cowplot"</span>)</a>
+<a class="sourceLine" id="cb4-7" title="7"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"RColorBrewer"</span>)</a>
+<a class="sourceLine" id="cb4-8" title="8"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"broom"</span>)</a>
+<a class="sourceLine" id="cb4-9" title="9"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"intergraph"</span>)</a>
+<a class="sourceLine" id="cb4-10" title="10"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"igraph"</span>)</a>
+<a class="sourceLine" id="cb4-11" title="11"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"ggnetwork"</span>)</a>
+<a class="sourceLine" id="cb4-12" title="12"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"ggcorrplot"</span>)</a>
+<a class="sourceLine" id="cb4-13" title="13"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"MASS"</span>)</a>
+<a class="sourceLine" id="cb4-14" title="14"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"parallel"</span>)</a>
+<a class="sourceLine" id="cb4-15" title="15"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"dplyr"</span>)</a>
+<a class="sourceLine" id="cb4-16" title="16"><span class="kw">theme_set</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/ggthemes/topics/theme_few">theme_few</a></span>())</a></code></pre></div>
 </div>
 <div id="load-data" class="section level1">
 <h1 class="hasAnchor">
 <a href="#load-data" class="anchor"></a>Load Data</h1>
+<p>Download preprocessed data from Zenodo.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">rdata_filenames =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(cytof_data, prefit)</a>
+<a class="sourceLine" id="cb5-2" title="2"><span class="cf">for</span>(filename <span class="cf">in</span> rdata_filenames)</a>
+<a class="sourceLine" id="cb5-3" title="3">    <span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/download.file">download.file</a></span>(<span class="dt">url =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(zenodo_url, filename), </a>
+<a class="sourceLine" id="cb5-4" title="4">                  <span class="dt">destfile =</span> filename,</a>
+<a class="sourceLine" id="cb5-5" title="5">                  <span class="dt">mode =</span> <span class="st">"wb"</span>)</a></code></pre></div>
 <p>Load <code>SummarizedExperiment</code> object from CytoGLMM workflow.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/load">load</a></span>(<span class="st">"se_aghaeepour2017immune.Rdata"</span>)</a>
-<a class="sourceLine" id="cb8-2" title="2">exprs =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/SummarizedExperiment/topics/SummarizedExperiment-class">assay</a></span>(se_aghaeepour2017immune)</a>
-<a class="sourceLine" id="cb8-3" title="3">sample_info =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/SummarizedExperiment/topics/SummarizedExperiment-class">rowData</a></span>(se_aghaeepour2017immune)</a>
-<a class="sourceLine" id="cb8-4" title="4">sample_info_names =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(sample_info)</a>
-<a class="sourceLine" id="cb8-5" title="5">df_samples =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">cbind</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/as.data.frame">as.data.frame</a></span>(exprs), <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/as.data.frame">as.data.frame</a></span>(sample_info))</a>
-<a class="sourceLine" id="cb8-6" title="6">df_samples <span class="op">%&lt;&gt;%</span><span class="st"> </span>as.tibble</a>
-<a class="sourceLine" id="cb8-7" title="7">protein_names =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/SummarizedExperiment/topics/SummarizedExperiment-class">colData</a></span>(se_aghaeepour2017immune) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb8-8" title="8"><span class="st">  </span>as.data.frame <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb8-9" title="9"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(type <span class="op">==</span><span class="st"> "function"</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb8-10" title="10"><span class="st">  </span>.<span class="op">$</span>protein_name</a>
-<a class="sourceLine" id="cb8-11" title="11">gate_protein_names =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/SummarizedExperiment/topics/SummarizedExperiment-class">colData</a></span>(se_aghaeepour2017immune) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb8-12" title="12"><span class="st">  </span>as.data.frame <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb8-13" title="13"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(type <span class="op">==</span><span class="st"> "phenotype"</span>) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb8-14" title="14"><span class="st">  </span>.<span class="op">$</span>protein_name</a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/load">load</a></span>(cytof_data)</a>
+<a class="sourceLine" id="cb6-2" title="2">exprs =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/SummarizedExperiment/topics/SummarizedExperiment-class">assay</a></span>(se_aghaeepour2017immune)</a>
+<a class="sourceLine" id="cb6-3" title="3">sample_info =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/SummarizedExperiment/topics/SummarizedExperiment-class">rowData</a></span>(se_aghaeepour2017immune)</a>
+<a class="sourceLine" id="cb6-4" title="4">sample_info_names =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(sample_info)</a>
+<a class="sourceLine" id="cb6-5" title="5">df_samples =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cbind">cbind</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/as.data.frame">as.data.frame</a></span>(exprs), <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/as.data.frame">as.data.frame</a></span>(sample_info))</a>
+<a class="sourceLine" id="cb6-6" title="6">df_samples <span class="op">%&lt;&gt;%</span><span class="st"> </span>as.tibble</a>
+<a class="sourceLine" id="cb6-7" title="7">protein_names =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/SummarizedExperiment/topics/SummarizedExperiment-class">colData</a></span>(se_aghaeepour2017immune) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb6-8" title="8"><span class="st">  </span>as.data.frame <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb6-9" title="9"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(type <span class="op">==</span><span class="st"> "function"</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb6-10" title="10"><span class="st">  </span>.<span class="op">$</span>protein_name</a>
+<a class="sourceLine" id="cb6-11" title="11">gate_protein_names =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/SummarizedExperiment/topics/SummarizedExperiment-class">colData</a></span>(se_aghaeepour2017immune) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb6-12" title="12"><span class="st">  </span>as.data.frame <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb6-13" title="13"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(type <span class="op">==</span><span class="st"> "phenotype"</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb6-14" title="14"><span class="st">  </span>.<span class="op">$</span>protein_name</a></code></pre></div>
 </div>
 <div id="fit-model" class="section level1">
 <h1 class="hasAnchor">
 <a href="#fit-model" class="anchor"></a>Fit Model</h1>
 <p>Tally cell count.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">df_samples <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(term,celltype,donor) <span class="op">%&gt;%</span><span class="st"> </span>tally <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(n)</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">df_samples <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(term,celltype,donor) <span class="op">%&gt;%</span><span class="st"> </span>tally <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(n)</a></code></pre></div>
 <pre><code>## # A tibble: 379 x 4
 ## # Groups:   term, celltype [24]
 ##    term          celltype donor       n
@@ -177,7 +184,7 @@
 ##  9 1st trimester gdT      PTLG020     4
 ## 10 3rd trimester intMC    PTLG004     5
 ## # ... with 369 more rows</code></pre>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">df_samples <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(term,celltype,donor) <span class="op">%&gt;%</span><span class="st"> </span>tally <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(<span class="kw"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span>(n))</a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">df_samples <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(term,celltype,donor) <span class="op">%&gt;%</span><span class="st"> </span>tally <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(<span class="kw"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span>(n))</a></code></pre></div>
 <pre><code>## # A tibble: 379 x 4
 ## # Groups:   term, celltype [24]
 ##    term          celltype   donor       n
@@ -194,30 +201,30 @@
 ## 10 3rd trimester CD4+Tnaive PTLG001 24423
 ## # ... with 369 more rows</code></pre>
 <p>Subset to NK cells.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1">df_samples_subset =<span class="st"> </span>df_samples <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(celltype <span class="op">==</span><span class="st"> "NK"</span>)</a>
-<a class="sourceLine" id="cb13-2" title="2">df_samples_subset <span class="op">%&lt;&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(protein_names,gate_protein_names,sample_info_names)</a></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1">df_samples_subset =<span class="st"> </span>df_samples <span class="op">%&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(celltype <span class="op">==</span><span class="st"> "NK"</span>)</a>
+<a class="sourceLine" id="cb11-2" title="2">df_samples_subset <span class="op">%&lt;&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(protein_names,gate_protein_names,sample_info_names)</a></code></pre></div>
 <p>Subsample cells to a maximum number of cells per donor.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="cf">if</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/nrow">nrow</a></span>(df_samples_subset) <span class="op">&gt;</span><span class="st"> </span>ncells) {</a>
-<a class="sourceLine" id="cb14-2" title="2">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste</a></span>(<span class="st">"subsampled to"</span>,ncells,<span class="st">"per donor"</span>))</a>
-<a class="sourceLine" id="cb14-3" title="3">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(seed)</a>
-<a class="sourceLine" id="cb14-4" title="4">  <span class="co"># subsample depending on max cell count</span></a>
-<a class="sourceLine" id="cb14-5" title="5">  df_count =<span class="st"> </span>df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(donor) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/tally.html">tally</a></span>() <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb14-6" title="6"><span class="st">    </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(<span class="dt">nnew =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/ifelse">ifelse</a></span>(n <span class="op">&gt;</span><span class="st"> </span>ncells,ncells,n))</a>
-<a class="sourceLine" id="cb14-7" title="7">  <span class="co"># create table with a data frame in one column</span></a>
-<a class="sourceLine" id="cb14-8" title="8">  df_nested =<span class="st"> </span>df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(donor) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">nest</span>() <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb14-9" title="9"><span class="st">    </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/join.html">left_join</a></span>(df_count,<span class="dt">by =</span> <span class="st">"donor"</span>)</a>
-<a class="sourceLine" id="cb14-10" title="10">  <span class="co"># subsample per donor</span></a>
-<a class="sourceLine" id="cb14-11" title="11">  df_samples_subset =<span class="st"> </span>df_nested <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb14-12" title="12"><span class="st">    </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(<span class="dt">samp =</span> <span class="kw">map2</span>(data, nnew, sample_n)) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb14-13" title="13"><span class="st">    </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(donor, samp) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb14-14" title="14"><span class="st">    </span><span class="kw">unnest</span>()</a>
-<a class="sourceLine" id="cb14-15" title="15">} <span class="cf">else</span> {</a>
-<a class="sourceLine" id="cb14-16" title="16">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(<span class="st">"no subsampling done"</span>)</a>
-<a class="sourceLine" id="cb14-17" title="17">}</a></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="cf">if</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/nrow">nrow</a></span>(df_samples_subset) <span class="op">&gt;</span><span class="st"> </span>ncells) {</a>
+<a class="sourceLine" id="cb12-2" title="2">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste</a></span>(<span class="st">"subsampled to"</span>,ncells,<span class="st">"per donor"</span>))</a>
+<a class="sourceLine" id="cb12-3" title="3">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(seed)</a>
+<a class="sourceLine" id="cb12-4" title="4">  <span class="co"># subsample depending on max cell count</span></a>
+<a class="sourceLine" id="cb12-5" title="5">  df_count =<span class="st"> </span>df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(donor) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/tally.html">tally</a></span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb12-6" title="6"><span class="st">    </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(<span class="dt">nnew =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/ifelse">ifelse</a></span>(n <span class="op">&gt;</span><span class="st"> </span>ncells,ncells,n))</a>
+<a class="sourceLine" id="cb12-7" title="7">  <span class="co"># create table with a data frame in one column</span></a>
+<a class="sourceLine" id="cb12-8" title="8">  df_nested =<span class="st"> </span>df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(donor) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">nest</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb12-9" title="9"><span class="st">    </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/join.html">left_join</a></span>(df_count,<span class="dt">by =</span> <span class="st">"donor"</span>)</a>
+<a class="sourceLine" id="cb12-10" title="10">  <span class="co"># subsample per donor</span></a>
+<a class="sourceLine" id="cb12-11" title="11">  df_samples_subset =<span class="st"> </span>df_nested <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb12-12" title="12"><span class="st">    </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(<span class="dt">samp =</span> <span class="kw">map2</span>(data, nnew, sample_n)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb12-13" title="13"><span class="st">    </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(donor, samp) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb12-14" title="14"><span class="st">    </span><span class="kw">unnest</span>()</a>
+<a class="sourceLine" id="cb12-15" title="15">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb12-16" title="16">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(<span class="st">"no subsampling done"</span>)</a>
+<a class="sourceLine" id="cb12-17" title="17">}</a></code></pre></div>
 <pre><code>## [1] "no subsampling done"</code></pre>
 <p>Tally cell count.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1">df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(term,celltype,donor) <span class="op">%&gt;%</span><span class="st"> </span>tally <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb16-2" title="2"><span class="st">  </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(n)</a></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1">df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(term,celltype,donor) <span class="op">%&gt;%</span><span class="st"> </span>tally <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb14-2" title="2"><span class="st">  </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(n)</a></code></pre></div>
 <pre><code>## # A tibble: 32 x 4
 ## # Groups:   term, celltype [2]
 ##    term          celltype donor       n
@@ -233,8 +240,8 @@
 ##  9 1st trimester NK       PTLG010  4273
 ## 10 3rd trimester NK       PTLG019  4542
 ## # ... with 22 more rows</code></pre>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1">df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(term,celltype,donor) <span class="op">%&gt;%</span><span class="st"> </span>tally <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb18-2" title="2"><span class="st">  </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(<span class="kw"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span>(n))</a></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1">df_samples_subset <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(term,celltype,donor) <span class="op">%&gt;%</span><span class="st"> </span>tally <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb16-2" title="2"><span class="st">  </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(<span class="kw"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span>(n))</a></code></pre></div>
 <pre><code>## # A tibble: 32 x 4
 ## # Groups:   term, celltype [2]
 ##    term          celltype donor       n
@@ -254,31 +261,35 @@
 <h2 class="hasAnchor">
 <a href="#hmc-sampling" class="anchor"></a>HMC Sampling</h2>
 <p>Sample from posterior distribution (initialization details in paper).</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1">df_samples_subset<span class="op">$</span>term <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/factor">factor</a></span>(<span class="dt">levels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"1st trimester"</span>,</a>
-<a class="sourceLine" id="cb20-2" title="2">                                              <span class="st">"3rd trimester"</span>))</a></code></pre></div>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1">obj =<span class="st"> </span>cytoeffect<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/cytoeffect/topics/poisson_lognormal">poisson_lognormal</a></span>(df_samples_subset, protein_names, </a>
-<a class="sourceLine" id="cb21-2" title="2">                                    <span class="dt">condition =</span> <span class="st">"term"</span>, <span class="dt">group =</span> <span class="st">"donor"</span>,</a>
-<a class="sourceLine" id="cb21-3" title="3">                                    <span class="dt">iter =</span> <span class="dv">82</span>, <span class="dt">warmup =</span> <span class="dv">50</span>,</a>
-<a class="sourceLine" id="cb21-4" title="4">                                    <span class="dt">num_chains =</span> ncores)</a>
-<a class="sourceLine" id="cb21-5" title="5"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/save">save</a></span>(obj,<span class="dt">file =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"cytoeffect_poisson_ncells"</span>,ncells,<span class="st">".Rdata"</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1">df_samples_subset<span class="op">$</span>term <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/factor">factor</a></span>(<span class="dt">levels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"1st trimester"</span>,</a>
+<a class="sourceLine" id="cb18-2" title="2">                                              <span class="st">"3rd trimester"</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1"><span class="cf">if</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/files">file.exists</a></span>(prefit)) {</a>
+<a class="sourceLine" id="cb19-2" title="2">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/load">load</a></span>(<span class="dt">file =</span> prefit)</a>
+<a class="sourceLine" id="cb19-3" title="3">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb19-4" title="4">  obj =<span class="st"> </span>cytoeffect<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/cytoeffect/topics/poisson_lognormal">poisson_lognormal</a></span>(df_samples_subset, protein_names, </a>
+<a class="sourceLine" id="cb19-5" title="5">                                      <span class="dt">condition =</span> <span class="st">"term"</span>, <span class="dt">group =</span> <span class="st">"donor"</span>,</a>
+<a class="sourceLine" id="cb19-6" title="6">                                      <span class="dt">iter =</span> <span class="dv">325</span>, <span class="dt">warmup =</span> <span class="dv">200</span>,</a>
+<a class="sourceLine" id="cb19-7" title="7">                                      <span class="dt">num_chains =</span> ncores)</a>
+<a class="sourceLine" id="cb19-8" title="8">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/save">save</a></span>(obj,<span class="dt">file =</span> prefit)</a>
+<a class="sourceLine" id="cb19-9" title="9">}</a></code></pre></div>
 </div>
 <div id="hmc-diagnostics" class="section level2">
 <h2 class="hasAnchor">
 <a href="#hmc-diagnostics" class="anchor"></a>HMC Diagnostics</h2>
 <p>Postprocessing of posterior samples. Traceplot of posterior samples.</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1">pars_str =<span class="st"> "beta"</span></a>
-<a class="sourceLine" id="cb22-2" title="2">rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-traceplot">traceplot</a></span>(obj<span class="op">$</span>fit_mcmc, <span class="dt">inc_warmup =</span> <span class="ot">FALSE</span>, <span class="dt">pars =</span> pars_str)</a></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1">pars_str =<span class="st"> "beta"</span></a>
+<a class="sourceLine" id="cb20-2" title="2">rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-traceplot">traceplot</a></span>(obj<span class="op">$</span>fit_mcmc, <span class="dt">inc_warmup =</span> <span class="ot">FALSE</span>, <span class="dt">pars =</span> pars_str)</a></code></pre></div>
 <p><img src="Reanalysis_Aghaeepour2017_Poisson_files/figure-html/post_sampling-1.png" width="700"></p>
 <p>Some more MCMC diagnostics. According to empirically findings, Rhat &gt; 1.1 is usually indicative of problems in the fit.</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1">pars =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"beta"</span>,</a>
-<a class="sourceLine" id="cb23-2" title="2">         <span class="st">"sigma"</span>,<span class="st">"sigma_term"</span>,<span class="st">"sigma_donor"</span>,</a>
-<a class="sourceLine" id="cb23-3" title="3">         <span class="st">"Cor"</span>,<span class="st">"Cor_term"</span>,<span class="st">"Cor_donor"</span>)</a>
-<a class="sourceLine" id="cb23-4" title="4">tb =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(obj<span class="op">$</span>fit_mcmc, </a>
-<a class="sourceLine" id="cb23-5" title="5">             <span class="dt">pars =</span> pars)<span class="op">$</span>summary <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb23-6" title="6"><span class="st">  </span><span class="kw">as.tibble</span>(<span class="dt">rownames =</span> <span class="st">"pars"</span>, <span class="dt">.before =</span> <span class="dv">1</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb23-7" title="7"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(pars, n_eff, Rhat)</a>
-<a class="sourceLine" id="cb23-8" title="8">tb <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/na.fail">na.omit</a></span>() <span class="co"># Stan fills upper triangle with zeros</span></a>
-<a class="sourceLine" id="cb23-9" title="9">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(n_eff)</a></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1">pars =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"beta"</span>,</a>
+<a class="sourceLine" id="cb21-2" title="2">         <span class="st">"sigma"</span>,<span class="st">"sigma_term"</span>,<span class="st">"sigma_donor"</span>,</a>
+<a class="sourceLine" id="cb21-3" title="3">         <span class="st">"Cor"</span>,<span class="st">"Cor_term"</span>,<span class="st">"Cor_donor"</span>)</a>
+<a class="sourceLine" id="cb21-4" title="4">tb =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/summary">summary</a></span>(obj<span class="op">$</span>fit_mcmc, </a>
+<a class="sourceLine" id="cb21-5" title="5">             <span class="dt">pars =</span> pars)<span class="op">$</span>summary <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb21-6" title="6"><span class="st">  </span><span class="kw">as.tibble</span>(<span class="dt">rownames =</span> <span class="st">"pars"</span>, <span class="dt">.before =</span> <span class="dv">1</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb21-7" title="7"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span>(pars, n_eff, Rhat)</a>
+<a class="sourceLine" id="cb21-8" title="8">tb <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/na.fail">na.omit</a></span>() <span class="co"># Stan fills upper triangle with zeros</span></a>
+<a class="sourceLine" id="cb21-9" title="9">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(n_eff)</a></code></pre></div>
 <pre><code>## # A tibble: 347 x 3
 ##    pars           n_eff  Rhat
 ##    &lt;chr&gt;          &lt;dbl&gt; &lt;dbl&gt;
@@ -293,7 +304,7 @@
 ##  9 beta[2,1]       149. 1.05 
 ## 10 beta[3,2]       166. 1.05 
 ## # ... with 337 more rows</code></pre>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" title="1">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(<span class="kw"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span>(Rhat))</a></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(<span class="kw"><a href="https://dplyr.tidyverse.org/reference/desc.html">desc</a></span>(Rhat))</a></code></pre></div>
 <pre><code>## # A tibble: 347 x 3
 ##    pars          n_eff  Rhat
 ##    &lt;chr&gt;         &lt;dbl&gt; &lt;dbl&gt;
@@ -308,12 +319,12 @@
 ##  9 Cor[1,4]       227.  1.05
 ## 10 Cor[4,1]       227.  1.05
 ## # ... with 337 more rows</code></pre>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span>(<span class="dt">min =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">min</a></span>(n_eff), <span class="dt">max =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">max</a></span>(n_eff))</a></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" title="1">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span>(<span class="dt">min =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">min</a></span>(n_eff), <span class="dt">max =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">max</a></span>(n_eff))</a></code></pre></div>
 <pre><code>## # A tibble: 1 x 2
 ##     min   max
 ##   &lt;dbl&gt; &lt;dbl&gt;
 ## 1  112. 1053.</code></pre>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" title="1">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span>(<span class="dt">min =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">min</a></span>(Rhat), <span class="dt">max =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">max</a></span>(Rhat))</a></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" title="1">tb <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span>(<span class="dt">min =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">min</a></span>(Rhat), <span class="dt">max =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Extremes">max</a></span>(Rhat))</a></code></pre></div>
 <pre><code>## # A tibble: 1 x 2
 ##     min   max
 ##   &lt;dbl&gt; &lt;dbl&gt;
@@ -324,49 +335,96 @@
 <h1 class="hasAnchor">
 <a href="#results" class="anchor"></a>Results</h1>
 <p>Plot posterior regression coefficients.</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" title="1">p1 =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(obj, <span class="dt">type =</span> <span class="st">"beta"</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb31-2" title="2"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/expression">expression</a></span>(<span class="st">"Fixed Effects"</span><span class="op">~</span>beta)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb31-3" title="3"><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">"bottom"</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb31-4" title="4"><span class="st">  </span><span class="kw">guides</span>(<span class="dt">col =</span> <span class="kw">guide_legend</span>(<span class="dt">ncol =</span> <span class="dv">1</span>)) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb31-5" title="5"><span class="st">  </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggthemes/topics/scale_few">scale_color_few</a></span>()</a>
-<a class="sourceLine" id="cb31-6" title="6">p1</a></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" title="1">p1 =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(obj, <span class="dt">type =</span> <span class="st">"beta"</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb29-2" title="2"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/expression">expression</a></span>(<span class="st">"Fixed Effects"</span><span class="op">~</span>beta)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb29-3" title="3"><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">"bottom"</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb29-4" title="4"><span class="st">  </span><span class="kw">guides</span>(<span class="dt">col =</span> <span class="kw">guide_legend</span>(<span class="dt">ncol =</span> <span class="dv">1</span>)) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb29-5" title="5"><span class="st">  </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggthemes/topics/scale_few">scale_color_few</a></span>()</a>
+<a class="sourceLine" id="cb29-6" title="6">p1</a></code></pre></div>
 <p><img src="Reanalysis_Aghaeepour2017_Poisson_files/figure-html/plot_beta-1.png" width="700"></p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(obj, <span class="dt">type =</span> <span class="st">"beta"</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb32-2" title="2"><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>condition, <span class="dt">scales =</span> <span class="st">"free_x"</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb32-3" title="3"><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">"bottom"</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb32-4" title="4"><span class="st">  </span><span class="kw">guides</span>(<span class="dt">col =</span> <span class="kw">guide_legend</span>(<span class="dt">ncol =</span> <span class="dv">1</span>)) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb32-5" title="5"><span class="st">  </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggthemes/topics/scale_few">scale_color_few</a></span>()</a></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(obj, <span class="dt">type =</span> <span class="st">"beta"</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb30-2" title="2"><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="op">~</span>condition, <span class="dt">scales =</span> <span class="st">"free_x"</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb30-3" title="3"><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">"bottom"</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb30-4" title="4"><span class="st">  </span><span class="kw">guides</span>(<span class="dt">col =</span> <span class="kw">guide_legend</span>(<span class="dt">ncol =</span> <span class="dv">1</span>)) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb30-5" title="5"><span class="st">  </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggthemes/topics/scale_few">scale_color_few</a></span>()</a></code></pre></div>
 <p><img src="Reanalysis_Aghaeepour2017_Poisson_files/figure-html/plot_beta-2.png" width="700"></p>
 <p>Extract expected count difference for pSTAT1.</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" title="1">post_beta =<span class="st"> </span>rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-extract">extract</a></span>(obj<span class="op">$</span>fit_mcmc, <span class="dt">pars =</span> <span class="st">"beta"</span>)[[<span class="dv">1</span>]]</a>
-<a class="sourceLine" id="cb33-2" title="2">first_index =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(obj<span class="op">$</span>conditions <span class="op">==</span><span class="st"> "1st trimester"</span>)</a>
-<a class="sourceLine" id="cb33-3" title="3">third_index =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(obj<span class="op">$</span>conditions <span class="op">==</span><span class="st"> "3rd trimester"</span>)</a>
-<a class="sourceLine" id="cb33-4" title="4">pstat1_index =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(obj<span class="op">$</span>protein_names <span class="op">==</span><span class="st"> "pSTAT1"</span>)</a>
-<a class="sourceLine" id="cb33-5" title="5">first_log_count =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/quantile">quantile</a></span>(post_beta[,pstat1_index,first_index], </a>
-<a class="sourceLine" id="cb33-6" title="6">                           <span class="dt">probs =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))</a>
-<a class="sourceLine" id="cb33-7" title="7">first_log_count</a></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" title="1">post_beta =<span class="st"> </span>rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-extract">extract</a></span>(obj<span class="op">$</span>fit_mcmc, <span class="dt">pars =</span> <span class="st">"beta"</span>)[[<span class="dv">1</span>]]</a>
+<a class="sourceLine" id="cb31-2" title="2">first_index =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(obj<span class="op">$</span>conditions <span class="op">==</span><span class="st"> "1st trimester"</span>)</a>
+<a class="sourceLine" id="cb31-3" title="3">third_index =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(obj<span class="op">$</span>conditions <span class="op">==</span><span class="st"> "3rd trimester"</span>)</a>
+<a class="sourceLine" id="cb31-4" title="4">pstat1_index =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(obj<span class="op">$</span>protein_names <span class="op">==</span><span class="st"> "pSTAT1"</span>)</a>
+<a class="sourceLine" id="cb31-5" title="5">first_log_count =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/quantile">quantile</a></span>(post_beta[,pstat1_index,first_index], </a>
+<a class="sourceLine" id="cb31-6" title="6">                           <span class="dt">probs =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))</a>
+<a class="sourceLine" id="cb31-7" title="7">first_log_count</a></code></pre></div>
 <pre><code>##     2.5%      50%    97.5% 
 ## 2.150289 2.311943 2.475899</code></pre>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Log">exp</a></span>(first_log_count)</a></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb33-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Log">exp</a></span>(first_log_count)</a></code></pre></div>
 <pre><code>##      2.5%       50%     97.5% 
 ##  8.587339 10.094014 11.892397</code></pre>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" title="1">third_log_count =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/quantile">quantile</a></span>(post_beta[,pstat1_index,third_index], </a>
-<a class="sourceLine" id="cb37-2" title="2">                           <span class="dt">probs =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))</a>
-<a class="sourceLine" id="cb37-3" title="3">third_log_count</a></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" title="1">third_log_count =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/quantile">quantile</a></span>(post_beta[,pstat1_index,third_index], </a>
+<a class="sourceLine" id="cb35-2" title="2">                           <span class="dt">probs =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))</a>
+<a class="sourceLine" id="cb35-3" title="3">third_log_count</a></code></pre></div>
 <pre><code>##     2.5%      50%    97.5% 
 ## 2.508325 2.671118 2.835957</code></pre>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Log">exp</a></span>(third_log_count)</a></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Log">exp</a></span>(third_log_count)</a></code></pre></div>
 <pre><code>##     2.5%      50%    97.5% 
 ## 12.28434 14.45613 17.04671</code></pre>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" title="1">diff_log_count =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/quantile">quantile</a></span>(</a>
-<a class="sourceLine" id="cb41-2" title="2">  post_beta[,pstat1_index,third_index] <span class="op">-</span><span class="st"> </span>post_beta[,pstat1_index,first_index], </a>
-<a class="sourceLine" id="cb41-3" title="3">  <span class="dt">probs =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))</a>
-<a class="sourceLine" id="cb41-4" title="4">diff_log_count</a></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" title="1">diff_log_count =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/quantile">quantile</a></span>(</a>
+<a class="sourceLine" id="cb39-2" title="2">  post_beta[,pstat1_index,third_index] <span class="op">-</span><span class="st"> </span>post_beta[,pstat1_index,first_index], </a>
+<a class="sourceLine" id="cb39-3" title="3">  <span class="dt">probs =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>))</a>
+<a class="sourceLine" id="cb39-4" title="4">diff_log_count</a></code></pre></div>
 <pre><code>##      2.5%       50%     97.5% 
 ## 0.3512085 0.3586297 0.3655275</code></pre>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Log">exp</a></span>(diff_log_count)</a></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Log">exp</a></span>(diff_log_count)</a></code></pre></div>
 <pre><code>##     2.5%      50%    97.5% 
 ## 1.420784 1.431367 1.441274</code></pre>
+<p>Posterior multivariate pairs plot.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" title="1">pSTAT1_index =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(obj<span class="op">$</span>protein_names <span class="op">==</span><span class="st"> "pSTAT1"</span>)</a>
+<a class="sourceLine" id="cb43-2" title="2">pSTAT3_index =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(obj<span class="op">$</span>protein_names <span class="op">==</span><span class="st"> "pSTAT3"</span>)</a>
+<a class="sourceLine" id="cb43-3" title="3">pSTAT5_index =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(obj<span class="op">$</span>protein_names <span class="op">==</span><span class="st"> "pSTAT5"</span>)</a>
+<a class="sourceLine" id="cb43-4" title="4">post_beta =<span class="st"> </span>rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-extract">extract</a></span>(obj<span class="op">$</span>fit_mcmc, <span class="dt">pars =</span> <span class="st">"beta"</span>)[[<span class="dv">1</span>]]</a>
+<a class="sourceLine" id="cb43-5" title="5">tb_log_count =<span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/bind.html">bind_rows</a></span>(</a>
+<a class="sourceLine" id="cb43-6" title="6">  <span class="kw"><a href="https://dplyr.tidyverse.org/reference/reexports.html">tibble</a></span>(</a>
+<a class="sourceLine" id="cb43-7" title="7">    <span class="dt">term =</span> obj<span class="op">$</span>conditions[<span class="dv">1</span>],</a>
+<a class="sourceLine" id="cb43-8" title="8">    <span class="dt">pSTAT1 =</span> post_beta[,pSTAT1_index,<span class="dv">1</span>],</a>
+<a class="sourceLine" id="cb43-9" title="9">    <span class="dt">pSTAT3 =</span> post_beta[,pSTAT3_index,<span class="dv">1</span>],</a>
+<a class="sourceLine" id="cb43-10" title="10">    <span class="dt">pSTAT5 =</span> post_beta[,pSTAT5_index,<span class="dv">1</span>]</a>
+<a class="sourceLine" id="cb43-11" title="11">  ),</a>
+<a class="sourceLine" id="cb43-12" title="12">  <span class="kw"><a href="https://dplyr.tidyverse.org/reference/reexports.html">tibble</a></span>(</a>
+<a class="sourceLine" id="cb43-13" title="13">    <span class="dt">term =</span> obj<span class="op">$</span>conditions[<span class="dv">2</span>],</a>
+<a class="sourceLine" id="cb43-14" title="14">    <span class="dt">pSTAT1 =</span> post_beta[,pSTAT1_index,<span class="dv">2</span>],</a>
+<a class="sourceLine" id="cb43-15" title="15">    <span class="dt">pSTAT3 =</span> post_beta[,pSTAT3_index,<span class="dv">2</span>],</a>
+<a class="sourceLine" id="cb43-16" title="16">    <span class="dt">pSTAT5 =</span> post_beta[,pSTAT5_index,<span class="dv">2</span>]</a>
+<a class="sourceLine" id="cb43-17" title="17">  )</a>
+<a class="sourceLine" id="cb43-18" title="18">)</a>
+<a class="sourceLine" id="cb43-19" title="19">plot_diag =<span class="st"> </span><span class="cf">function</span>(marker) {</a>
+<a class="sourceLine" id="cb43-20" title="20">  <span class="kw">ggplot</span>(tb_log_count, <span class="kw">aes_string</span>(marker, <span class="dt">fill =</span> <span class="st">"term"</span>)) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb43-21" title="21"><span class="st">    </span><span class="kw">geom_histogram</span>(<span class="dt">bins =</span> <span class="dv">40</span>, <span class="dt">position =</span> <span class="st">"identity"</span>, <span class="dt">alpha =</span> <span class="fl">0.5</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb43-22" title="22"><span class="st">    </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggthemes/topics/scale_few">scale_fill_few</a></span>()</a>
+<a class="sourceLine" id="cb43-23" title="23">}</a>
+<a class="sourceLine" id="cb43-24" title="24">plot_off_diag =<span class="st"> </span><span class="cf">function</span>(marker1, marker2) {</a>
+<a class="sourceLine" id="cb43-25" title="25">  <span class="kw">ggplot</span>(tb_log_count, <span class="kw">aes_string</span>(marker1, marker2, <span class="dt">color =</span> <span class="st">"term"</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb43-26" title="26"><span class="st">    </span><span class="kw">geom_density2d</span>() <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb43-27" title="27"><span class="st">    </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggthemes/topics/scale_few">scale_color_few</a></span>()</a>
+<a class="sourceLine" id="cb43-28" title="28">}</a>
+<a class="sourceLine" id="cb43-29" title="29">ppair =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/plot_grid">plot_grid</a></span>(</a>
+<a class="sourceLine" id="cb43-30" title="30">  <span class="kw">plot_diag</span>(<span class="st">"pSTAT1"</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">"none"</span>),</a>
+<a class="sourceLine" id="cb43-31" title="31">  <span class="ot">NULL</span>, </a>
+<a class="sourceLine" id="cb43-32" title="32">  <span class="ot">NULL</span>,</a>
+<a class="sourceLine" id="cb43-33" title="33">  <span class="kw">plot_off_diag</span>(<span class="st">"pSTAT1"</span>,<span class="st">"pSTAT3"</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">"none"</span>), </a>
+<a class="sourceLine" id="cb43-34" title="34">  <span class="kw">plot_diag</span>(<span class="st">"pSTAT3"</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">"none"</span>), </a>
+<a class="sourceLine" id="cb43-35" title="35">  <span class="ot">NULL</span>,</a>
+<a class="sourceLine" id="cb43-36" title="36">  <span class="kw">plot_off_diag</span>(<span class="st">"pSTAT1"</span>,<span class="st">"pSTAT5"</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">"none"</span>), </a>
+<a class="sourceLine" id="cb43-37" title="37">  <span class="kw">plot_off_diag</span>(<span class="st">"pSTAT3"</span>,<span class="st">"pSTAT5"</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">"none"</span>), </a>
+<a class="sourceLine" id="cb43-38" title="38">  <span class="kw">plot_diag</span>(<span class="st">"pSTAT5"</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">"none"</span>),</a>
+<a class="sourceLine" id="cb43-39" title="39">  <span class="dt">ncol =</span> <span class="dv">3</span></a>
+<a class="sourceLine" id="cb43-40" title="40">)</a>
+<a class="sourceLine" id="cb43-41" title="41"><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/plot_grid">plot_grid</a></span>(ppair,</a>
+<a class="sourceLine" id="cb43-42" title="42">          <span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/get_legend">get_legend</a></span>(<span class="kw">plot_diag</span>(<span class="st">"pSTAT1"</span>) <span class="op">+</span><span class="st"> </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">"bottom"</span>)),</a>
+<a class="sourceLine" id="cb43-43" title="43">          <span class="dt">ncol =</span> <span class="dv">1</span>,</a>
+<a class="sourceLine" id="cb43-44" title="44">          <span class="dt">rel_heights =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="dv">1</span>, <span class="fl">.1</span>))</a></code></pre></div>
+<p><img src="Reanalysis_Aghaeepour2017_Poisson_files/figure-html/posterior_pair_plot-1.png" width="700"></p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/ggsave">ggsave</a></span>(<span class="dt">filename =</span> <span class="st">"posterior_multivariate_plmm.pdf"</span>, <span class="dt">width =</span> <span class="dv">8</span>, <span class="dt">height =</span> <span class="dv">6</span>)</a></code></pre></div>
 <p>Plot posterior standard deviation.</p>
 <div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" title="1">p2 =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(obj, <span class="dt">type =</span> <span class="st">"sigma"</span>) <span class="op">+</span><span class="st"> </span></a>
 <a class="sourceLine" id="cb45-2" title="2"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">"Marker Standard Deviation"</span><span class="op">~</span>sigma) <span class="op">+</span></a>
@@ -386,24 +444,30 @@
 <pre><code>## 
 ## [[3]]</code></pre>
 <p><img src="Reanalysis_Aghaeepour2017_Poisson_files/figure-html/posterior_cor-3.png" width="700"></p>
-<p>Assess correlation uncertainity.</p>
+<p>Pairwise correlation change between conditions.</p>
 <div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" title="1">marker_pair =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"pSTAT3"</span>,<span class="st">"pSTAT5"</span>)</a>
 <a class="sourceLine" id="cb50-2" title="2">Cor =<span class="st"> </span>rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-extract">extract</a></span>(obj<span class="op">$</span>fit_mcmc, <span class="dt">pars =</span> <span class="st">"Cor"</span>)[[<span class="dv">1</span>]]</a>
 <a class="sourceLine" id="cb50-3" title="3">Cor_term =<span class="st"> </span>rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-extract">extract</a></span>(obj<span class="op">$</span>fit_mcmc, <span class="dt">pars =</span> <span class="st">"Cor_term"</span>)[[<span class="dv">1</span>]]</a>
 <a class="sourceLine" id="cb50-4" title="4">Cor_diff =<span class="st"> </span>Cor_term <span class="op">-</span><span class="st"> </span>Cor</a>
 <a class="sourceLine" id="cb50-5" title="5">tb_cor =<span class="st"> </span>Cor_diff[,</a>
-<a class="sourceLine" id="cb50-6" title="6">                  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(protein_names <span class="op">==</span><span class="st"> </span>marker_pair[<span class="dv">1</span>]),</a>
-<a class="sourceLine" id="cb50-7" title="7">                  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(protein_names <span class="op">==</span><span class="st"> </span>marker_pair[<span class="dv">2</span>])] <span class="op">%&gt;%</span><span class="st"> </span>as.tibble</a>
+<a class="sourceLine" id="cb50-6" title="6">                  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(obj<span class="op">$</span>protein_names <span class="op">==</span><span class="st"> </span>marker_pair[<span class="dv">1</span>]),</a>
+<a class="sourceLine" id="cb50-7" title="7">                  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(obj<span class="op">$</span>protein_names <span class="op">==</span><span class="st"> </span>marker_pair[<span class="dv">2</span>])] <span class="op">%&gt;%</span><span class="st"> </span>as.tibble</a>
 <a class="sourceLine" id="cb50-8" title="8">tb_cor <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(</a>
 <a class="sourceLine" id="cb50-9" title="9">  <span class="dt">side =</span> <span class="kw"><a href="https://dplyr.tidyverse.org/reference/if_else.html">if_else</a></span>(tb_cor<span class="op">$</span>value <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>, </a>
 <a class="sourceLine" id="cb50-10" title="10">                 <span class="dt">true =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"positive ("</span>, <span class="dv">100</span><span class="op">*</span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/mean">mean</a></span>(tb_cor<span class="op">$</span>value <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>), <span class="st">"%)"</span>),</a>
 <a class="sourceLine" id="cb50-11" title="11">                 <span class="dt">false =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"negative ("</span>, <span class="dv">100</span><span class="op">*</span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/mean">mean</a></span>(tb_cor<span class="op">$</span>value <span class="op">&lt;=</span><span class="st"> </span><span class="dv">0</span>), <span class="st">"%)"</span>))</a>
 <a class="sourceLine" id="cb50-12" title="12">)</a>
-<a class="sourceLine" id="cb50-13" title="13"><span class="kw">ggplot</span>(tb_cor, <span class="kw">aes</span>(value, <span class="dt">fill =</span> side)) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb50-14" title="14"><span class="st">  </span><span class="kw">geom_histogram</span>(<span class="dt">bins =</span> <span class="dv">50</span>, <span class="dt">alpha =</span> <span class="fl">0.7</span>) <span class="op">+</span></a>
-<a class="sourceLine" id="cb50-15" title="15"><span class="st">  </span><span class="kw">xlab</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"Cor_term("</span>, <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste</a></span>(marker_pair, <span class="dt">collapse =</span> <span class="st">", "</span>),<span class="st">")"</span> )) <span class="op">+</span></a>
-<a class="sourceLine" id="cb50-16" title="16"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">"Posterior Distribution"</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb50-17" title="17"><span class="st">  </span><span class="kw">scale_fill_manual</span>(<span class="dt">values =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"#E46726"</span>)) <span class="co">#"#6D9EC1"</span></a></code></pre></div>
+<a class="sourceLine" id="cb50-13" title="13"><span class="co"># keep colors consistent</span></a>
+<a class="sourceLine" id="cb50-14" title="14"><span class="cf">if</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/mean">mean</a></span>(tb_cor<span class="op">$</span>value <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) <span class="op">==</span><span class="st"> </span><span class="dv">1</span>) {</a>
+<a class="sourceLine" id="cb50-15" title="15">  fill_colors =<span class="st"> "#E46726"</span></a>
+<a class="sourceLine" id="cb50-16" title="16">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb50-17" title="17">  fill_colors =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"#6D9EC1"</span>,<span class="st">"#E46726"</span>)</a>
+<a class="sourceLine" id="cb50-18" title="18">}</a>
+<a class="sourceLine" id="cb50-19" title="19"><span class="kw">ggplot</span>(tb_cor, <span class="kw">aes</span>(value, <span class="dt">fill =</span> side)) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb50-20" title="20"><span class="st">  </span><span class="kw">geom_histogram</span>(<span class="dt">bins =</span> <span class="dv">50</span>, <span class="dt">alpha =</span> <span class="fl">0.7</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb50-21" title="21"><span class="st">  </span><span class="kw">xlab</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"Cor_term("</span>, <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste</a></span>(marker_pair, <span class="dt">collapse =</span> <span class="st">", "</span>),<span class="st">")"</span> )) <span class="op">+</span></a>
+<a class="sourceLine" id="cb50-22" title="22"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">"Posterior Distribution"</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb50-23" title="23"><span class="st">  </span><span class="kw">scale_fill_manual</span>(<span class="dt">values =</span> fill_colors)</a></code></pre></div>
 <p><img src="Reanalysis_Aghaeepour2017_Poisson_files/figure-html/correlation_uncertainty-1.png" width="700"></p>
 <p>Check if overall correlation structure changes between conditions.</p>
 <div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb51-1" title="1">value =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/lapply">sapply</a></span>(<span class="dv">1</span><span class="op">:</span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/nrow">nrow</a></span>(Cor_diff), <span class="cf">function</span>(i) {</a>
@@ -420,14 +484,14 @@
 <a class="sourceLine" id="cb51-12" title="12">p_global =<span class="st"> </span><span class="kw">ggplot</span>(tb_cor, <span class="kw">aes</span>(value, <span class="dt">fill =</span> side)) <span class="op">+</span><span class="st"> </span></a>
 <a class="sourceLine" id="cb51-13" title="13"><span class="st">  </span><span class="kw">geom_histogram</span>(<span class="dt">bins =</span> <span class="dv">25</span>, <span class="dt">alpha =</span> <span class="fl">0.7</span>) <span class="op">+</span></a>
 <a class="sourceLine" id="cb51-14" title="14"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/expression">expression</a></span>(<span class="st">"Overall P(Corr"</span><span class="op">~</span>Omega<span class="op">~</span><span class="st">"(3rd) &gt; Corr"</span><span class="op">~</span>Omega<span class="op">~</span><span class="st">"(1st))"</span>)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb51-15" title="15"><span class="st">  </span><span class="kw">scale_fill_manual</span>(<span class="dt">values =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"#E46726"</span>)) <span class="op">+</span><span class="st"> </span><span class="co">#"#6D9EC1"</span></a>
+<a class="sourceLine" id="cb51-15" title="15"><span class="st">  </span><span class="kw">scale_fill_manual</span>(<span class="dt">values =</span> fill_colors) <span class="op">+</span></a>
 <a class="sourceLine" id="cb51-16" title="16"><span class="st">  </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">"bottom"</span>) <span class="op">+</span></a>
 <a class="sourceLine" id="cb51-17" title="17"><span class="st">  </span><span class="kw">xlab</span>(<span class="st">"probability"</span>)</a>
 <a class="sourceLine" id="cb51-18" title="18">p_global</a></code></pre></div>
 <p><img src="Reanalysis_Aghaeepour2017_Poisson_files/figure-html/compare_covariance-1.png" width="700"></p>
 <p>Plot differential correlations.</p>
 <div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb52-1" title="1">cor_increase =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/apply">apply</a></span>(<span class="dt">X =</span> Cor_diff, <span class="dt">MARGIN =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="dv">2</span>,<span class="dv">3</span>), <span class="dt">FUN =</span> <span class="cf">function</span>(x) <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/mean">mean</a></span>(x <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>))</a>
-<a class="sourceLine" id="cb52-2" title="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames</a></span>(cor_increase) =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">rownames</a></span>(cor_increase) =<span class="st"> </span>protein_names</a>
+<a class="sourceLine" id="cb52-2" title="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames</a></span>(cor_increase) =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">rownames</a></span>(cor_increase) =<span class="st"> </span>obj<span class="op">$</span>protein_names</a>
 <a class="sourceLine" id="cb52-3" title="3">p_local =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggcorrplot/topics/ggcorrplot">ggcorrplot</a></span>(cor_increase, <span class="dt">hc.order =</span> <span class="ot">TRUE</span>, <span class="dt">type =</span> <span class="st">"lower"</span>,</a>
 <a class="sourceLine" id="cb52-4" title="4">           <span class="dt">outline.col =</span> <span class="st">"lightgray"</span>,</a>
 <a class="sourceLine" id="cb52-5" title="5">           <span class="dt">colors =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"#6D9EC1"</span>, <span class="st">"white"</span>, <span class="st">"#E46726"</span>)) <span class="op">+</span></a>
@@ -446,8 +510,8 @@
 <a class="sourceLine" id="cb53-4" title="4">  graph[<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/lower.tri">upper.tri</a></span>(graph)] =<span class="st"> </span><span class="dv">0</span></a>
 <a class="sourceLine" id="cb53-5" title="5">  ind =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(graph <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>, <span class="dt">arr.ind =</span> T)</a>
 <a class="sourceLine" id="cb53-6" title="6">  tb_graph =<span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/reexports.html">tibble</a></span>(</a>
-<a class="sourceLine" id="cb53-7" title="7">    <span class="dt">from =</span> protein_names[ind[,<span class="dv">1</span>]],</a>
-<a class="sourceLine" id="cb53-8" title="8">    <span class="dt">to =</span> protein_names[ind[,<span class="dv">2</span>]],</a>
+<a class="sourceLine" id="cb53-7" title="7">    <span class="dt">from =</span> obj<span class="op">$</span>protein_names[ind[,<span class="dv">1</span>]],</a>
+<a class="sourceLine" id="cb53-8" title="8">    <span class="dt">to =</span> obj<span class="op">$</span>protein_names[ind[,<span class="dv">2</span>]],</a>
 <a class="sourceLine" id="cb53-9" title="9">    <span class="dt">prob =</span> graph[ind]</a>
 <a class="sourceLine" id="cb53-10" title="10">  )</a>
 <a class="sourceLine" id="cb53-11" title="11">  tb_graph <span class="op">%&lt;&gt;%</span><span class="st"> </span>dplyr<span class="op">::</span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/filter.html">filter</a></span>(prob <span class="op">&gt;</span><span class="st"> </span>lambda)</a>
@@ -488,43 +552,44 @@
 <a href="#goodness-of-fit" class="anchor"></a>Goodness of Fit</h1>
 <p>Define a test statistics and compare observed value with posterior predictive distribution.</p>
 <p>Predictive distribution marginalized over cell random effects.</p>
-<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" title="1">stan_pars =<span class="st"> </span>rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-extract">extract</a></span>(obj<span class="op">$</span>fit_mcmc, <span class="dt">pars =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"beta"</span>,</a>
-<a class="sourceLine" id="cb55-2" title="2">                                                  <span class="st">"sigma"</span>,<span class="st">"sigma_term"</span>,<span class="st">"sigma_donor"</span>,</a>
-<a class="sourceLine" id="cb55-3" title="3">                                                  <span class="st">"Cor"</span>,<span class="st">"Cor_term"</span>,<span class="st">"Cor_donor"</span>))</a>
-<a class="sourceLine" id="cb55-4" title="4">condition =<span class="st"> "term"</span></a>
-<a class="sourceLine" id="cb55-5" title="5">term =<span class="st"> </span>df_samples_subset <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb55-6" title="6"><span class="st">    </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span>(condition) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb55-7" title="7"><span class="st">    </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/factor">as.factor</a></span>() <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb55-8" title="8"><span class="st">    </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/integer">as.integer</a></span>()</a>
-<a class="sourceLine" id="cb55-9" title="9"><span class="co"># kth posterior draw</span></a>
-<a class="sourceLine" id="cb55-10" title="10">sample_y_hat =<span class="st"> </span><span class="cf">function</span>(<span class="dt">k =</span> <span class="dv">1</span>) {</a>
-<a class="sourceLine" id="cb55-11" title="11">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/lapply">lapply</a></span>(<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="cf">function</span>(cond) {</a>
-<a class="sourceLine" id="cb55-12" title="12">    n_cells_cond =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/table">table</a></span>(term)[cond]</a>
-<a class="sourceLine" id="cb55-13" title="13">    beta =<span class="st"> </span>stan_pars<span class="op">$</span>beta[k,,]</a>
-<a class="sourceLine" id="cb55-14" title="14">    mu =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/rep">rep</a></span>(<span class="dv">0</span>, <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(protein_names))</a>
-<a class="sourceLine" id="cb55-15" title="15">    beta_rep =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/lapply">sapply</a></span>(beta[,cond], rep, n_cells_cond)</a>
-<a class="sourceLine" id="cb55-16" title="16">    sigma =<span class="st"> </span>stan_pars<span class="op">$</span>sigma[k,]</a>
-<a class="sourceLine" id="cb55-17" title="17">    Cor =<span class="st"> </span>stan_pars<span class="op">$</span>Cor[k,,]</a>
-<a class="sourceLine" id="cb55-18" title="18">    Cov =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/diag">diag</a></span>(sigma) <span class="op">%*%</span><span class="st"> </span>Cor <span class="op">%*%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/diag">diag</a></span>(sigma)</a>
-<a class="sourceLine" id="cb55-19" title="19">    b =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/MASS/topics/mvrnorm">mvrnorm</a></span>(<span class="dt">n =</span> n_cells_cond, mu, Cov)</a>
-<a class="sourceLine" id="cb55-20" title="20">    sigma_donor =<span class="st"> </span>stan_pars<span class="op">$</span>sigma_donor[k,]</a>
-<a class="sourceLine" id="cb55-21" title="21">    Cor_donor =<span class="st"> </span>stan_pars<span class="op">$</span>Cor_donor[k,,]</a>
-<a class="sourceLine" id="cb55-22" title="22">    Cov_donor =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/diag">diag</a></span>(sigma_donor) <span class="op">%*%</span><span class="st"> </span>Cor_donor <span class="op">%*%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/diag">diag</a></span>(sigma_donor)</a>
-<a class="sourceLine" id="cb55-23" title="23">    b_donor =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/MASS/topics/mvrnorm">mvrnorm</a></span>(<span class="dt">n =</span> n_cells_cond, mu, Cov_donor)</a>
-<a class="sourceLine" id="cb55-24" title="24">    count =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Log">exp</a></span>(beta_rep <span class="op">+</span><span class="st"> </span>b <span class="op">+</span><span class="st"> </span>b_donor)</a>
-<a class="sourceLine" id="cb55-25" title="25">    count =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/matrix">matrix</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/Poisson">rpois</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(count), count),</a>
-<a class="sourceLine" id="cb55-26" title="26">                   <span class="dt">nrow =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/nrow">nrow</a></span>(count), </a>
-<a class="sourceLine" id="cb55-27" title="27">                   <span class="dt">ncol =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/nrow">ncol</a></span>(count))</a>
-<a class="sourceLine" id="cb55-28" title="28">    count <span class="op">%&lt;&gt;%</span><span class="st"> </span>as.tibble</a>
-<a class="sourceLine" id="cb55-29" title="29">    <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(count) =<span class="st"> </span>protein_names</a>
-<a class="sourceLine" id="cb55-30" title="30">    count <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw">add_column</span>(<span class="dt">term  =</span> obj<span class="op">$</span>conditions[cond])</a>
-<a class="sourceLine" id="cb55-31" title="31">    count</a>
-<a class="sourceLine" id="cb55-32" title="32">  }) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/bind.html">bind_rows</a></span>()</a>
-<a class="sourceLine" id="cb55-33" title="33">}</a>
-<a class="sourceLine" id="cb55-34" title="34">Y_hat =<span class="st"> </span><span class="kw">sample_y_hat</span>(<span class="dt">k =</span> <span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb55-35" title="35">Y_hat <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb55-36" title="36"><span class="st">  </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(term) <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb55-37" title="37"><span class="st">  </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/summarise_all.html">summarize_at</a></span>(protein_names, median)</a></code></pre></div>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb55-1" title="1">stan_pars =<span class="st"> </span>rstan<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rstan/topics/stanfit-method-extract">extract</a></span>(obj<span class="op">$</span>fit_mcmc, </a>
+<a class="sourceLine" id="cb55-2" title="2">                           <span class="dt">pars =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"beta"</span>,</a>
+<a class="sourceLine" id="cb55-3" title="3">                                    <span class="st">"sigma"</span>,<span class="st">"sigma_term"</span>,<span class="st">"sigma_donor"</span>,</a>
+<a class="sourceLine" id="cb55-4" title="4">                                    <span class="st">"Cor"</span>,<span class="st">"Cor_term"</span>,<span class="st">"Cor_donor"</span>))</a>
+<a class="sourceLine" id="cb55-5" title="5">condition =<span class="st"> "term"</span></a>
+<a class="sourceLine" id="cb55-6" title="6">term =<span class="st"> </span>df_samples_subset <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb55-7" title="7"><span class="st">    </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/pull.html">pull</a></span>(condition) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb55-8" title="8"><span class="st">    </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/factor">as.factor</a></span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb55-9" title="9"><span class="st">    </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/integer">as.integer</a></span>()</a>
+<a class="sourceLine" id="cb55-10" title="10"><span class="co"># kth posterior draw</span></a>
+<a class="sourceLine" id="cb55-11" title="11">sample_y_hat =<span class="st"> </span><span class="cf">function</span>(<span class="dt">k =</span> <span class="dv">1</span>) {</a>
+<a class="sourceLine" id="cb55-12" title="12">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/lapply">lapply</a></span>(<span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="cf">function</span>(cond) {</a>
+<a class="sourceLine" id="cb55-13" title="13">    n_cells_cond =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/table">table</a></span>(term)[cond]</a>
+<a class="sourceLine" id="cb55-14" title="14">    beta =<span class="st"> </span>stan_pars<span class="op">$</span>beta[k,,]</a>
+<a class="sourceLine" id="cb55-15" title="15">    mu =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/rep">rep</a></span>(<span class="dv">0</span>, <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(protein_names))</a>
+<a class="sourceLine" id="cb55-16" title="16">    beta_rep =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/lapply">sapply</a></span>(beta[,cond], rep, n_cells_cond)</a>
+<a class="sourceLine" id="cb55-17" title="17">    sigma =<span class="st"> </span>stan_pars<span class="op">$</span>sigma[k,]</a>
+<a class="sourceLine" id="cb55-18" title="18">    Cor =<span class="st"> </span>stan_pars<span class="op">$</span>Cor[k,,]</a>
+<a class="sourceLine" id="cb55-19" title="19">    Cov =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/diag">diag</a></span>(sigma) <span class="op">%*%</span><span class="st"> </span>Cor <span class="op">%*%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/diag">diag</a></span>(sigma)</a>
+<a class="sourceLine" id="cb55-20" title="20">    b =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/MASS/topics/mvrnorm">mvrnorm</a></span>(<span class="dt">n =</span> n_cells_cond, mu, Cov)</a>
+<a class="sourceLine" id="cb55-21" title="21">    sigma_donor =<span class="st"> </span>stan_pars<span class="op">$</span>sigma_donor[k,]</a>
+<a class="sourceLine" id="cb55-22" title="22">    Cor_donor =<span class="st"> </span>stan_pars<span class="op">$</span>Cor_donor[k,,]</a>
+<a class="sourceLine" id="cb55-23" title="23">    Cov_donor =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/diag">diag</a></span>(sigma_donor) <span class="op">%*%</span><span class="st"> </span>Cor_donor <span class="op">%*%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/diag">diag</a></span>(sigma_donor)</a>
+<a class="sourceLine" id="cb55-24" title="24">    b_donor =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/MASS/topics/mvrnorm">mvrnorm</a></span>(<span class="dt">n =</span> n_cells_cond, mu, Cov_donor)</a>
+<a class="sourceLine" id="cb55-25" title="25">    count =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Log">exp</a></span>(beta_rep <span class="op">+</span><span class="st"> </span>b <span class="op">+</span><span class="st"> </span>b_donor)</a>
+<a class="sourceLine" id="cb55-26" title="26">    count =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/matrix">matrix</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/stats/topics/Poisson">rpois</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(count), count),</a>
+<a class="sourceLine" id="cb55-27" title="27">                   <span class="dt">nrow =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/nrow">nrow</a></span>(count), </a>
+<a class="sourceLine" id="cb55-28" title="28">                   <span class="dt">ncol =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/nrow">ncol</a></span>(count))</a>
+<a class="sourceLine" id="cb55-29" title="29">    count <span class="op">%&lt;&gt;%</span><span class="st"> </span>as.tibble</a>
+<a class="sourceLine" id="cb55-30" title="30">    <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(count) =<span class="st"> </span>protein_names</a>
+<a class="sourceLine" id="cb55-31" title="31">    count <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw">add_column</span>(<span class="dt">term  =</span> obj<span class="op">$</span>conditions[cond])</a>
+<a class="sourceLine" id="cb55-32" title="32">    count</a>
+<a class="sourceLine" id="cb55-33" title="33">  }) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/bind.html">bind_rows</a></span>()</a>
+<a class="sourceLine" id="cb55-34" title="34">}</a>
+<a class="sourceLine" id="cb55-35" title="35">Y_hat =<span class="st"> </span><span class="kw">sample_y_hat</span>(<span class="dt">k =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb55-36" title="36">Y_hat <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb55-37" title="37"><span class="st">  </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/group_by.html">group_by</a></span>(term) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb55-38" title="38"><span class="st">  </span><span class="kw"><a href="https://dplyr.tidyverse.org/reference/summarise_all.html">summarize_at</a></span>(protein_names, median)</a></code></pre></div>
 <pre><code>## # A tibble: 2 x 11
 ##   term pCREB pSTAT5  pP38 pSTAT1 pSTAT3 prpS6 pMAPKAPK   IkB pNFkB pERK1_2
 ##   &lt;ch&gt; &lt;int&gt;  &lt;int&gt; &lt;int&gt;  &lt;int&gt;  &lt;int&gt; &lt;int&gt;    &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;int&gt;

@@ -97,42 +97,52 @@
 <div id="goal" class="section level1">
 <h1 class="hasAnchor">
 <a href="#goal" class="anchor"></a>Goal</h1>
-<p>Reanalysis of mass cytometry data from <span class="citation">Aghaeepour et al. (2017)</span> using GLMM with multivariate donor and cell type random effects.</p>
+<p>Reanalysis of mass cytometry data from <span class="citation">Aghaeepour et al. (2017)</span> using the Logistic Linear Mixed Model.</p>
 </div>
 <div id="prerequisites" class="section level1">
 <h1 class="hasAnchor">
 <a href="#prerequisites" class="anchor"></a>Prerequisites</h1>
 <p>Parse input parameters.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">ncells =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Round">floor</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/numeric">as.numeric</a></span>(params<span class="op">$</span>ncells))</a>
-<a class="sourceLine" id="cb1-2" title="2">ncells</a></code></pre></div>
-<pre><code>## [1] Inf</code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">seed =<span class="st"> </span>params<span class="op">$</span>seed</a>
-<a class="sourceLine" id="cb3-2" title="2">seed</a></code></pre></div>
-<pre><code>## [1] "0xdada"</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">ncores =<span class="st"> </span><span class="dv">8</span></a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">ncells =<span class="st"> </span><span class="ot">Inf</span></a>
+<a class="sourceLine" id="cb1-2" title="2">seed =<span class="st"> </span><span class="dv">0xdada</span></a>
+<a class="sourceLine" id="cb1-3" title="3">ncores =<span class="st"> </span><span class="dv">8</span></a>
+<a class="sourceLine" id="cb1-4" title="4">zenodo_url =<span class="st"> "https://zenodo.org/record/2597291/files/"</span></a>
+<a class="sourceLine" id="cb1-5" title="5">cytof_data =<span class="st"> "se_aghaeepour2017immune.Rdata"</span></a>
+<a class="sourceLine" id="cb1-6" title="6">prefit =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"cytoeffect_llmm_ncells_"</span>,ncells,<span class="st">".Rdata"</span>)</a>
+<a class="sourceLine" id="cb1-7" title="7">prefit</a></code></pre></div>
+<pre><code>## [1] "cytoeffect_llmm_ncells_Inf.Rdata"</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">prefit_reduced =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"cytoeffect_llmm_ncells_"</span>,ncells,<span class="st">"_reduced.Rdata"</span>)</a>
+<a class="sourceLine" id="cb3-2" title="2">prefit_reduced</a></code></pre></div>
+<pre><code>## [1] "cytoeffect_llmm_ncells_Inf_reduced.Rdata"</code></pre>
 <p>Install packages.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">pkgs_needed =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"devtools"</span>,<span class="st">"tidyverse"</span>,<span class="st">"magrittr"</span>,<span class="st">"SummarizedExperiment"</span>,</a>
-<a class="sourceLine" id="cb6-2" title="2">                <span class="st">"ggthemes"</span>,<span class="st">"cowplot"</span>)</a>
-<a class="sourceLine" id="cb6-3" title="3">letsinstall =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/sets">setdiff</a></span>(pkgs_needed, <span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/installed.packages">installed.packages</a></span>())</a>
-<a class="sourceLine" id="cb6-4" title="4"><span class="cf">if</span> (<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(letsinstall) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) {</a>
-<a class="sourceLine" id="cb6-5" title="5">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/source">source</a></span>(<span class="st">"http://bioconductor.org/biocLite.R"</span>)</a>
-<a class="sourceLine" id="cb6-6" title="6">  <span class="kw">biocLite</span>(letsinstall)</a>
-<a class="sourceLine" id="cb6-7" title="7">}</a>
-<a class="sourceLine" id="cb6-8" title="8">devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"ChristofSeiler/cytoeffect"</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">pkgs_needed =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"devtools"</span>,<span class="st">"tidyverse"</span>,<span class="st">"magrittr"</span>,<span class="st">"SummarizedExperiment"</span>,</a>
+<a class="sourceLine" id="cb5-2" title="2">                <span class="st">"ggthemes"</span>,<span class="st">"cowplot"</span>)</a>
+<a class="sourceLine" id="cb5-3" title="3">letsinstall =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/sets">setdiff</a></span>(pkgs_needed, <span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/installed.packages">installed.packages</a></span>())</a>
+<a class="sourceLine" id="cb5-4" title="4"><span class="cf">if</span> (<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(letsinstall) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) {</a>
+<a class="sourceLine" id="cb5-5" title="5">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/source">source</a></span>(<span class="st">"http://bioconductor.org/biocLite.R"</span>)</a>
+<a class="sourceLine" id="cb5-6" title="6">  <span class="kw">biocLite</span>(letsinstall)</a>
+<a class="sourceLine" id="cb5-7" title="7">}</a>
+<a class="sourceLine" id="cb5-8" title="8">devtools<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/devtools/topics/reexports">install_github</a></span>(<span class="st">"ChristofSeiler/cytoeffect"</span>)</a></code></pre></div>
 <p>Load packages.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"cytoeffect"</span>)</a>
-<a class="sourceLine" id="cb7-2" title="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"tidyverse"</span>)</a>
-<a class="sourceLine" id="cb7-3" title="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"magrittr"</span>)</a>
-<a class="sourceLine" id="cb7-4" title="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"SummarizedExperiment"</span>)</a>
-<a class="sourceLine" id="cb7-5" title="5"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"ggthemes"</span>)</a>
-<a class="sourceLine" id="cb7-6" title="6"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"cowplot"</span>)</a>
-<a class="sourceLine" id="cb7-7" title="7"><span class="kw">theme_set</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/ggthemes/topics/theme_few">theme_few</a></span>())</a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"cytoeffect"</span>)</a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"tidyverse"</span>)</a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"magrittr"</span>)</a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"SummarizedExperiment"</span>)</a>
+<a class="sourceLine" id="cb6-5" title="5"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"ggthemes"</span>)</a>
+<a class="sourceLine" id="cb6-6" title="6"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"cowplot"</span>)</a>
+<a class="sourceLine" id="cb6-7" title="7"><span class="kw">theme_set</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/ggthemes/topics/theme_few">theme_few</a></span>())</a></code></pre></div>
 </div>
 <div id="load-data" class="section level1">
 <h1 class="hasAnchor">
 <a href="#load-data" class="anchor"></a>Load Data</h1>
+<p>Download preprocessed data from Zenodo.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1">rdata_filenames =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(cytof_data, prefit, prefit_reduced)</a>
+<a class="sourceLine" id="cb7-2" title="2"><span class="cf">for</span>(filename <span class="cf">in</span> rdata_filenames)</a>
+<a class="sourceLine" id="cb7-3" title="3">    <span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/download.file">download.file</a></span>(<span class="dt">url =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(zenodo_url, filename), </a>
+<a class="sourceLine" id="cb7-4" title="4">                  <span class="dt">destfile =</span> filename,</a>
+<a class="sourceLine" id="cb7-5" title="5">                  <span class="dt">mode =</span> <span class="st">"wb"</span>)</a></code></pre></div>
 <p>Load <code>SummarizedExperiment</code> object from CytoGLMM workflow.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/load">load</a></span>(<span class="st">"se_aghaeepour2017immune.Rdata"</span>)</a>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/load">load</a></span>(cytof_data)</a>
 <a class="sourceLine" id="cb8-2" title="2">exprs =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/SummarizedExperiment/topics/SummarizedExperiment-class">assay</a></span>(se_aghaeepour2017immune)</a>
 <a class="sourceLine" id="cb8-3" title="3">sample_info =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/SummarizedExperiment/topics/SummarizedExperiment-class">rowData</a></span>(se_aghaeepour2017immune)</a>
 <a class="sourceLine" id="cb8-4" title="4">sample_info_names =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(sample_info)</a>
@@ -251,11 +261,15 @@
 <p>Sample from posterior distribution (initialization details in paper).</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1">df_samples_subset<span class="op">$</span>term <span class="op">%&lt;&gt;%</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/factor">factor</a></span>(<span class="dt">levels =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"1st trimester"</span>,</a>
 <a class="sourceLine" id="cb21-2" title="2">                                              <span class="st">"3rd trimester"</span>))</a></code></pre></div>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1">obj =<span class="st"> </span>cytoeffect<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/cytoeffect/topics/glmm">glmm</a></span>(df_samples_subset, protein_names, </a>
-<a class="sourceLine" id="cb22-2" title="2">                       <span class="dt">condition =</span> <span class="st">"term"</span>, <span class="dt">group =</span> <span class="st">"donor"</span>,</a>
-<a class="sourceLine" id="cb22-3" title="3">                       <span class="dt">iter =</span> <span class="dv">325</span>, <span class="dt">warmup =</span> <span class="dv">200</span>, <span class="dt">num_chains =</span> ncores, </a>
-<a class="sourceLine" id="cb22-4" title="4">                       <span class="dt">eta =</span> <span class="fl">1.0</span>)</a>
-<a class="sourceLine" id="cb22-5" title="5"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/save">save</a></span>(obj,<span class="dt">file =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"cytoeffect_ncells"</span>,ncells,<span class="st">".Rdata"</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb22-1" title="1"><span class="cf">if</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/files">file.exists</a></span>(prefit)) {</a>
+<a class="sourceLine" id="cb22-2" title="2">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/load">load</a></span>(<span class="dt">file =</span> prefit)</a>
+<a class="sourceLine" id="cb22-3" title="3">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb22-4" title="4">  obj =<span class="st"> </span>cytoeffect<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/cytoeffect/topics/glmm">glmm</a></span>(df_samples_subset, protein_names, </a>
+<a class="sourceLine" id="cb22-5" title="5">                       <span class="dt">condition =</span> <span class="st">"term"</span>, <span class="dt">group =</span> <span class="st">"donor"</span>,</a>
+<a class="sourceLine" id="cb22-6" title="6">                       <span class="dt">iter =</span> <span class="dv">325</span>, <span class="dt">warmup =</span> <span class="dv">200</span>, </a>
+<a class="sourceLine" id="cb22-7" title="7">                       <span class="dt">num_chains =</span> ncores)</a>
+<a class="sourceLine" id="cb22-8" title="8">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/save">save</a></span>(obj,<span class="dt">file =</span> prefit)</a>
+<a class="sourceLine" id="cb22-9" title="9">}</a></code></pre></div>
 </div>
 <div id="hmc-diagnostics" class="section level2">
 <h2 class="hasAnchor">
@@ -349,11 +363,15 @@
 <a href="#refit-without-pstat1" class="anchor"></a>Refit Without pSTAT1</h1>
 <p>Refit model to test potentional collider confounding.</p>
 <div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" title="1">protein_names =<span class="st"> </span>protein_names[<span class="op">-</span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(protein_names <span class="op">==</span><span class="st"> "pSTAT1"</span>)]</a>
-<a class="sourceLine" id="cb42-2" title="2">obj =<span class="st"> </span>cytoeffect<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/cytoeffect/topics/glmm">glmm</a></span>(df_samples_subset, protein_names, </a>
-<a class="sourceLine" id="cb42-3" title="3">                       <span class="dt">condition =</span> <span class="st">"term"</span>, <span class="dt">group =</span> <span class="st">"donor"</span>,</a>
-<a class="sourceLine" id="cb42-4" title="4">                       <span class="dt">iter =</span> <span class="dv">325</span>, <span class="dt">warmup =</span> <span class="dv">200</span>, <span class="dt">num_chains =</span> ncores, </a>
-<a class="sourceLine" id="cb42-5" title="5">                       <span class="dt">eta =</span> <span class="fl">1.0</span>)</a>
-<a class="sourceLine" id="cb42-6" title="6"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/save">save</a></span>(obj,<span class="dt">file =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"cytoeffect_ncells_collider"</span>,ncells,<span class="st">".Rdata"</span>))</a></code></pre></div>
+<a class="sourceLine" id="cb42-2" title="2"><span class="cf">if</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/files">file.exists</a></span>(prefit_reduced)) {</a>
+<a class="sourceLine" id="cb42-3" title="3">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/load">load</a></span>(<span class="dt">file =</span> prefit_reduced)</a>
+<a class="sourceLine" id="cb42-4" title="4">} <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb42-5" title="5">  obj =<span class="st"> </span>cytoeffect<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/cytoeffect/topics/glmm">glmm</a></span>(df_samples_subset, protein_names, </a>
+<a class="sourceLine" id="cb42-6" title="6">                         <span class="dt">condition =</span> <span class="st">"term"</span>, <span class="dt">group =</span> <span class="st">"donor"</span>,</a>
+<a class="sourceLine" id="cb42-7" title="7">                         <span class="dt">iter =</span> <span class="dv">325</span>, <span class="dt">warmup =</span> <span class="dv">200</span>, </a>
+<a class="sourceLine" id="cb42-8" title="8">                         <span class="dt">num_chains =</span> ncores)</a>
+<a class="sourceLine" id="cb42-9" title="9">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/save">save</a></span>(obj,<span class="dt">file =</span> prefit_reduced)</a>
+<a class="sourceLine" id="cb42-10" title="10">}</a></code></pre></div>
 <div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" title="1">p_reduced =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(obj, <span class="dt">type =</span> <span class="st">"beta"</span>) <span class="op">+</span><span class="st"> </span></a>
 <a class="sourceLine" id="cb43-2" title="2"><span class="st">  </span><span class="kw">ggtitle</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/expression">expression</a></span>(<span class="st">"Reduced Fixed Effects"</span><span class="op">~</span>beta)) <span class="op">+</span></a>
 <a class="sourceLine" id="cb43-3" title="3"><span class="st">  </span><span class="kw">xlab</span>(<span class="st">"log-odds of 3rd/1st trimester"</span>)</a>

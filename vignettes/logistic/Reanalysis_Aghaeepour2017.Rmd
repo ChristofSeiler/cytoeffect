@@ -7,9 +7,6 @@ output:
   BiocStyle::html_document:
     toc_float: true
 bibliography: bibliography.bib
-params:
-  ncells: "Inf"
-  seed: "0xdada"
 ---
 
 ```{r setup, include=FALSE}
@@ -18,18 +15,22 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 # Goal
 
-Reanalysis of mass cytometry data from @aghaeepour2017immune using GLMM with multivariate donor and cell type random effects.
+Reanalysis of mass cytometry data from @aghaeepour2017immune using the Logistic Linear Mixed Model.
 
 # Prerequisites
 
 Parse input parameters.
 
 ```{r parse_input_parameters}
-ncells = floor(as.numeric(params$ncells))
-ncells
-seed = params$seed
-seed
+ncells = Inf
+seed = 0xdada
 ncores = 8
+zenodo_url = "https://zenodo.org/record/2597291/files/"
+cytof_data = "se_aghaeepour2017immune.Rdata"
+prefit = paste0("cytoeffect_llmm_ncells_",ncells,".Rdata")
+prefit
+prefit_reduced = paste0("cytoeffect_llmm_ncells_",ncells,"_reduced.Rdata")
+prefit_reduced
 ```
 
 Install packages.
@@ -59,10 +60,20 @@ theme_set(theme_few())
 
 # Load Data
 
+Download preprocessed data from Zenodo.
+
+```{r download_zenodo}
+rdata_filenames = c(cytof_data, prefit, prefit_reduced)
+for(filename in rdata_filenames)
+    download.file(url = paste0(zenodo_url, filename), 
+                  destfile = filename,
+                  mode = "wb")
+```
+
 Load ``SummarizedExperiment`` object from CytoGLMM workflow.
 
 ```{r load_summarized_experiment}
-load("se_aghaeepour2017immune.Rdata")
+load(cytof_data)
 exprs = assay(se_aghaeepour2017immune)
 sample_info = rowData(se_aghaeepour2017immune)
 sample_info_names = names(sample_info)
@@ -143,16 +154,16 @@ df_samples_subset$term %<>% factor(levels = c("1st trimester",
                                               "3rd trimester"))
 ```
 
-```{r poisson_sampling_load, echo=FALSE, eval=TRUE}
-load(file = paste0("cytoeffect_ncells",ncells,".Rdata"))
-```
-
-```{r bayesian_glmm_celltype, eval=FALSE}
-obj = cytoeffect::glmm(df_samples_subset, protein_names, 
+```{r logistic_sampling}
+if(file.exists(prefit)) {
+  load(file = prefit)
+} else {
+  obj = cytoeffect::glmm(df_samples_subset, protein_names, 
                        condition = "term", group = "donor",
-                       iter = 325, warmup = 200, num_chains = ncores, 
-                       eta = 1.0)
-save(obj,file = paste0("cytoeffect_ncells",ncells,".Rdata"))
+                       iter = 325, warmup = 200, 
+                       num_chains = ncores)
+  save(obj,file = prefit)
+}
 ```
 
 ## HMC Diagnostics
@@ -220,17 +231,17 @@ ggsave("posterior_summary_cor_glmm.pdf", width = 4, height = 4)
 
 Refit model to test potentional collider confounding.
 
-```{r poisson_sampling_load_refit, echo=FALSE, eval=TRUE}
-load(file = paste0("cytoeffect_ncells_collider",ncells,".Rdata"))
-```
-
-```{r refit, eval=FALSE}
+```{r refit}
 protein_names = protein_names[-which(protein_names == "pSTAT1")]
-obj = cytoeffect::glmm(df_samples_subset, protein_names, 
-                       condition = "term", group = "donor",
-                       iter = 325, warmup = 200, num_chains = ncores, 
-                       eta = 1.0)
-save(obj,file = paste0("cytoeffect_ncells_collider",ncells,".Rdata"))
+if(file.exists(prefit_reduced)) {
+  load(file = prefit_reduced)
+} else {
+  obj = cytoeffect::glmm(df_samples_subset, protein_names, 
+                         condition = "term", group = "donor",
+                         iter = 325, warmup = 200, 
+                         num_chains = ncores)
+  save(obj,file = prefit_reduced)
+}
 ```
 
 ```{r plot_refit}

@@ -7,9 +7,6 @@ output:
   BiocStyle::html_document:
     toc_float: true
 bibliography: bibliography.bib
-params:
-  ncells: "Inf"
-  seed: "0xdada"
 ---
 
 ```{r setup, include=FALSE}
@@ -18,18 +15,20 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 # Goal
 
-Reanalysis of mass cytometry data from @aghaeepour2017immune using the Poisson Log-Normal Model.
+Reanalysis of mass cytometry data from @aghaeepour2017immune using the Poisson Log-Normal Mixed Model.
 
 # Prerequisites
 
 Parse input parameters.
 
 ```{r parse_input_parameters}
-ncells = floor(as.numeric(params$ncells))
-ncells
-seed = params$seed
-seed
+ncells = Inf
+seed = 0xdada
 ncores = 8
+zenodo_url = "https://zenodo.org/record/2597291/files/"
+cytof_data = "se_aghaeepour2017immune.Rdata"
+prefit = paste0("cytoeffect_plmm_ncells_",ncells,".Rdata")
+prefit
 ```
 
 Install packages.
@@ -69,10 +68,20 @@ theme_set(theme_few())
 
 # Load Data
 
+Download preprocessed data from Zenodo.
+
+```{r download_zenodo}
+rdata_filenames = c(cytof_data, prefit)
+for(filename in rdata_filenames)
+    download.file(url = paste0(zenodo_url, filename), 
+                  destfile = filename,
+                  mode = "wb")
+```
+
 Load ``SummarizedExperiment`` object from CytoGLMM workflow.
 
 ```{r load_summarized_experiment}
-load("se_aghaeepour2017immune.Rdata")
+load(cytof_data)
 exprs = assay(se_aghaeepour2017immune)
 sample_info = rowData(se_aghaeepour2017immune)
 sample_info_names = names(sample_info)
@@ -144,16 +153,16 @@ df_samples_subset$term %<>% factor(levels = c("1st trimester",
                                               "3rd trimester"))
 ```
 
-```{r poisson_sampling_load, echo=FALSE, eval=TRUE}
-load(file = paste0("cytoeffect_poisson_ncells",ncells,".Rdata"))
-```
-
-```{r poisson_sampling_run, eval=FALSE}
-obj = cytoeffect::poisson_lognormal(df_samples_subset, protein_names, 
-                                    condition = "term", group = "donor",
-                                    iter = 82, warmup = 50,
-                                    num_chains = ncores)
-save(obj,file = paste0("cytoeffect_poisson_ncells",ncells,".Rdata"))
+```{r poisson_sampling}
+if(file.exists(prefit)) {
+  load(file = prefit)
+} else {
+  obj = cytoeffect::poisson_lognormal(df_samples_subset, protein_names, 
+                                      condition = "term", group = "donor",
+                                      iter = 325, warmup = 200,
+                                      num_chains = ncores)
+  save(obj,file = prefit)
+}
 ```
 
 ## HMC Diagnostics
@@ -222,6 +231,56 @@ diff_log_count
 exp(diff_log_count)
 ```
 
+Posterior multivariate pairs plot.
+
+```{r posterior_pair_plot}
+pSTAT1_index = which(obj$protein_names == "pSTAT1")
+pSTAT3_index = which(obj$protein_names == "pSTAT3")
+pSTAT5_index = which(obj$protein_names == "pSTAT5")
+post_beta = rstan::extract(obj$fit_mcmc, pars = "beta")[[1]]
+tb_log_count = bind_rows(
+  tibble(
+    term = obj$conditions[1],
+    pSTAT1 = post_beta[,pSTAT1_index,1],
+    pSTAT3 = post_beta[,pSTAT3_index,1],
+    pSTAT5 = post_beta[,pSTAT5_index,1]
+  ),
+  tibble(
+    term = obj$conditions[2],
+    pSTAT1 = post_beta[,pSTAT1_index,2],
+    pSTAT3 = post_beta[,pSTAT3_index,2],
+    pSTAT5 = post_beta[,pSTAT5_index,2]
+  )
+)
+plot_diag = function(marker) {
+  ggplot(tb_log_count, aes_string(marker, fill = "term")) + 
+    geom_histogram(bins = 40, position = "identity", alpha = 0.5) +
+    scale_fill_few()
+}
+plot_off_diag = function(marker1, marker2) {
+  ggplot(tb_log_count, aes_string(marker1, marker2, color = "term")) +
+    geom_density2d() + 
+    scale_color_few()
+}
+ppair = plot_grid(
+  plot_diag("pSTAT1") + theme(legend.position = "none"),
+  NULL, 
+  NULL,
+  plot_off_diag("pSTAT1","pSTAT3") + theme(legend.position = "none"), 
+  plot_diag("pSTAT3") + theme(legend.position = "none"), 
+  NULL,
+  plot_off_diag("pSTAT1","pSTAT5") + theme(legend.position = "none"), 
+  plot_off_diag("pSTAT3","pSTAT5") + theme(legend.position = "none"), 
+  plot_diag("pSTAT5") + theme(legend.position = "none"),
+  ncol = 3
+)
+plot_grid(ppair,
+          get_legend(plot_diag("pSTAT1") + theme(legend.position = "bottom")),
+          ncol = 1,
+          rel_heights = c(1, .1))
+ggsave(filename = "posterior_multivariate_plmm.pdf", width = 8, height = 6)
+```
+
 Plot posterior standard deviation.
 
 ```{r posterior_sigma}
@@ -240,7 +299,7 @@ plist = plot(obj, type = "Cor")
 plist
 ```
 
-Assess correlation uncertainity.
+Pairwise correlation change between conditions.
 
 ```{r correlation_uncertainty}
 marker_pair = c("pSTAT3","pSTAT5")
@@ -248,18 +307,24 @@ Cor = rstan::extract(obj$fit_mcmc, pars = "Cor")[[1]]
 Cor_term = rstan::extract(obj$fit_mcmc, pars = "Cor_term")[[1]]
 Cor_diff = Cor_term - Cor
 tb_cor = Cor_diff[,
-                  which(protein_names == marker_pair[1]),
-                  which(protein_names == marker_pair[2])] %>% as.tibble
+                  which(obj$protein_names == marker_pair[1]),
+                  which(obj$protein_names == marker_pair[2])] %>% as.tibble
 tb_cor %<>% mutate(
   side = if_else(tb_cor$value > 0, 
                  true = paste0("positive (", 100*mean(tb_cor$value > 0), "%)"),
                  false = paste0("negative (", 100*mean(tb_cor$value <= 0), "%)"))
 )
+# keep colors consistent
+if(mean(tb_cor$value > 0) == 1) {
+  fill_colors = "#E46726"
+} else {
+  fill_colors = c("#6D9EC1","#E46726")
+}
 ggplot(tb_cor, aes(value, fill = side)) + 
   geom_histogram(bins = 50, alpha = 0.7) +
   xlab(paste0("Cor_term(", paste(marker_pair, collapse = ", "),")" )) +
   ggtitle("Posterior Distribution") + 
-  scale_fill_manual(values = c("#E46726")) #"#6D9EC1"
+  scale_fill_manual(values = fill_colors)
 ```
 
 Check if overall correlation structure changes between conditions.
@@ -279,7 +344,7 @@ tb_cor %<>% mutate(
 p_global = ggplot(tb_cor, aes(value, fill = side)) + 
   geom_histogram(bins = 25, alpha = 0.7) +
   ggtitle(expression("Overall P(Corr"~Omega~"(3rd) > Corr"~Omega~"(1st))")) +
-  scale_fill_manual(values = c("#E46726")) + #"#6D9EC1"
+  scale_fill_manual(values = fill_colors) +
   theme(legend.position = "bottom") +
   xlab("probability")
 p_global
@@ -289,7 +354,7 @@ Plot differential correlations.
 
 ```{r plot_differential_cor}
 cor_increase = apply(X = Cor_diff, MARGIN = c(2,3), FUN = function(x) mean(x > 0))
-colnames(cor_increase) = rownames(cor_increase) = protein_names
+colnames(cor_increase) = rownames(cor_increase) = obj$protein_names
 p_local = ggcorrplot(cor_increase, hc.order = TRUE, type = "lower",
            outline.col = "lightgray",
            colors = c("#6D9EC1", "white", "#E46726")) +
@@ -311,8 +376,8 @@ plot_correlation_graph = function(lambda) {
   graph[upper.tri(graph)] = 0
   ind = which(graph > 0, arr.ind = T)
   tb_graph = tibble(
-    from = protein_names[ind[,1]],
-    to = protein_names[ind[,2]],
+    from = obj$protein_names[ind[,1]],
+    to = obj$protein_names[ind[,2]],
     prob = graph[ind]
   )
   tb_graph %<>% dplyr::filter(prob > lambda)
@@ -359,9 +424,10 @@ Define a test statistics and compare observed value with posterior predictive di
 Predictive distribution marginalized over cell random effects.
 
 ```{r marginal_predicted_counts}
-stan_pars = rstan::extract(obj$fit_mcmc, pars = c("beta",
-                                                  "sigma","sigma_term","sigma_donor",
-                                                  "Cor","Cor_term","Cor_donor"))
+stan_pars = rstan::extract(obj$fit_mcmc, 
+                           pars = c("beta",
+                                    "sigma","sigma_term","sigma_donor",
+                                    "Cor","Cor_term","Cor_donor"))
 condition = "term"
 term = df_samples_subset %>%
     pull(condition) %>%
