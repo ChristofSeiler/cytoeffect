@@ -232,7 +232,7 @@ ggsave("posterior_summary_cor_glmm.pdf", width = 4, height = 4)
 Refit model to test potentional collider confounding.
 
 ```{r refit}
-protein_names = protein_names[-which(protein_names == "pSTAT1")]
+protein_names = obj$protein_names[-which(obj$protein_names == "pSTAT1")]
 if(file.exists(prefit_reduced)) {
   load(file = prefit_reduced)
 } else {
