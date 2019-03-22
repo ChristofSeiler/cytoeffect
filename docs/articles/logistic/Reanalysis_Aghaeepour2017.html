@@ -362,7 +362,7 @@
 <h1 class="hasAnchor">
 <a href="#refit-without-pstat1" class="anchor"></a>Refit Without pSTAT1</h1>
 <p>Refit model to test potentional collider confounding.</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" title="1">protein_names =<span class="st"> </span>protein_names[<span class="op">-</span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(protein_names <span class="op">==</span><span class="st"> "pSTAT1"</span>)]</a>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" title="1">protein_names =<span class="st"> </span>obj<span class="op">$</span>protein_names[<span class="op">-</span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which">which</a></span>(obj<span class="op">$</span>protein_names <span class="op">==</span><span class="st"> "pSTAT1"</span>)]</a>
 <a class="sourceLine" id="cb42-2" title="2"><span class="cf">if</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/files">file.exists</a></span>(prefit_reduced)) {</a>
 <a class="sourceLine" id="cb42-3" title="3">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/load">load</a></span>(<span class="dt">file =</span> prefit_reduced)</a>
 <a class="sourceLine" id="cb42-4" title="4">} <span class="cf">else</span> {</a>
