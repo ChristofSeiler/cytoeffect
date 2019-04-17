@@ -607,6 +607,7 @@ sample_condition_donor = function(k, tb_info) {
   names(mu) = obj$protein_names
   mu %<>% add_column(term  = tb_info$term)
   mu %<>% add_column(donor  = tb_info$donor)
+  mu %<>% add_column(k  = k)
   mu
 }
 # count number of cells per term and donor
@@ -623,19 +624,17 @@ sample_mu_hat = function(k) {
     }) %>% bind_rows()
 }
 # sample all tables
-mu_hat1 = sample_mu_hat(k = 1)
-mu_hat2 = sample_mu_hat(k = 2)
-CytoGLMM::plot_prcomp(mu_hat1,
-                      protein_names = protein_names,
-                      color_var = "term",
-                      repel = TRUE)
-CytoGLMM::plot_prcomp(mu_hat2,
-                      protein_names = protein_names,
-                      color_var = "donor",
-                      repel = TRUE)
-CytoGLMM::plot_mds(mu_hat1,
+mu_hat = lapply(1:10, 
+                function(i) sample_mu_hat(k = i)
+                ) %>% bind_rows
+CytoGLMM::plot_mds(mu_hat,
                    protein_names = protein_names,
-                   sample_info_names = c("donor","term"),
+                   sample_info_names = c("donor","term","k"),
+                   color = "term")
+# compare to original data
+CytoGLMM::plot_mds(df_samples_subset %>% mutate_at(protein_names, function(x) asinh(x/5)),
+                   protein_names = protein_names,
+                   sample_info_names = sample_info_names,
                    color = "term")
 ```
 
