@@ -179,7 +179,8 @@ Some more MCMC diagnostics. According to empirically findings, Rhat > 1.1 is usu
 ```{r mcmc_diagnostics}
 pars = c("beta",
          "sigma","sigma_term","sigma_donor",
-         "Cor","Cor_term","Cor_donor")
+         "Cor","Cor_term","Cor_donor"),
+         "b_donor")
 tb = summary(obj$fit_mcmc, 
              pars = pars)$summary %>% 
   as.tibble(rownames = "pars", .before = 1) %>% 
@@ -441,8 +442,13 @@ sample_y_hat = function(k = 1) {
     beta = stan_pars$beta[k,,]
     mu = rep(0, length(protein_names))
     beta_rep = sapply(beta[,cond], rep, n_cells_cond)
-    sigma = stan_pars$sigma[k,]
-    Cor = stan_pars$Cor[k,,]
+    if(cond == 1) {
+      sigma = stan_pars$sigma[k,]
+      Cor = stan_pars$Cor[k,,]
+    } else {
+      sigma = stan_pars$sigma_term[k,]
+      Cor = stan_pars$Cor_term[k,,]
+    }
     Cov = diag(sigma) %*% Cor %*% diag(sigma)
     b = mvrnorm(n = n_cells_cond, mu, Cov)
     sigma_donor = stan_pars$sigma_donor[k,]
@@ -561,6 +567,76 @@ ggplot(gof_pred_all, aes(statistic, fill = term)) +
   theme(legend.position="bottom")
 ggsave(filename = "goodness_of_fit.pdf", 
        width = 8, height = 5)
+```
+
+Multivariate posterior plots.
+
+```{r multivariate_posterior}
+stan_pars = rstan::extract(obj$fit_mcmc, 
+                           pars = c("beta",
+                                    "sigma","sigma_term","sigma_donor",
+                                    "Cor","Cor_term","Cor_donor",
+                                    "b_donor"))
+condition_index = seq(obj$conditions)
+donor = df_samples_subset$donor %>% as.factor %>% levels
+donor_index = seq(donor)
+# kth posterior draw
+sample_condition_donor = function(k, tb_info) {
+  set.seed(seed)
+  # fixed effects
+  beta = stan_pars$beta[k,,]
+  mu = rep(0, length(obj$protein_names))
+  beta_rep = sapply(beta[,tb_info$term_index], rep, tb_info$n)
+  # cell random effect
+  if(tb_info$term_index == 1) {
+    sigma = stan_pars$sigma[k,]
+    Cor = stan_pars$Cor[k,,]
+  } else {
+    sigma = stan_pars$sigma_term[k,]
+    Cor = stan_pars$Cor_term[k,,]
+  }
+  sigma = stan_pars$sigma[k,]
+  Cor = stan_pars$Cor[k,,]
+  Cov = diag(sigma) %*% Cor %*% diag(sigma)
+  b = mvrnorm(n = tb_info$n, mu, Cov)
+  # donor random effect
+  b_donor = stan_pars$b_donor[k, tb_info$donor_index, ]
+  # combine
+  mu = beta_rep + b + b_donor
+  mu %<>% as.tibble
+  names(mu) = obj$protein_names
+  mu %<>% add_column(term  = tb_info$term)
+  mu %<>% add_column(donor  = tb_info$donor)
+  mu
+}
+# count number of cells per term and donor
+subgroups = df_samples_subset %>% 
+  group_by(term, donor) %>% 
+  tally %>% 
+  ungroup
+subgroups %<>% mutate(term_index = as.integer(term))
+subgroups %<>% mutate(donor_index = as.integer(as.factor(donor)))
+# sample one table
+sample_mu_hat = function(k) {
+  lapply(seq(nrow(subgroups)), function(i) {
+    sample_condition_donor(k = k, tb_info = subgroups[i,])
+    }) %>% bind_rows()
+}
+# sample all tables
+mu_hat1 = sample_mu_hat(k = 1)
+mu_hat2 = sample_mu_hat(k = 2)
+CytoGLMM::plot_prcomp(mu_hat1,
+                      protein_names = protein_names,
+                      color_var = "term",
+                      repel = TRUE)
+CytoGLMM::plot_prcomp(mu_hat2,
+                      protein_names = protein_names,
+                      color_var = "donor",
+                      repel = TRUE)
+CytoGLMM::plot_mds(mu_hat1,
+                   protein_names = protein_names,
+                   sample_info_names = c("donor","term"),
+                   color = "term")
 ```
 
 # Session Info {.unnumbered}
