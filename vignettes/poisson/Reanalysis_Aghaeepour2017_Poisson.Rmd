@@ -624,18 +624,64 @@ sample_mu_hat = function(k) {
     }) %>% bind_rows()
 }
 # sample all tables
-mu_hat = lapply(1:10, 
-                function(i) sample_mu_hat(k = i)
-                ) %>% bind_rows
-CytoGLMM::plot_mds(mu_hat,
-                   protein_names = protein_names,
-                   sample_info_names = c("donor","term","k"),
-                   color = "term")
-# compare to original data
-CytoGLMM::plot_mds(df_samples_subset %>% mutate_at(protein_names, function(x) asinh(x/5)),
-                   protein_names = protein_names,
-                   sample_info_names = sample_info_names,
-                   color = "term")
+sample_info_names = c("donor","term","k")
+expr_median = lapply(1:10, 
+                     function(i) sample_mu_hat(k = i) %>%
+                       group_by(.dots = sample_info_names) %>%
+                       summarize_at(protein_names,median)
+                     ) %>% bind_rows
+# classical MDS on all posterior draws
+dist_matrix = dist(expr_median[,-seq(sample_info_names)])
+mds_res = cmdscale(dist_matrix,eig = TRUE, k = 2) # k is the number of dim
+explained_var = (100*mds_res$eig[1:2]/sum(mds_res$eig)) %>% round(digits = 1)
+expr_median %<>% bind_cols(tibble(MDS1 = mds_res$points[,1],
+                                  MDS2 = mds_res$points[,2]))
+# plot MDS
+ggmds = ggplot(expr_median, aes_string(x = "MDS1", y = "MDS2",color = color)) +
+  xlab(paste0("MDS1 (",explained_var[1],"%)")) +
+  ylab(paste0("MDS2 (",explained_var[2],"%)")) +
+  scale_color_manual(values = c("#5DA5DA", "#FAA43A")) +
+  geom_density_2d(alpha = 0.5) +
+  stat_ellipse(type = "t", level = 0.95, linetype = 2, size = 1)
+# make circle of correlation plot
+protein_sd = apply(expr_median[,protein_names],2,sd)
+# only keep makers that have some variability
+protein_selection = protein_names[protein_sd != 0]
+# correlations between variables and MDS axes
+expr_cor = cor(expr_median[,protein_selection],
+               expr_median[,c("MDS1","MDS2")]) %>% as.tibble
+expr_cor %<>% add_column(protein_selection)
+# add arrows coordinates
+expr_cor %<>% add_column(x0 = rep(0,nrow(expr_cor)))
+expr_cor %<>% add_column(y0 = rep(0,nrow(expr_cor)))
+# add to MDS plot
+ggmds = ggmds + 
+  annotate("segment", 
+           x = expr_cor$x0, xend = expr_cor$MDS1, 
+           y = expr_cor$y0, yend = expr_cor$MDS2, 
+           colour = "black", alpha = 0.5) +
+  annotate("text", 
+           x = expr_cor$MDS1, y = expr_cor$MDS2, 
+           label = expr_cor$protein_selection)
+# add median donors
+expr_median_donor = expr_median %>% 
+  group_by(.dots = c("donor","term")) %>% 
+  summarize_at(c("MDS1","MDS2"), median)
+expr_median_donor %<>% add_column(
+  color = sapply(expr_median_donor$term, 
+                 function(x) if(x == "1st trimester") "#5DA5DA" else "#FAA43A"))
+ggmds = ggmds +
+  annotate("text",
+           x = expr_median_donor$MDS1, y = expr_median_donor$MDS2, 
+           label = expr_median_donor$donor, color = expr_median_donor$color) +
+  ggtitle("Posterior MDS of Latent Variable"~mu~"(Aspect Ratio Unscaled)")
+ggmds
+ggsave(filename = "posterior_mds_latent_variable_mu.pdf", width = 10, height = 5)
+# change aspect ratio according to explained variance
+ggmds + 
+  coord_fixed(ratio = explained_var[2] / explained_var[1]) +
+  ggtitle("Posterior MDS of Latent Variable"~mu)
+ggsave(filename = "posterior_mds_latent_variable_mu_scaled.pdf", width = 10, height = 5)
 ```
 
 # Session Info {.unnumbered}

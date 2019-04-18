@@ -22,3 +22,5 @@ vignettes/poisson/posterior_multivariate_plmm.pdf
 vignettes/poisson/cytoeffect_plmm_ncells_Inf.Rdata
 vignettes/logistic/cytoeffect_llmm_ncells_Inf_reduced.Rdata
 vignettes/logistic/cytoeffect_llmm_ncells_Inf.Rdata
+vignettes/poisson/posterior_mds_latent_variable_mu.pdf
+vignettes/poisson/posterior_mds_latent_variable_mu_scaled.pdf
