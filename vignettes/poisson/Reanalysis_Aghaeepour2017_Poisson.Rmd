@@ -624,20 +624,24 @@ sample_mu_hat = function(k) {
     }) %>% bind_rows()
 }
 # sample all tables
-sample_info_names = c("donor","term","k")
-expr_median = lapply(1:10, 
-                     function(i) sample_mu_hat(k = i) %>%
-                       group_by(.dots = sample_info_names) %>%
-                       summarize_at(protein_names,median)
-                     ) %>% bind_rows
+sample_info_k = c("donor","term","k")
+set.seed(seed)
+expr_median = mclapply(sample(1:nrow(stan_pars$beta), 100), 
+                       function(i) {
+                         sample_mu_hat(k = i) %>%
+                           group_by(.dots = sample_info_k) %>%
+                           summarize_at(protein_names,median)
+                       }, 
+                       mc.cores = ncores
+                       ) %>% bind_rows
 # classical MDS on all posterior draws
-dist_matrix = dist(expr_median[,-seq(sample_info_names)])
+dist_matrix = dist(expr_median[,-seq(sample_info_k)])
 mds_res = cmdscale(dist_matrix,eig = TRUE, k = 2) # k is the number of dim
 explained_var = (100*mds_res$eig[1:2]/sum(mds_res$eig)) %>% round(digits = 1)
 expr_median %<>% bind_cols(tibble(MDS1 = mds_res$points[,1],
                                   MDS2 = mds_res$points[,2]))
 # plot MDS
-ggmds = ggplot(expr_median, aes_string(x = "MDS1", y = "MDS2",color = color)) +
+ggmds = ggplot(expr_median, aes(x = MDS1, y = MDS2, color = term)) +
   xlab(paste0("MDS1 (",explained_var[1],"%)")) +
   ylab(paste0("MDS2 (",explained_var[2],"%)")) +
   scale_color_manual(values = c("#5DA5DA", "#FAA43A")) +
