@@ -1,0 +1,151 @@
+#' Plot Multivariate Posterior Summaries for Poisson Log-Normal Mixed Model
+#'
+#' @import rstan
+#' @import ggplot2
+#' @import magrittr
+#' @import dplyr
+#' @import tidyr
+#' @export
+#'
+#' @param obj Object of class \code{cytoeffect_poisson} computed
+#'   using \code{\link{poisson_lognormal}}
+#' @param condition The column name of the condition variable
+#' @param group The column name of the group variable
+#' @param asp Set \code{asp = FALSE} to avoid scaling aspect ratio by eigenvalues
+#' @return \code{\link[ggplot2]{ggplot2}} object
+#'
+#' @examples
+#' # fit = cytoeffect::poisson_lognormal(...)
+#' # cytoeffect::plot_mds(fit, asp = FALSE)
+plot_mds = function(obj, asp = TRUE) {
+
+  if (class(obj) != "cytoeffect_poisson")
+    stop("Not a cytoeffect_poisson object.")
+
+  seed = 0xdada
+  stan_pars = rstan::extract(obj$fit_mcmc,
+                             pars = c("beta",
+                                      "sigma","sigma_term","sigma_donor",
+                                      "Cor","Cor_term","Cor_donor",
+                                      "b_donor"))
+  condition_index = seq(obj$conditions)
+  donor = obj$df_samples_subset %>%
+    pull(obj$group) %>%
+    as.factor %>%
+    levels
+  donor_index = seq(donor)
+  # kth posterior draw
+  sample_condition_donor = function(k, tb_info) {
+    set.seed(seed)
+    # fixed effects
+    beta = stan_pars$beta[k,,]
+    mu = rep(0, length(obj$protein_names))
+    beta_rep = sapply(beta[,tb_info$term_index], rep, tb_info$n)
+    # cell random effect
+    if(tb_info$term_index == 1) {
+      sigma = stan_pars$sigma[k,]
+      Cor = stan_pars$Cor[k,,]
+    } else {
+      sigma = stan_pars$sigma_term[k,]
+      Cor = stan_pars$Cor_term[k,,]
+    }
+    sigma = stan_pars$sigma[k,]
+    Cor = stan_pars$Cor[k,,]
+    Cov = diag(sigma) %*% Cor %*% diag(sigma)
+    b = mvrnorm(n = tb_info$n, mu, Cov)
+    # donor random effect
+    b_donor = stan_pars$b_donor[k, tb_info$donor_index, ]
+    # combine
+    mu = beta_rep + b + b_donor
+    mu %<>% as.tibble
+    names(mu) = obj$protein_names
+    mu %<>% add_column(term  = tb_info$term)
+    mu %<>% add_column(donor  = tb_info$donor)
+    mu %<>% add_column(k  = k)
+    mu
+  }
+  # count number of cells per term and donor
+  subgroups = obj$df_samples_subset %>%
+    group_by_(obj$condition, obj$group) %>%
+    tally %>%
+    ungroup
+  subgroups %<>% mutate(term_index = subgroups %>%
+                          pull(obj$condition) %>%
+                          as.integer)
+  subgroups %<>% mutate(donor_index = subgroups %>%
+                          pull(obj$group) %>%
+                          as.factor %>%
+                          as.integer)
+  # sample one table
+  sample_mu_hat = function(k) {
+    lapply(seq(nrow(subgroups)), function(i) {
+      sample_condition_donor(k = k, tb_info = subgroups[i,])
+    }) %>% bind_rows()
+  }
+  # sample all tables
+  sample_info_k = c("donor","term","k")
+  set.seed(seed)
+  expr_median = mclapply(sample(1:nrow(stan_pars$beta), 100),
+                         function(i) {
+                           sample_mu_hat(k = i) %>%
+                             group_by(.dots = sample_info_k) %>%
+                             summarize_at(obj$protein_names,median)
+                         },
+                         mc.cores = ncores
+  ) %>% bind_rows
+  # classical MDS on all posterior draws
+  dist_matrix = dist(expr_median[,-seq(sample_info_k)])
+  mds_res = cmdscale(dist_matrix,eig = TRUE, k = 2) # k is the number of dim
+  explained_var = (100*mds_res$eig[1:2]/sum(mds_res$eig)) %>% round(digits = 1)
+  expr_median %<>% bind_cols(tibble(MDS1 = mds_res$points[,1],
+                                    MDS2 = mds_res$points[,2]))
+  # plot MDS
+  ggmds = ggplot(expr_median, aes(x = MDS1, y = MDS2, color = term)) +
+    xlab(paste0("MDS1 (",explained_var[1],"%)")) +
+    ylab(paste0("MDS2 (",explained_var[2],"%)")) +
+    scale_color_manual(values = c("#5DA5DA", "#FAA43A")) +
+    geom_density_2d()
+  # + stat_ellipse(type = "t", level = 0.95, linetype = 2, size = 1)
+  # make circle of correlation plot
+  protein_sd = apply(expr_median[,obj$protein_names],2,sd)
+  # only keep makers that have some variability
+  protein_selection = obj$protein_names[protein_sd != 0]
+  # correlations between variables and MDS axes
+  expr_cor = cor(expr_median[,protein_selection],
+                 expr_median[,c("MDS1","MDS2")]) %>% as.tibble
+  expr_cor %<>% add_column(protein_selection)
+  # add arrows coordinates
+  expr_cor %<>% add_column(x0 = rep(0,nrow(expr_cor)))
+  expr_cor %<>% add_column(y0 = rep(0,nrow(expr_cor)))
+  # add to MDS plot
+  ggmds = ggmds +
+    annotate("segment",
+             x = expr_cor$x0, xend = expr_cor$MDS1,
+             y = expr_cor$y0, yend = expr_cor$MDS2,
+             colour = "black", alpha = 0.5) +
+    annotate("text",
+             x = expr_cor$MDS1, y = expr_cor$MDS2,
+             label = expr_cor$protein_selection)
+  # add median donors
+  expr_median_donor = expr_median %>%
+    group_by(.dots = c("donor","term")) %>%
+    summarize_at(c("MDS1","MDS2"), median)
+  expr_median_donor %<>% add_column(
+    color = sapply(expr_median_donor$term,
+                   function(x) if(x == "1st trimester") "#5DA5DA" else "#FAA43A"))
+
+  if(asp) {
+    # change aspect ratio according to explained variance
+    ggmds = ggmds +
+      coord_fixed(ratio = explained_var[2] / explained_var[1]) +
+      ggtitle("Posterior MDS of Latent Variable"~mu)
+  } else {
+    ggmds = ggmds +
+      annotate("text",
+               x = expr_median_donor$MDS1, y = expr_median_donor$MDS2,
+               label = expr_median_donor$donor, color = expr_median_donor$color) +
+      ggtitle("Posterior MDS of Latent Variable"~mu~"(Aspect Ratio Unscaled)")
+  }
+  ggmds
+
+}

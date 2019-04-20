@@ -9,21 +9,23 @@
 #' @import stringr
 #' @export
 #'
-#' @param obj Object of class \code{cytoeffect_poisson} computed using \code{\link{poisson_lognormal}}
-#' @param type A string with the variable name to plot: \code{type = "beta"}, \code{type = "sigma"}, or \code{type = "Cor"}
+#' @param obj Object of class \code{cytoeffect_poisson} computed
+#'   using \code{\link{poisson_lognormal}}
+#' @param type A string with the parameter to plot:
+#'   \code{type = "beta"}, \code{type = "sigma"}, or \code{type = "Cor"}
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
 #' # fit = cytoeffect::poisson_lognormal(...)
 #' # plot(fit)
-plot.cytoeffect_poisson = function(obj, type = "distribution") {
+plot.cytoeffect_poisson = function(obj, type = "beta") {
 
   if (class(obj) != "cytoeffect_poisson")
     stop("Not a cytoeffect_poisson object.")
 
   warmup = obj$fit_mcmc@stan_args[[1]]$warmup
   protein_names = obj$protein_names
-  conditions = obj$conditions
+  conditions = levels(pull(obj$df_samples_subset, obj$condition))
 
   if(type == "beta") {
 
@@ -94,34 +96,6 @@ plot.cytoeffect_poisson = function(obj, type = "distribution") {
         theme(panel.grid.major = element_blank(),
               panel.grid.minor = element_blank())
     })
-
-  } else if (type == "Y_hat") {
-
-    if(sum(str_detect(names(obj$fit_mcmc), type)) == 0)
-      stop("Y_hat not available")
-
-    Y = obj$Y
-    Y_hat = rstan::extract(obj$fit_mcmc, pars = type)[[1]]
-    Y_hat_mean = apply(X = Y_hat, MARGIN = c(2,3), FUN = mean)
-    # Standard residuals
-    #Y_residual = Y - Y_hat_mean
-    # Pearson residuals
-    #Y_residual = (Y - Y_hat_mean)/sd(Y_hat_mean)
-    # Deviance residuals
-    Y_residual = sign(Y - Y_hat_mean)*sqrt(2*(Y*log(Y/Y_hat_mean) - (Y-Y_hat_mean)))
-    Y_residual %<>% as.tibble
-    ggplot(Y_residual %>% gather(marker, expr, protein_names), aes(expr)) +
-      geom_histogram(bins = 30) +
-      facet_wrap(~marker) +
-      ggtitle("Deviance Residuals")
-    # plot residuals correlations
-    # Y_residual = Y - Y_hat_mean
-    # ggcorrplot(cor(Y_residual), hc.order = TRUE, type = "lower",
-    #            outline.col = "lightgray",
-    #            colors = c("#6D9EC1", "white", "#E46726")) +
-    #   ggtitle(paste0("Marker Correlations (",type,")")) +
-    #   theme(panel.grid.major = element_blank(),
-    #         panel.grid.minor = element_blank())
 
   } else {
 

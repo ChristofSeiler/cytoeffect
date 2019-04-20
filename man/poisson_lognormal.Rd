@@ -27,8 +27,9 @@ cell condition, and group information}
 A list of class \code{cytoeffect_poisson} containing
   \item{fit_mcmc}{\code{\link[rstan]{rstan}} object}
   \item{protein_names}{input protein names}
-  \item{conditions}{input condition variable}
-  \item{Y}{input orignal count matrix}
+  \item{condition}{input condition variable}
+  \item{group}{input group names}
+  \item{df_samples_subset}{input df_samples_subset table}
 }
 \description{
 \code{poisson_lognormal} uses Hamiltonion Monte Carlo to sample form an extend

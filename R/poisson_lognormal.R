@@ -21,8 +21,9 @@
 #' @return A list of class \code{cytoeffect_poisson} containing
 #'   \item{fit_mcmc}{\code{\link[rstan]{rstan}} object}
 #'   \item{protein_names}{input protein names}
-#'   \item{conditions}{input condition variable}
-#'   \item{Y}{input orignal count matrix}
+#'   \item{condition}{input condition variable}
+#'   \item{group}{input group names}
+#'   \item{df_samples_subset}{input df_samples_subset table}
 #'
 poisson_lognormal = function(df_samples_subset,
                              protein_names,
@@ -142,9 +143,10 @@ poisson_lognormal = function(df_samples_subset,
 
   # create cytoeffect class
   obj = list(fit_mcmc = fit_mcmc,
+             df_samples_subset = df_samples_subset,
              protein_names = protein_names,
-             conditions = levels(pull(df_samples_subset, condition)),
-             Y = Y)
+             condition = condition,
+             group = group)
   class(obj) = "cytoeffect_poisson"
   obj
 

@@ -6,7 +6,8 @@
 #' @export
 #'
 #' @param obj Object of class \code{cytoeffect} computed using \code{\link{glmm}}
-#' @param type A string with the variable name to plot: \code{par = "beta"}, \code{par = "sigma"}, or \code{par = "Cor"}
+#' @param par A string with the variable name to summarize:
+#'   \code{par = "beta"}, \code{par = "sigma"}, or \code{par = "Cor"}
 #' @return \code{\link[tibble]{tibble}} object
 #'
 #' @examples

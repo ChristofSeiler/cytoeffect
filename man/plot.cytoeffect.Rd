@@ -4,12 +4,13 @@
 \alias{plot.cytoeffect}
 \title{Plot Posterior Summaries of Logistic Linear Mixed Model}
 \usage{
-plot.cytoeffect(obj, type = "distribution")
+plot.cytoeffect(obj, type = "beta")
 }
 \arguments{
 \item{obj}{Object of class \code{cytoeffect} computed using \code{\link{glmm}}}
 
-\item{type}{A string with the variable name to plot: \code{type = "beta"}, \code{type = "sigma_donor"}, or \code{type = "Cor_donor"}}
+\item{type}{A string with the variable name to plot:
+\code{type = "beta"}, \code{type = "sigma_donor"}, or \code{type = "Cor_donor"}}
 }
 \value{
 \code{\link[ggplot2]{ggplot2}} object

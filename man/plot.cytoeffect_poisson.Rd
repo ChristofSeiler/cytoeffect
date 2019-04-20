@@ -4,12 +4,14 @@
 \alias{plot.cytoeffect_poisson}
 \title{Plot Posterior Summaries for Poisson Log-Normal Mixed Model}
 \usage{
-plot.cytoeffect_poisson(obj, type = "distribution")
+plot.cytoeffect_poisson(obj, type = "beta")
 }
 \arguments{
-\item{obj}{Object of class \code{cytoeffect_poisson} computed using \code{\link{poisson_lognormal}}}
+\item{obj}{Object of class \code{cytoeffect_poisson} computed
+using \code{\link{poisson_lognormal}}}
 
-\item{type}{A string with the variable name to plot: \code{type = "beta"}, \code{type = "sigma"}, or \code{type = "Cor"}}
+\item{type}{A string with the parameter to plot:
+\code{type = "beta"}, \code{type = "sigma"}, or \code{type = "Cor"}}
 }
 \value{
 \code{\link[ggplot2]{ggplot2}} object

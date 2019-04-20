@@ -9,7 +9,8 @@ summary.cytoeffect(obj, par)
 \arguments{
 \item{obj}{Object of class \code{cytoeffect} computed using \code{\link{glmm}}}
 
-\item{type}{A string with the variable name to plot: \code{par = "beta"}, \code{par = "sigma"}, or \code{par = "Cor"}}
+\item{par}{A string with the variable name to summarize:
+\code{par = "beta"}, \code{par = "sigma"}, or \code{par = "Cor"}}
 }
 \value{
 \code{\link[tibble]{tibble}} object
