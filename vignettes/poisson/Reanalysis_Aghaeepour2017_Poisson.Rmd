@@ -214,8 +214,10 @@ Extract expected count difference for pSTAT1.
 
 ```{r fixed_effects_pSTAT1}
 post_beta = rstan::extract(obj$fit_mcmc, pars = "beta")[[1]]
-first_index = which(obj$conditions == "1st trimester")
-third_index = which(obj$conditions == "3rd trimester")
+first_index = which(levels(pull(obj$df_samples_subset, obj$condition)) 
+                    == "1st trimester")
+third_index = which(levels(pull(obj$df_samples_subset, obj$condition)) 
+                    == "3rd trimester")
 pstat1_index = which(obj$protein_names == "pSTAT1")
 first_log_count = quantile(post_beta[,pstat1_index,first_index], 
                            probs = c(0.025, 0.5, 0.975))
@@ -241,13 +243,13 @@ pSTAT5_index = which(obj$protein_names == "pSTAT5")
 post_beta = rstan::extract(obj$fit_mcmc, pars = "beta")[[1]]
 tb_log_count = bind_rows(
   tibble(
-    term = obj$conditions[1],
+    term = levels(pull(obj$df_samples_subset, obj$condition))[1],
     pSTAT1 = post_beta[,pSTAT1_index,1],
     pSTAT3 = post_beta[,pSTAT3_index,1],
     pSTAT5 = post_beta[,pSTAT5_index,1]
   ),
   tibble(
-    term = obj$conditions[2],
+    term = levels(pull(obj$df_samples_subset, obj$condition))[2],
     pSTAT1 = post_beta[,pSTAT1_index,2],
     pSTAT3 = post_beta[,pSTAT3_index,2],
     pSTAT5 = post_beta[,pSTAT5_index,2]
@@ -298,6 +300,15 @@ Plot posterior correlations.
 ```{r posterior_cor}
 plist = plot(obj, type = "Cor")
 plist
+```
+
+Multivariate posterior MDS plots.
+
+```{r multivariate_posterior}
+cytoeffect::plot_mds(obj)
+ggsave(filename = "posterior_mds_latent_variable_mu_scaled.pdf", width = 10, height = 5)
+cytoeffect::plot_mds(obj, asp = FALSE)
+ggsave(filename = "posterior_mds_latent_variable_mu_unscaled.pdf", width = 10, height = 5)
 ```
 
 Pairwise correlation change between conditions.
@@ -430,10 +441,12 @@ stan_pars = rstan::extract(obj$fit_mcmc,
                                     "sigma","sigma_term","sigma_donor",
                                     "Cor","Cor_term","Cor_donor"))
 condition = "term"
-term = df_samples_subset %>%
+term = obj$df_samples_subset %>%
     pull(condition) %>%
     as.factor() %>%
     as.integer()
+conditions_levels = levels(pull(obj$df_samples_subset, 
+                                obj$condition))
 # kth posterior draw
 sample_y_hat = function(k = 1) {
   set.seed(seed)
@@ -461,7 +474,7 @@ sample_y_hat = function(k = 1) {
                    ncol = ncol(count))
     count %<>% as.tibble
     names(count) = protein_names
-    count %<>% add_column(term  = obj$conditions[cond])
+    count %<>% add_column(term  = conditions_levels[cond])
     count
   }) %>% bind_rows()
 }
@@ -567,15 +580,6 @@ ggplot(gof_pred_all, aes(statistic, fill = term)) +
   theme(legend.position="bottom")
 ggsave(filename = "goodness_of_fit.pdf", 
        width = 8, height = 5)
-```
-
-Multivariate posterior plots.
-
-```{r multivariate_posterior}
-cytoeffect::plot_mds(obj)
-ggsave(filename = "posterior_mds_latent_variable_mu_scaled.pdf", width = 10, height = 5)
-cytoeffect::plot_mds(obj, asp = FALSE)
-ggsave(filename = "posterior_mds_latent_variable_mu_unscaled.pdf", width = 10, height = 5)
 ```
 
 # Session Info {.unnumbered}

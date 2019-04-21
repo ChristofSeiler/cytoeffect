@@ -103,7 +103,8 @@ plot_mds = function(obj, asp = TRUE) {
   ggmds = ggplot(expr_median, aes(x = MDS1, y = MDS2, color = term)) +
     xlab(paste0("MDS1 (",explained_var[1],"%)")) +
     ylab(paste0("MDS2 (",explained_var[2],"%)")) +
-    scale_color_manual(values = c("#5DA5DA", "#FAA43A")) +
+    scale_color_manual(values = c("#5DA5DA", "#FAA43A"),
+                       name = obj$condition) +
     geom_density_2d()
   # + stat_ellipse(type = "t", level = 0.95, linetype = 2, size = 1)
   # make circle of correlation plot
@@ -133,18 +134,17 @@ plot_mds = function(obj, asp = TRUE) {
   expr_median_donor %<>% add_column(
     color = sapply(expr_median_donor$term,
                    function(x) if(x == "1st trimester") "#5DA5DA" else "#FAA43A"))
+  ggmds = ggmds +
+    annotate("text",
+             x = expr_median_donor$MDS1, y = expr_median_donor$MDS2,
+             label = expr_median_donor$donor, color = expr_median_donor$color) +
+    ggtitle("Posterior MDS of Latent Variable"~mu~"(Aspect Ratio Unscaled)")
 
   if(asp) {
     # change aspect ratio according to explained variance
     ggmds = ggmds +
       coord_fixed(ratio = explained_var[2] / explained_var[1]) +
       ggtitle("Posterior MDS of Latent Variable"~mu)
-  } else {
-    ggmds = ggmds +
-      annotate("text",
-               x = expr_median_donor$MDS1, y = expr_median_donor$MDS2,
-               label = expr_median_donor$donor, color = expr_median_donor$color) +
-      ggtitle("Posterior MDS of Latent Variable"~mu~"(Aspect Ratio Unscaled)")
   }
   ggmds
 
