@@ -22,7 +22,7 @@ Reanalysis of mass cytometry data from @aghaeepour2017immune using the Poisson L
 Parse input parameters.
 
 ```{r parse_input_parameters}
-ncells = 1000
+ncells = Inf
 seed = 0xdada
 ncores = 8
 zenodo_url = "https://zenodo.org/record/2597291/files/"
@@ -71,7 +71,7 @@ theme_set(theme_few())
 Download preprocessed data from Zenodo.
 
 ```{r download_zenodo}
-rdata_filenames = c(cytof_data) #, prefit)
+rdata_filenames = c(cytof_data, prefit)
 for(filename in rdata_filenames)
     download.file(url = paste0(zenodo_url, filename), 
                   destfile = filename,
