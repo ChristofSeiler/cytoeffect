@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cytoeffect</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -62,6 +62,9 @@
       <a href="../articles/poisson/Reanalysis_Aghaeepour2017_Poisson.html">Poisson Log-Normal Mixed Model</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -314,46 +317,40 @@
 <a class="sourceLine" id="cb15-2" title="2">  <span class="kw">fit_plot_prediction_model</span>(tb_sim),</a>
 <a class="sourceLine" id="cb15-3" title="3">  <span class="kw">fit_plot_response_model</span>(tb_sim)  </a>
 <a class="sourceLine" id="cb15-4" title="4">)</a></code></pre></div>
-<pre><code>## ld: warning: text-based stub file /System/Library/Frameworks//CoreFoundation.framework/CoreFoundation.tbd and library file /System/Library/Frameworks//CoreFoundation.framework/CoreFoundation are out of sync. Falling back to library file for linking.
-## ld: warning: text-based stub file /System/Library/Frameworks//CoreFoundation.framework/CoreFoundation.tbd and library file /System/Library/Frameworks//CoreFoundation.framework/CoreFoundation are out of sync. Falling back to library file for linking.</code></pre>
 <p><img src="Confounders_files/figure-html/analysis_no_confounders-2.png" width="700"></p>
 </div>
 <div id="pipe" class="section level2">
 <h2 class="hasAnchor">
 <a href="#pipe" class="anchor"></a>Pipe</h2>
 <p>Fit both models and plot results.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1"><span class="kw">visualize_data</span>(tb_sim_pipe)</a></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1"><span class="kw">visualize_data</span>(tb_sim_pipe)</a></code></pre></div>
 <p><img src="Confounders_files/figure-html/analysis_pipe-1.png" width="700"></p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/plot_grid">plot_grid</a></span>(</a>
-<a class="sourceLine" id="cb18-2" title="2">  <span class="kw">fit_plot_prediction_model</span>(tb_sim_pipe),</a>
-<a class="sourceLine" id="cb18-3" title="3">  <span class="kw">fit_plot_response_model</span>(tb_sim_pipe)</a>
-<a class="sourceLine" id="cb18-4" title="4">)</a></code></pre></div>
-<pre><code>## ld: warning: text-based stub file /System/Library/Frameworks//CoreFoundation.framework/CoreFoundation.tbd and library file /System/Library/Frameworks//CoreFoundation.framework/CoreFoundation are out of sync. Falling back to library file for linking.
-## ld: warning: text-based stub file /System/Library/Frameworks//CoreFoundation.framework/CoreFoundation.tbd and library file /System/Library/Frameworks//CoreFoundation.framework/CoreFoundation are out of sync. Falling back to library file for linking.</code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/plot_grid">plot_grid</a></span>(</a>
+<a class="sourceLine" id="cb17-2" title="2">  <span class="kw">fit_plot_prediction_model</span>(tb_sim_pipe),</a>
+<a class="sourceLine" id="cb17-3" title="3">  <span class="kw">fit_plot_response_model</span>(tb_sim_pipe)</a>
+<a class="sourceLine" id="cb17-4" title="4">)</a></code></pre></div>
 <p><img src="Confounders_files/figure-html/analysis_pipe-2.png" width="700"></p>
 </div>
 <div id="collider" class="section level2">
 <h2 class="hasAnchor">
 <a href="#collider" class="anchor"></a>Collider</h2>
 <p>Fit both models and plot results.</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1"><span class="kw">visualize_data</span>(tb_sim_collider)</a></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1"><span class="kw">visualize_data</span>(tb_sim_collider)</a></code></pre></div>
 <p><img src="Confounders_files/figure-html/analysis_collider-1.png" width="700"></p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/plot_grid">plot_grid</a></span>(</a>
-<a class="sourceLine" id="cb21-2" title="2">  <span class="kw">fit_plot_prediction_model</span>(tb_sim_collider),</a>
-<a class="sourceLine" id="cb21-3" title="3">  <span class="kw">fit_plot_response_model</span>(tb_sim_collider)</a>
-<a class="sourceLine" id="cb21-4" title="4">)</a></code></pre></div>
-<pre><code>## ld: warning: text-based stub file /System/Library/Frameworks//CoreFoundation.framework/CoreFoundation.tbd and library file /System/Library/Frameworks//CoreFoundation.framework/CoreFoundation are out of sync. Falling back to library file for linking.
-## ld: warning: text-based stub file /System/Library/Frameworks//CoreFoundation.framework/CoreFoundation.tbd and library file /System/Library/Frameworks//CoreFoundation.framework/CoreFoundation are out of sync. Falling back to library file for linking.</code></pre>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/cowplot/topics/plot_grid">plot_grid</a></span>(</a>
+<a class="sourceLine" id="cb19-2" title="2">  <span class="kw">fit_plot_prediction_model</span>(tb_sim_collider),</a>
+<a class="sourceLine" id="cb19-3" title="3">  <span class="kw">fit_plot_response_model</span>(tb_sim_collider)</a>
+<a class="sourceLine" id="cb19-4" title="4">)</a></code></pre></div>
 <p><img src="Confounders_files/figure-html/analysis_collider-2.png" width="700"></p>
 </div>
 </div>
 <div id="session-info" class="section level1 unnumbered">
 <h1 class="hasAnchor">
 <a href="#session-info" class="anchor"></a>Session Info</h1>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/sessionInfo">sessionInfo</a></span>()</a></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/sessionInfo">sessionInfo</a></span>()</a></code></pre></div>
 <pre><code>## R version 3.5.1 (2018-07-02)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
-## Running under: macOS  10.14.3
+## Running under: macOS  10.14.4
 ## 
 ## Matrix products: default
 ## BLAS: /Library/Frameworks/R.framework/Versions/3.5/Resources/lib/libRblas.0.dylib

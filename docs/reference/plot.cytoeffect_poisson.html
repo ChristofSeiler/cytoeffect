@@ -63,7 +63,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cytoeffect</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -95,6 +95,9 @@
       <a href="../articles/poisson/Reanalysis_Aghaeepour2017_Poisson.html">Poisson Log-Normal Mixed Model</a>
     </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
       
@@ -128,18 +131,20 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>plot.cytoeffect_poisson</span>(<span class='no'>obj</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"distribution"</span>)</pre>
+    <pre class="usage"><span class='fu'>plot.cytoeffect_poisson</span>(<span class='no'>obj</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"beta"</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>obj</th>
-      <td><p>Object of class <code>cytoeffect_poisson</code> computed using <code><a href='poisson_lognormal.html'>poisson_lognormal</a></code></p></td>
+      <td><p>Object of class <code>cytoeffect_poisson</code> computed
+using <code><a href='poisson_lognormal.html'>poisson_lognormal</a></code></p></td>
     </tr>
     <tr>
       <th>type</th>
-      <td><p>A string with the variable name to plot: <code>type = "beta"</code>, <code>type = "sigma"</code>, or <code>type = "Cor"</code></p></td>
+      <td><p>A string with the parameter to plot:
+<code>type = "beta"</code>, <code>type = "sigma"</code>, or <code>type = "Cor"</code></p></td>
     </tr>
     </table>
     
