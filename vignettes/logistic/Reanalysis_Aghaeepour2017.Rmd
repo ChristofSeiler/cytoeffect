@@ -25,7 +25,7 @@ Parse input parameters.
 ncells = Inf
 seed = 0xdada
 ncores = 8
-zenodo_url = "https://zenodo.org/record/2597291/files/"
+zenodo_url = "https://zenodo.org/record/2652578/files/"
 cytof_data = "se_aghaeepour2017immune.Rdata"
 prefit = paste0("cytoeffect_llmm_ncells_",ncells,".Rdata")
 prefit

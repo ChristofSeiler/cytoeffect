@@ -5,19 +5,20 @@
 #' @import magrittr
 #' @import dplyr
 #' @import tidyr
+#' @import parallel
+#' @import MASS
 #' @export
 #'
 #' @param obj Object of class \code{cytoeffect_poisson} computed
 #'   using \code{\link{poisson_lognormal}}
-#' @param condition The column name of the condition variable
-#' @param group The column name of the group variable
 #' @param asp Set \code{asp = FALSE} to avoid scaling aspect ratio by eigenvalues
+#' @param ncores Number of cores
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
 #' # fit = cytoeffect::poisson_lognormal(...)
 #' # cytoeffect::plot_mds(fit, asp = FALSE)
-plot_mds = function(obj, asp = TRUE) {
+plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores()) {
 
   if (class(obj) != "cytoeffect_poisson")
     stop("Not a cytoeffect_poisson object.")

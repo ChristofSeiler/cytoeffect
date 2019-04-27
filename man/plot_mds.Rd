@@ -4,7 +4,7 @@
 \alias{plot_mds}
 \title{Plot Multivariate Posterior Summaries for Poisson Log-Normal Mixed Model}
 \usage{
-plot_mds(obj, asp = TRUE)
+plot_mds(obj, asp = TRUE, ncores = parallel::detectCores())
 }
 \arguments{
 \item{obj}{Object of class \code{cytoeffect_poisson} computed
@@ -12,9 +12,7 @@ using \code{\link{poisson_lognormal}}}
 
 \item{asp}{Set \code{asp = FALSE} to avoid scaling aspect ratio by eigenvalues}
 
-\item{condition}{The column name of the condition variable}
-
-\item{group}{The column name of the group variable}
+\item{ncores}{Number of cores}
 }
 \value{
 \code{\link[ggplot2]{ggplot2}} object
