@@ -37,6 +37,8 @@ after_script:
 
 after_success:
   - travis_wait 40 tar -C .. -xf $PKG_TARBALL
+  - Rscript -e 'remotes::install_cran("BiocManager")'
+  - Rscript -e 'BiocManager::install("BiocStyle")'
   - Rscript -e 'remotes::install_cran("pkgdown")'
   - Rscript -e 'pkgdown::build_site()'
 
