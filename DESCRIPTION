@@ -3,10 +3,10 @@ Type: Package
 Title: Regression Models for Mass Cytometry Experiments
 Version: 0.2.0
 Authors@R: c(
-    person("Christof", "Seiler", , "christof.seiler@maastrichtuniversity.nl", role = c("aut", "cre"), 
+    person("Christof", "Seiler", , "christof.seiler@maastrichtuniversity.nl", role = c("aut", "cre"),
       comment = c(ORCID = "0000-0001-8802-3642"))
     )
-Description: Poisson Log-Normal Mixed Model and Logistic Linear Mixed Model 
+Description: Poisson Log-Normal Mixed Model and Logistic Linear Mixed Model
              for mass cytometric experiments.
 License: LGPL-3
 URL: https://christofseiler.github.io/cytoeffect, https://github.com/ChristofSeiler/cytoeffect
@@ -23,16 +23,17 @@ Imports:
     stringr,
     rstan (>= 2.17.3),
     ggcorrplot,
-    batchtools
+    batchtools,
+    MASS
 LinkingTo: 
-    StanHeaders (>= 2.17.2), 
-    rstan (>= 2.17.3), 
-    BH (>= 1.66.0-1), 
-    Rcpp (>= 0.12.16), 
+    StanHeaders (>= 2.17.2),
+    rstan (>= 2.17.3),
+    BH (>= 1.66.0-1),
+    Rcpp (>= 0.12.16),
     RcppEigen (>= 0.3.3.4.0)
 Depends:
-    R (>= 3.4.0), 
-    Rcpp (>= 0.12.16), 
+    R (>= 3.4.0),
+    Rcpp (>= 0.12.16),
     methods
 SystemRequirements: GNU make
 NeedsCompilation: yes
