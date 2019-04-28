@@ -37,8 +37,9 @@ after_script:
   - echo ${NOT_CRAN}
 
 after_success:
-  - R CMD install .
-  - R CMD install cytoeffect_0.2.0.tar.gz
+  - R CMD INSTALL .
+  - R CMD INSTALL cytoeffect_*.tar.gz
+  - R CMD INSTALL cytoeffect_0.2.0.tar.gz
   - Rscript -e 'remotes::install_cran(c("pkgdown", "RColorBrewer", "cowplot", "ggthemes", "ggdag", "broom","hexbin", "intergraph", "igraph", "ggnetwork"))'
   - Rscript -e 'remotes::install_bioc(c("BiocStyle", "SummarizedExperiment"))'
   - travis_wait 90 Rscript -e 'pkgdown::build_site()'
