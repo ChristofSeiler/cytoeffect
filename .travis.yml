@@ -26,8 +26,6 @@ before_install:
   - mkdir -p ~/.R/
   - echo "CXX14 = g++-7 -fPIC -flto=2" >> ~/.R/Makevars
   - echo "CXX14FLAGS = -mtune=native -march=native -Wno-unused-variable -Wno-unused-function -Wno-unused-local-typedefs -Wno-ignored-attributes -Wno-deprecated-declarations -Wno-attributes -O3" >> ~/.R/Makevars
-  - sudo apt-get --yes --force-yes update -qq
-  - sudo apt-get install -y libv8-dev
 
 script:
   - |
@@ -42,7 +40,7 @@ after_success:
   - travis_wait 40 tar -C .. -xf $PKG_TARBALL
   - Rscript -e 'remotes::install_cran(c("pkgdown", "RColorBrewer", "cowplot", "ggthemes", "ggdag", "broom","hexbin", "intergraph", "igraph", "ggnetwork"))'
   - Rscript -e 'remotes::install_bioc(c("BiocStyle", "SummarizedExperiment"))'
-  - Rscript -e 'pkgdown::build_site()'
+  - travis_wait 90 Rscript -e 'pkgdown::build_site()'
 
 after_failure:
   - cat cytoeffect.Rcheck/00*
