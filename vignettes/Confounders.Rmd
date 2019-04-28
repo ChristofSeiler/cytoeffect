@@ -22,7 +22,7 @@ Install packages.
 
 ```{r install_packages, warning=FALSE, message=FALSE, eval=TRUE}
 pkgs_needed = c("devtools","tidyverse","magrittr",
-                "RColorBrewer", "cowplot", "ggthemes","dagitty","MASS",
+                "RColorBrewer", "cowplot", "ggthemes","MASS",
                 "rstan","ggdag")
 letsinstall = setdiff(pkgs_needed, installed.packages())
 if (length(letsinstall) > 0) {
@@ -40,7 +40,6 @@ library("broom")
 library("RColorBrewer")
 library("cowplot")
 library("ggthemes")
-library("dagitty")
 library("MASS")
 library("rstan")
 library("ggdag")
