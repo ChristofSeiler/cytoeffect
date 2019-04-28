@@ -28,9 +28,8 @@ before_install:
   - echo "CXX14FLAGS = -mtune=native -march=native -Wno-unused-variable -Wno-unused-function -Wno-unused-local-typedefs -Wno-ignored-attributes -Wno-deprecated-declarations -Wno-attributes -O3" >> ~/.R/Makevars
 
 script:
-  - |
-    travis_wait 42 R CMD build .
-    travis_wait 59 R CMD check cytoeffect*tar.gz
+  - R CMD build .
+  - R CMD check cytoeffect*tar.gz
 
 after_script:
   - tar -ztvf cytoeffect_*.tar.gz
@@ -38,11 +37,9 @@ after_script:
 
 after_success:
   - R CMD INSTALL .
-  - R CMD INSTALL cytoeffect_*.tar.gz
-  - R CMD INSTALL cytoeffect_0.2.0.tar.gz
   - Rscript -e 'remotes::install_cran(c("pkgdown", "RColorBrewer", "cowplot", "ggthemes", "ggdag", "broom","hexbin", "intergraph", "igraph", "ggnetwork"))'
   - Rscript -e 'remotes::install_bioc(c("BiocStyle", "SummarizedExperiment"))'
-  - travis_wait 90 Rscript -e 'pkgdown::build_site()'
+  - travis_wait 60 Rscript -e 'pkgdown::build_site()'
 
 after_failure:
   - cat cytoeffect.Rcheck/00*
