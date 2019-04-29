@@ -29,26 +29,26 @@ before_install:
 
 script:
   - R CMD build .
-  - R CMD check cytoeffect*tar.gz
+  - R CMD check cytoeffect_*.tar.gz
 
 after_script:
   - tar -ztvf cytoeffect_*.tar.gz
   - echo ${NOT_CRAN}
 
-after_success:
-  - R CMD INSTALL .
-  - Rscript -e 'remotes::install_cran(c("pkgdown", "RColorBrewer", "cowplot", "ggthemes", "ggdag", "broom","hexbin", "intergraph", "igraph", "ggnetwork"))'
-  - Rscript -e 'remotes::install_bioc(c("BiocStyle", "SummarizedExperiment"))'
-  - travis_wait 60 Rscript -e 'pkgdown::build_site()'
-
-after_failure:
-  - cat cytoeffect.Rcheck/00*
-
-deploy:
-  provider: pages
-  skip-cleanup: true
-  github-token: $GITHUB_PAT
-  keep-history: true
-  local-dir: docs
-  on:
-    branch: master
+#after_success:
+#  - R CMD INSTALL .
+#  - Rscript -e 'remotes::install_cran(c("pkgdown", "RColorBrewer", "cowplot", "ggthemes", "ggdag", "broom","hexbin", "intergraph", "igraph", "ggnetwork"))'
+#  - Rscript -e 'remotes::install_bioc(c("BiocStyle", "SummarizedExperiment"))'
+#  - travis_wait 60 Rscript -e 'pkgdown::build_site()'
+#
+#after_failure:
+#  - cat cytoeffect.Rcheck/00*
+#
+#deploy:
+#  provider: pages
+#  skip-cleanup: true
+#  github-token: $GITHUB_PAT
+#  keep-history: true
+#  local-dir: docs
+#  on:
+#    branch: master
