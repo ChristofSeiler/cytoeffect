@@ -81,3 +81,24 @@ test_that("stop when input df_sample_subset has a condition with more than two l
   )
 
 })
+
+test_that("fit poisson model", {
+
+  latent_M = rpois(100, 1)
+  df_samples_subset = tibble(
+    M1 = rpois(100, latent_M + 5),
+    M2 = rpois(100, latent_M + 3),
+    condition = factor(c(rep("unstim",50), rep("stim",50))),
+    group = factor(c(rep("A",25), rep("B",25), rep("C",25), rep("D",25)))
+  )
+  protein_names = c("M1","M2")
+  condition = "condition"
+  group = "group"
+  ncores = 1
+
+  obj = cytoeffect::poisson_lognormal(df_samples_subset, protein_names,
+                                      condition = condition, group = group,
+                                      num_chains = ncores)
+  expect_is(obj$fit_mcmc, "stanfit")
+
+})

@@ -78,7 +78,9 @@ poisson_lognormal = function(df_samples_subset,
   # covariance matrix per condition
   initcov = function(tfmY) {
     sigma = sqrt(diag(cov(tfmY)))
-    L = t(chol(cor(tfmY)))
+    corY = cor(tfmY)
+    corY[is.na(corY)] = 0
+    L = t(chol(corY))
     list(sigma=sigma,L=L)
   }
   tfm = function(x) asinh(x/5)
@@ -87,7 +89,7 @@ poisson_lognormal = function(df_samples_subset,
 
   # covariance matrix across donors
   Y_donor = df_samples_subset %>%
-    group_by(donor) %>%
+    group_by(group) %>%
     summarise_at(protein_names, median) %>%
     select(protein_names)
   cov_donor = initcov(tfm(Y_donor))
