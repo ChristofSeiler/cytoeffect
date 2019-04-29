@@ -38,3 +38,5 @@ Depends:
 SystemRequirements: GNU make
 NeedsCompilation: yes
 RoxygenNote: 6.1.1
+Suggests: 
+    testthat
