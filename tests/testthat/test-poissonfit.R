@@ -3,12 +3,73 @@ context("poisson model fit")
 test_that("stop when input df_sample_subset has no observations", {
 
   df_samples_subset = tibble(
-    A = integer(),
-    B = integer(),
-    condition = character(),
-    group = character()
+    M1 = integer(),
+    M2 = integer(),
+    condition = factor(),
+    group = factor()
     )
-  protein_names = c("A","B")
+  protein_names = c("M1","M2")
+  condition = "condition"
+  group = "group"
+  ncores = 1
+
+  expect_error(
+    cytoeffect::poisson_lognormal(df_samples_subset, protein_names,
+                                  condition = condition, group = group,
+                                  num_chains = ncores)
+  )
+
+})
+
+test_that("stop when input df_sample_subset has no condition column", {
+
+  df_samples_subset = tibble(
+    M1 = integer(),
+    M2 = integer(),
+    group = factor()
+  )
+  protein_names = c("M1","M2")
+  condition = "condition"
+  group = "group"
+  ncores = 1
+
+  expect_error(
+    cytoeffect::poisson_lognormal(df_samples_subset, protein_names,
+                                  condition = condition, group = group,
+                                  num_chains = ncores)
+  )
+
+})
+
+test_that("stop when input df_sample_subset has no group column", {
+
+  df_samples_subset = tibble(
+    M1 = integer(),
+    M2 = integer(),
+    condition = factor()
+  )
+  protein_names = c("M1","M2")
+  condition = "condition"
+  group = "group"
+  ncores = 1
+
+  expect_error(
+    cytoeffect::poisson_lognormal(df_samples_subset, protein_names,
+                                  condition = condition, group = group,
+                                  num_chains = ncores)
+  )
+
+})
+
+test_that("stop when input df_sample_subset has a condition with more than two levels", {
+
+  df_samples_subset = tibble(
+    M1 = c(3,2,1),
+    M2 = c(1,1,1),
+    condition = factor(c("unstim","stim","control")),
+    group = factor(c("A","B","B"))
+  )
+  protein_names = c("M1","M2")
   condition = "condition"
   group = "group"
   ncores = 1
