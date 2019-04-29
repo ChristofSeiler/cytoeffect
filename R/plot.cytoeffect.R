@@ -18,9 +18,6 @@
 #' # plot(fit)
 plot.cytoeffect = function(obj, type = "beta") {
 
-  if (class(obj) != "cytoeffect")
-    stop("Not a cytoeffect object.")
-
   fit_mcmc = obj$fit_mcmc
   protein_names = obj$protein_names
   warmup = fit_mcmc@stan_args[[1]]$warmup

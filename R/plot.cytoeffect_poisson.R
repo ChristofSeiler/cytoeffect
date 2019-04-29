@@ -20,9 +20,6 @@
 #' # plot(fit)
 plot.cytoeffect_poisson = function(obj, type = "beta") {
 
-  if (class(obj) != "cytoeffect_poisson")
-    stop("Not a cytoeffect_poisson object.")
-
   warmup = obj$fit_mcmc@stan_args[[1]]$warmup
   protein_names = obj$protein_names
   conditions = levels(pull(obj$df_samples_subset, obj$condition))
