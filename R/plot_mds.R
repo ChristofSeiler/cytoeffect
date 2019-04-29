@@ -13,12 +13,13 @@
 #'   using \code{\link{poisson_lognormal}}
 #' @param asp Set \code{asp = FALSE} to avoid scaling aspect ratio by eigenvalues
 #' @param ncores Number of cores
+#' @param nsubsample Subsample size for posterior draws
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
 #' # fit = cytoeffect::poisson_lognormal(...)
 #' # cytoeffect::plot_mds(fit, asp = FALSE)
-plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores()) {
+plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsample = 100) {
 
   if (class(obj) != "cytoeffect_poisson")
     stop("Not a cytoeffect_poisson object.")
@@ -60,8 +61,8 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores()) {
     mu = beta_rep + b + b_donor
     mu %<>% as.tibble
     names(mu) = obj$protein_names
-    mu %<>% add_column(term  = tb_info$term)
-    mu %<>% add_column(donor  = tb_info$donor)
+    mu %<>% add_column(term  = tb_info$condition)
+    mu %<>% add_column(donor  = tb_info$group)
     mu %<>% add_column(k  = k)
     mu
   }
@@ -86,7 +87,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores()) {
   # sample all tables
   sample_info_k = c("donor","term","k")
   set.seed(seed)
-  expr_median = mclapply(sample(1:nrow(stan_pars$beta), 100),
+  expr_median = mclapply(sample(1:nrow(stan_pars$beta), nsubsample),
                          function(i) {
                            sample_mu_hat(k = i) %>%
                              group_by(.dots = sample_info_k) %>%
