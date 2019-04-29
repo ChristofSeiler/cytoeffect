@@ -107,7 +107,7 @@
 <a href="#prerequisites" class="anchor"></a>Prerequisites</h1>
 <p>Install packages.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">pkgs_needed =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"devtools"</span>,<span class="st">"tidyverse"</span>,<span class="st">"magrittr"</span>,</a>
-<a class="sourceLine" id="cb1-2" title="2">                <span class="st">"RColorBrewer"</span>, <span class="st">"cowplot"</span>, <span class="st">"ggthemes"</span>,<span class="st">"dagitty"</span>,<span class="st">"MASS"</span>,</a>
+<a class="sourceLine" id="cb1-2" title="2">                <span class="st">"RColorBrewer"</span>, <span class="st">"cowplot"</span>, <span class="st">"ggthemes"</span>,<span class="st">"MASS"</span>,</a>
 <a class="sourceLine" id="cb1-3" title="3">                <span class="st">"rstan"</span>,<span class="st">"ggdag"</span>)</a>
 <a class="sourceLine" id="cb1-4" title="4">letsinstall =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/sets">setdiff</a></span>(pkgs_needed, <span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/installed.packages">installed.packages</a></span>())</a>
 <a class="sourceLine" id="cb1-5" title="5"><span class="cf">if</span> (<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(letsinstall) <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>) {</a>
@@ -121,11 +121,10 @@
 <a class="sourceLine" id="cb2-4" title="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"RColorBrewer"</span>)</a>
 <a class="sourceLine" id="cb2-5" title="5"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"cowplot"</span>)</a>
 <a class="sourceLine" id="cb2-6" title="6"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"ggthemes"</span>)</a>
-<a class="sourceLine" id="cb2-7" title="7"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"dagitty"</span>)</a>
-<a class="sourceLine" id="cb2-8" title="8"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"MASS"</span>)</a>
-<a class="sourceLine" id="cb2-9" title="9"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"rstan"</span>)</a>
-<a class="sourceLine" id="cb2-10" title="10"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"ggdag"</span>)</a>
-<a class="sourceLine" id="cb2-11" title="11"><span class="kw">theme_set</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/ggthemes/topics/theme_few">theme_few</a></span>())</a></code></pre></div>
+<a class="sourceLine" id="cb2-7" title="7"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"MASS"</span>)</a>
+<a class="sourceLine" id="cb2-8" title="8"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"rstan"</span>)</a>
+<a class="sourceLine" id="cb2-9" title="9"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(<span class="st">"ggdag"</span>)</a>
+<a class="sourceLine" id="cb2-10" title="10"><span class="kw">theme_set</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/ggthemes/topics/theme_few">theme_few</a></span>())</a></code></pre></div>
 </div>
 <div id="confounders-analysis" class="section level1">
 <h1 class="hasAnchor">
@@ -365,12 +364,11 @@
 ## other attached packages:
 ##  [1] hexbin_1.27.2      bindrcpp_0.2.2     ggdag_0.1.0       
 ##  [4] rstan_2.18.1       StanHeaders_2.18.0 MASS_7.3-51       
-##  [7] dagitty_0.2-2      ggthemes_4.0.1     cowplot_0.9.3     
-## [10] RColorBrewer_1.1-2 broom_0.5.0        magrittr_1.5      
-## [13] forcats_0.3.0      stringr_1.3.1      dplyr_0.7.7       
-## [16] purrr_0.2.5        readr_1.1.1        tidyr_0.8.2       
-## [19] tibble_1.4.2       ggplot2_3.1.0      tidyverse_1.2.1   
-## [22] BiocStyle_2.8.2   
+##  [7] ggthemes_4.0.1     cowplot_0.9.3      RColorBrewer_1.1-2
+## [10] broom_0.5.0        magrittr_1.5       forcats_0.3.0     
+## [13] stringr_1.3.1      dplyr_0.7.7        purrr_0.2.5       
+## [16] readr_1.1.1        tidyr_0.8.2        tibble_1.4.2      
+## [19] ggplot2_3.1.0      tidyverse_1.2.1    BiocStyle_2.8.2   
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] nlme_3.1-137       matrixStats_0.54.0 fs_1.2.6          
@@ -385,20 +383,21 @@
 ## [28] commonmark_1.7     digest_0.6.18      rmarkdown_1.10    
 ## [31] base64enc_0.1-3    pkgconfig_2.0.2    htmltools_0.3.6   
 ## [34] rlang_0.3.0.1      readxl_1.1.0       rstudioapi_0.8    
-## [37] farver_1.1.0       bindr_0.1.1        jsonlite_1.5      
-## [40] inline_0.3.15      loo_2.0.0          Rcpp_0.12.19      
-## [43] munsell_0.5.0      viridis_0.5.1      stringi_1.2.4     
-## [46] yaml_2.2.0         ggraph_1.0.2       pkgbuild_1.0.2    
-## [49] plyr_1.8.4         grid_3.5.1         ggrepel_0.8.0     
-## [52] parallel_3.5.1     crayon_1.3.4       lattice_0.20-35   
-## [55] haven_1.1.2        hms_0.4.2          knitr_1.20        
-## [58] ps_1.2.0           pillar_1.3.0       igraph_1.2.2      
-## [61] boot_1.3-20        codetools_0.2-15   stats4_3.5.1      
-## [64] glue_1.3.0         evaluate_0.12      V8_1.5            
-## [67] modelr_0.1.2       tweenr_1.0.1       cellranger_1.1.0  
-## [70] gtable_0.2.0       assertthat_0.2.0   xfun_0.4          
-## [73] ggforce_0.1.3      tidygraph_1.1.1    roxygen2_6.1.1    
-## [76] viridisLite_0.3.0  memoise_1.1.0      units_0.6-2</code></pre>
+## [37] dagitty_0.2-2      farver_1.1.0       bindr_0.1.1       
+## [40] jsonlite_1.5       inline_0.3.15      loo_2.0.0         
+## [43] Rcpp_0.12.19       munsell_0.5.0      viridis_0.5.1     
+## [46] stringi_1.2.4      yaml_2.2.0         ggraph_1.0.2      
+## [49] pkgbuild_1.0.2     plyr_1.8.4         grid_3.5.1        
+## [52] ggrepel_0.8.0      parallel_3.5.1     crayon_1.3.4      
+## [55] lattice_0.20-35    haven_1.1.2        hms_0.4.2         
+## [58] knitr_1.20         ps_1.2.0           pillar_1.3.0      
+## [61] igraph_1.2.2       boot_1.3-20        codetools_0.2-15  
+## [64] stats4_3.5.1       glue_1.3.0         evaluate_0.12     
+## [67] V8_1.5             modelr_0.1.2       tweenr_1.0.1      
+## [70] cellranger_1.1.0   gtable_0.2.0       assertthat_0.2.0  
+## [73] ggforce_0.1.3      xfun_0.4           tidygraph_1.1.1   
+## [76] roxygen2_6.1.1     viridisLite_0.3.0  memoise_1.1.0     
+## [79] units_0.6-2</code></pre>
 </div>
   </div>
 

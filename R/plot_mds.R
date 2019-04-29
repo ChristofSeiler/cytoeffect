@@ -61,21 +61,21 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
     mu = beta_rep + b + b_donor
     mu %<>% as.tibble
     names(mu) = obj$protein_names
-    mu %<>% add_column(term  = tb_info$condition)
-    mu %<>% add_column(donor  = tb_info$group)
+    mu %<>% add_column(term  = tb_info$term)
+    mu %<>% add_column(donor  = tb_info$donor)
     mu %<>% add_column(k  = k)
     mu
   }
   # count number of cells per term and donor
   subgroups = obj$df_samples_subset %>%
-    group_by_(obj$condition, obj$group) %>%
+    group_by_(term = obj$condition, donor = obj$group) %>%
     tally %>%
     ungroup
   subgroups %<>% mutate(term_index = subgroups %>%
-                          pull(obj$condition) %>%
+                          pull(term) %>%
                           as.integer)
   subgroups %<>% mutate(donor_index = subgroups %>%
-                          pull(obj$group) %>%
+                          pull(donor) %>%
                           as.factor %>%
                           as.integer)
   # sample one table

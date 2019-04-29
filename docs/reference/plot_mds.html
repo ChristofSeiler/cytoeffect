@@ -131,7 +131,8 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>plot_mds</span>(<span class='no'>obj</span>, <span class='kw'>asp</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>ncores</span> <span class='kw'>=</span> <span class='kw pkg'>parallel</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/parallel/topics/detectCores'>detectCores</a></span>())</pre>
+    <pre class="usage"><span class='fu'>plot_mds</span>(<span class='no'>obj</span>, <span class='kw'>asp</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>ncores</span> <span class='kw'>=</span> <span class='kw pkg'>parallel</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/parallel/topics/detectCores'>detectCores</a></span>(),
+  <span class='kw'>nsubsample</span> <span class='kw'>=</span> <span class='fl'>100</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -148,6 +149,10 @@ using <code><a href='poisson_lognormal.html'>poisson_lognormal</a></code></p></t
     <tr>
       <th>ncores</th>
       <td><p>Number of cores</p></td>
+    </tr>
+    <tr>
+      <th>nsubsample</th>
+      <td><p>Subsample size for posterior draws</p></td>
     </tr>
     </table>
     
