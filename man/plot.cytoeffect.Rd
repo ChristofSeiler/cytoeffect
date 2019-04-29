@@ -10,7 +10,8 @@ plot.cytoeffect(obj, type = "beta")
 \item{obj}{Object of class \code{cytoeffect} computed using \code{\link{glmm}}}
 
 \item{type}{A string with the variable name to plot:
-\code{type = "beta"}, \code{type = "sigma_donor"}, or \code{type = "Cor_donor"}}
+\code{type = "beta"}, \code{type = "sigma_donor"}, \code{type = "Cor_donor"},
+or \code{type = "Cor_donor_all"}}
 }
 \value{
 \code{\link[ggplot2]{ggplot2}} object

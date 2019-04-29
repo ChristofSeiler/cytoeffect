@@ -22,6 +22,8 @@ cell condition, and group information}
 \item{warmup}{Number of warm up steps per chain for the HMC sampler}
 
 \item{num_chains}{Number of HMC chains to run in parallel}
+
+\item{eta}{Hyperparametr for LKJ prior}
 }
 \value{
 A list of class \emph{cytoeffect} containing

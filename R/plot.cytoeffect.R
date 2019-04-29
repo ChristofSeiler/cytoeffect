@@ -10,7 +10,8 @@
 #'
 #' @param obj Object of class \code{cytoeffect} computed using \code{\link{glmm}}
 #' @param type A string with the variable name to plot:
-#'   \code{type = "beta"}, \code{type = "sigma_donor"}, or \code{type = "Cor_donor"}
+#'   \code{type = "beta"}, \code{type = "sigma_donor"}, \code{type = "Cor_donor"},
+#'   or \code{type = "Cor_donor_all"}
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
@@ -88,40 +89,6 @@ plot.cytoeffect = function(obj, type = "beta") {
       geom_line(color = "black", stat = "density", alpha = 0.3) +
       theme(legend.position="none") +
       ggtitle(paste0("Marker Correlations (",type,")"))
-
-  # } else if (type == "uc") {
-
-    # reordered_names = protein_names[order(summary(obj, "sigmac")$median)]
-    # uc = rstan::extract(fit_mcmc,pars = "uc")[[1]]
-    # uc = uc[,,-1] # remove intercept
-    # # rehape posterior samples
-    # convert = function(qt) {
-    #   tb = as.tibble(qt)
-    #   names(tb) = protein_names
-    #   tb %>% mutate(celltype = celltypes)
-    # }
-    # tb_mid = convert(qt = apply(uc,c(2,3),median)) %>%
-    #   gather(protein_name, mid, -celltype)
-    # tb_low = convert(qt = apply(uc,c(2,3),
-    #                             function(x) quantile(x,probs = 0.025))) %>%
-    #   gather(protein_name, low, -celltype)
-    # tb_high = convert(qt = apply(uc,c(2,3),
-    #                              function(x) quantile(x,probs = 0.975))) %>%
-    #   gather(protein_name, high, -celltype)
-    # tb = bind_cols(tb_mid,tb_low,tb_high) %>%
-    #   select(protein_name,celltype,mid,low,high)
-    # tb$protein_name %<>% factor(levels = reordered_names)
-    # tb$celltype %<>% as.factor
-    # xlab_str = paste(conditions,collapse = " <-> ")
-    # ggplot(tb, aes(x = mid, y = protein_name, color = protein_name)) +
-    #   geom_vline(xintercept = 0,color = "black") +
-    #   geom_point(size = 2) +
-    #   geom_errorbarh(aes(xmin = low, xmax = high)) +
-    #   ggtitle("Cell Type Random Effects") +
-    #   xlab(xlab_str) +
-    #   theme(legend.position="none",
-    #         axis.title.y = element_blank()) +
-    #   facet_wrap(~celltype,nrow = 2)
 
   } else {
 

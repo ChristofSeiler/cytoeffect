@@ -103,4 +103,15 @@ test_that("fit poisson model", {
 
   expect_is(obj$fit_mcmc, "stanfit")
 
+  expect_is(plot(obj, type = "beta"), "ggplot")
+  expect_is(plot(obj, type = "sigma"), "ggplot")
+  expect_is(plot(obj, type = "Cor")[[1]], "ggplot")
+  expect_is(plot(obj, type = "Cor")[[2]], "ggplot")
+  expect_is(plot(obj, type = "Cor")[[3]], "ggplot")
+  expect_error(plot(obj, type = "something_crazy"))
+
+  expect_is(plot_mds(obj, asp = TRUE, ncores = 1), "ggplot")
+  expect_is(plot_mds(obj, asp = FALSE, ncores = 1), "ggplot")
+  expect_error(plot_mds(obj$fit_mcmc))
+
 })

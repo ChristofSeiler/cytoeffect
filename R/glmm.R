@@ -19,6 +19,7 @@
 #' @param iter Number of iteration per chain for the HMC sampler
 #' @param warmup Number of warm up steps per chain for the HMC sampler
 #' @param num_chains Number of HMC chains to run in parallel
+#' @param eta Hyperparametr for LKJ prior
 #' @return A list of class \emph{cytoeffect} containing
 #'   \item{fit_mcmc}{\code{\link[rstan]{rstan}} object}
 #'   \item{protein_names}{input protein names}
@@ -41,6 +42,8 @@ glmm = function(df_samples_subset,
     stop("group column missing")
   if(nrow(df_samples_subset) == 0)
     stop("no observations")
+  if(df_samples_subset %>% pull(condition) %>% nlevels != 2)
+    stop("condition variables should have two levels")
   if(!eta > 0)
     stop("eta needs to be positive")
 
@@ -54,9 +57,7 @@ glmm = function(df_samples_subset,
     N = nrow(X),
     P = ncol(X),
     J = length(unique(pull(df_samples_subset, group))),
-    K = length(unique(df_samples_subset$celltype)),
     donor = as.integer(as.factor(pull(df_samples_subset, group))),
-    celltype = as.integer(as.factor(df_samples_subset$celltype)),
     X = X,
     treatment = treatment,
     eta = eta
