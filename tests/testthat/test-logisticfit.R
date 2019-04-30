@@ -116,12 +116,12 @@ test_that("fit logistic model", {
   df_samples_subset = tibble(
     M1 = rpois(100, latent_M + 5),
     M2 = rpois(100, latent_M + 4),
-    condition = factor(c(rep("unstim",50), rep("stim",50))),
-    group = factor(c(rep("A",25), rep("B",25), rep("C",25), rep("D",25)))
+    treatment = factor(c(rep("unstim",50), rep("stim",50))),
+    patient = factor(c(rep("A",25), rep("B",25), rep("C",25), rep("D",25)))
   )
   protein_names = c("M1","M2")
-  condition = "condition"
-  group = "group"
+  condition = "treatment"
+  group = "patient"
   ncores = 1
 
   df_samples_subset %<>% mutate_at(protein_names, function(x) asinh(x/5))

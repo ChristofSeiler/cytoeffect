@@ -6,6 +6,7 @@
 #' @import magrittr
 #' @import dplyr
 #' @import tidyr
+#' @import tibble
 #' @export
 #'
 #' @param obj Object of class \code{cytoeffect} computed using \code{\link{glmm}}
@@ -30,7 +31,7 @@ plot.cytoeffect = function(obj, type = "beta") {
     tb_beta = tb_beta$summary[,c("2.5%","50%","97.5%")]
     tb_beta %<>% as.tibble(rownames = "name")
     tb_beta %<>% filter(name != "beta[1]") # remove intercept
-    tb_beta %<>% add_column(protein_name = protein_names)
+    tb_beta %<>% add_column(protein_name = as.character(protein_names))
     ggplot(tb_beta, aes(x = `50%`, y = protein_name)) +
       geom_vline(xintercept = 0,color = "red") +
       geom_point(size = 2) +
@@ -45,7 +46,7 @@ plot.cytoeffect = function(obj, type = "beta") {
     tb_sigma = tb_sigma$summary[,c("2.5%","50%","97.5%")]
     tb_sigma %<>% as.tibble(rownames = "name")
     tb_sigma %<>% filter(name != "sigma_donor[1]") # remove intercept
-    tb_sigma %<>% add_column(protein_name = protein_names)
+    tb_sigma %<>% add_column(protein_name = as.character(protein_names))
     ggplot(tb_sigma, aes(x = `50%`, y = protein_name)) +
       geom_point(size = 2) +
       geom_errorbarh(aes(xmin = `2.5%`, xmax = `97.5%`, height = 0.3)) +

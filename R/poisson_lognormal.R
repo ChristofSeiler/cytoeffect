@@ -72,8 +72,11 @@ poisson_lognormal = function(df_samples_subset,
   beta = df_samples_subset %>%
     group_by_(condition) %>%
     summarise_at(protein_names, function(x) log(mean(x))) %>%
-    select(protein_names) %>%
+    dplyr::select(protein_names) %>%
     t
+  # set according to prior
+  is.neginf = function(x) x == -Inf
+  beta[is.neginf(beta)] = -7 # beta[j] ~ normal(0, 7);
 
   # covariance matrix per condition
   initcov = function(tfmY) {
@@ -86,13 +89,18 @@ poisson_lognormal = function(df_samples_subset,
   tfm = function(x) asinh(x/5)
   cov1 = initcov(tfm(Y[term == 1,]))
   cov2 = initcov(tfm(Y[term == 2,]))
+  # set to low value when zero
+  cov1$sigma = ifelse(cov1$sigma == 0, 0.01, cov1$sigma)
+  cov2$sigma = ifelse(cov2$sigma == 0, 0.01, cov2$sigma)
 
   # covariance matrix across donors
   Y_donor = df_samples_subset %>%
-    group_by(group) %>%
+    group_by_(group) %>%
     summarise_at(protein_names, median) %>%
-    select(protein_names)
+    dplyr::select(protein_names)
   cov_donor = initcov(tfm(Y_donor))
+  # set to low value when zero
+  cov_donor$sigma = ifelse(cov_donor$sigma == 0, 0.01, cov_donor$sigma)
 
   # set random effects to zero
   z = matrix(0, nrow = n, ncol = d)

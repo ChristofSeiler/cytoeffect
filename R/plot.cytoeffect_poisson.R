@@ -7,6 +7,7 @@
 #' @import dplyr
 #' @import tidyr
 #' @import stringr
+#' @import tibble
 #' @export
 #'
 #' @param obj Object of class \code{cytoeffect_poisson} computed
