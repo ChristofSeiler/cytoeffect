@@ -4,7 +4,7 @@
 \alias{plot.cytoeffect_poisson}
 \title{Plot Posterior Summaries for Poisson Log-Normal Mixed Model}
 \usage{
-plot.cytoeffect_poisson(obj, type = "beta")
+\method{plot}{cytoeffect_poisson}(obj, type = "beta")
 }
 \arguments{
 \item{obj}{Object of class \code{cytoeffect_poisson} computed

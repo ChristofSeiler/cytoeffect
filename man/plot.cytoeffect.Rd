@@ -4,7 +4,7 @@
 \alias{plot.cytoeffect}
 \title{Plot Posterior Summaries of Logistic Linear Mixed Model}
 \usage{
-plot.cytoeffect(obj, type = "beta")
+\method{plot}{cytoeffect}(obj, type = "beta")
 }
 \arguments{
 \item{obj}{Object of class \code{cytoeffect} computed using \code{\link{glmm}}}

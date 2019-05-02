@@ -9,6 +9,8 @@
 #' @import tibble
 #' @export
 #'
+#' @aliases plot.cytoeffect
+#' @method plot cytoeffect
 #' @param obj Object of class \code{cytoeffect} computed using \code{\link{glmm}}
 #' @param type A string with the variable name to plot:
 #'   \code{type = "beta"}, \code{type = "sigma_donor"}, \code{type = "Cor_donor"},

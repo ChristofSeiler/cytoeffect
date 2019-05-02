@@ -1,0 +1,12 @@
+reference:
+- title: "Poisson Model"
+  desc: "Functions to fit model and plot results"
+  contents:
+  - '`poisson_lognormal`'
+  - '`plot.cytoeffect_poisson`'
+  - '`plot_mds`'
+- title: "Logistic Model"
+  desc: "Functions to fit model and plot results"
+  contents:
+  - '`glmm`'
+  - '`plot.cytoeffect`'

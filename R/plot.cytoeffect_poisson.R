@@ -10,6 +10,8 @@
 #' @import tibble
 #' @export
 #'
+#' @aliases plot.cytoeffect_poisson
+#' @method plot cytoeffect_poisson
 #' @param obj Object of class \code{cytoeffect_poisson} computed
 #'   using \code{\link{poisson_lognormal}}
 #' @param type A string with the parameter to plot:
