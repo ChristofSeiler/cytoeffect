@@ -110,11 +110,11 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
     geom_density_2d()
   # + stat_ellipse(type = "t", level = 0.95, linetype = 2, size = 1)
   # make circle of correlation plot
-  protein_sd = apply(expr_median[,obj$protein_names],2,sd)
+  protein_sd = apply(as.data.frame(expr_median)[,obj$protein_names],2,sd)
   # only keep makers that have some variability
   protein_selection = obj$protein_names[protein_sd != 0]
   # correlations between variables and MDS axes
-  expr_cor = cor(expr_median[,protein_selection],
+  expr_cor = cor(as.data.frame(expr_median)[,protein_selection],
                  expr_median[,c("MDS1","MDS2")]) %>% as.tibble
   expr_cor %<>% add_column(protein_selection)
   # add arrows coordinates
