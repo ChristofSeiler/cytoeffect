@@ -83,7 +83,11 @@ poisson_lognormal = function(df_samples_subset,
     sigma = sqrt(diag(cov(tfmY)))
     corY = cor(tfmY)
     corY[is.na(corY)] = 0
-    L = t(chol(corY))
+    if(attr(chol(corY, pivot = TRUE), "rank") == nrow(corY)) {
+      L = t(chol(corY))
+    } else {
+      L = diag(1, nrow(corY))
+    }
     list(sigma=sigma,L=L)
   }
   tfm = function(x) asinh(x/5)
