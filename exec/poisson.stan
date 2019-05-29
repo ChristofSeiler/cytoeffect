@@ -97,7 +97,7 @@ generated quantities {
   // correlation matrix
   matrix[d,d] Cor;
   matrix[d,d] Cor_term;
-  matrix[d,d] Cor_donor;
+  //matrix[d,d] Cor_donor;
   Cor = L * L';
   Cor_term = L_term * L_term';
   // Cor_donor = L_donor * L_donor';
