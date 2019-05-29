@@ -28,7 +28,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
   stan_pars = rstan::extract(obj$fit_mcmc,
                              pars = c("beta",
                                       "sigma","sigma_term","sigma_donor",
-                                      "Cor","Cor_term","Cor_donor",
+                                      "Cor","Cor_term",#"Cor_donor",
                                       "b_donor"))
   condition_index = seq(obj$conditions)
   donor = obj$df_samples_subset %>%
