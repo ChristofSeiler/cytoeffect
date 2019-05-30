@@ -11,7 +11,7 @@ data {
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
   int<lower=1,upper=p> term[n]; // donor indicator
-  corr_matrix[p] cor_donor;
+  corr_matrix[d] cor_donor;
 }
 transformed data {
   real eta = 1.0; // parameter of lkj prior
