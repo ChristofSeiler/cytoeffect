@@ -107,7 +107,7 @@ poisson_lognormal = function(df_samples_subset,
   reg = out$u %*% diag(eigval) %*% t(out$v)
   #ggcorrplot::ggcorrplot(cor(reg)) +
   #  ggtitle(paste0("rank = ", rank))
-  sigma_donor = diag(reg)
+  sigma_donor = sqrt(diag(reg))
   cor_donor = cor(reg)
 
   # set random effects to zero
