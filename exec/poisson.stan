@@ -11,6 +11,7 @@ data {
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
   int<lower=1,upper=p> term[n]; // donor indicator
+  corr_matrix[p] cor_donor;
 }
 transformed data {
   real eta = 1.0; // parameter of lkj prior
@@ -73,7 +74,7 @@ model {
     z_term[i] ~ std_normal();
   }
   for (i in 1:k)
-    b_donor[i] ~ normal(zeros, sigma_donor);
+    b_donor[i] ~ multi_normal(zeros, quad_form_diag(cor_donor, sigma_donor));
   // likelihood
   for (j in 1:d) {
     // Y[i,j] ~ poisson_log(

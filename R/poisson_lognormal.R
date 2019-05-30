@@ -63,8 +63,6 @@ poisson_lognormal = function(df_samples_subset,
     as.factor() %>%
     as.integer()
   k = length(table(donor))
-  stan_data = list(Y = Y, n = n, d = d, p = p,
-                   k = k, donor = donor, term = term)
 
   # prepare starting point for sampler
 
@@ -102,9 +100,15 @@ poisson_lognormal = function(df_samples_subset,
     group_by_(group) %>%
     summarise_at(protein_names, median) %>%
     dplyr::select(protein_names)
-  cov_donor = initcov(tfm(Y_donor))
-  # set to low value when zero
-  cov_donor$sigma = ifelse(cov_donor$sigma == 0, 0.01, cov_donor$sigma)
+  # low rank estimation of donor covariance matrix
+  out = svd(cov(tfm(Y_donor)))
+  rank = 2
+  eigval = c(out$d[1:rank], rep(0,length(out$d)-rank))
+  reg = out$u %*% diag(eigval) %*% t(out$v)
+  #ggcorrplot::ggcorrplot(cor(reg)) +
+  #  ggtitle(paste0("rank = ", rank))
+  sigma_donor = diag(reg)
+  cor_donor = cor(reg)
 
   # set random effects to zero
   z = matrix(0, nrow = n, ncol = d)
@@ -112,9 +116,13 @@ poisson_lognormal = function(df_samples_subset,
   z_donor = matrix(0, nrow = k, ncol = d)
   stan_init = list(
     beta = beta,
-    sigma = cov1$sigma, sigma_term = cov2$sigma, sigma_donor = cov_donor$sigma,
-    L = cov1$L, L_term = cov2$L, #L_donor = cov_donor$L,
+    sigma = cov1$sigma, sigma_term = cov2$sigma, sigma_donor = sigma_donor,
+    L = cov1$L, L_term = cov2$L,
     z = z, z_term = z_term, z_donor = z_donor
+  )
+  stan_data = list(Y = Y, n = n, d = d, p = p,
+                   k = k, donor = donor, term = term,
+                   cor_donor = cor_donor
   )
 
   # cluster function
