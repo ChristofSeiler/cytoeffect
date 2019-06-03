@@ -11,7 +11,7 @@ data {
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
   int<lower=1,upper=p> term[n]; // donor indicator
-  corr_matrix[d] Cor_donor;
+  cholesky_factor_corr[d] L_donor;
 }
 transformed data {
   real eta = 1.0; // parameter of lkj prior
@@ -58,7 +58,7 @@ transformed parameters {
   //   for (i in 1:k)
   //     b_donor[i] = Sigma * z_donor[i];
   // }
-  Sigma_donor = quad_form_diag(Cor_donor, sigma_donor);
+  Sigma_donor = diag_pre_multiply(sigma_donor, L_donor);
 }
 model {
   // priors
@@ -75,7 +75,7 @@ model {
     z_term[i] ~ std_normal();
   }
   for (i in 1:k)
-    b_donor[i] ~ multi_normal(zeros, Sigma_donor);
+    b_donor[i] ~ multi_normal_cholesky(zeros, Sigma_donor);
 
   // likelihood
   for (j in 1:d) {

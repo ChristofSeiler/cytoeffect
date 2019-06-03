@@ -128,7 +128,7 @@ poisson_lognormal = function(df_samples_subset,
   )
   stan_data = list(Y = Y, n = n, d = d, p = p,
                    k = k, donor = donor, term = term,
-                   Cor_donor = cov_donor$L %*% t(cov_donor$L))
+                   L_donor = cov_donor$L)
 
   # cluster function
   run_sampling = function(seed) {
