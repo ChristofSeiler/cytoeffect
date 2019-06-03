@@ -68,7 +68,7 @@ poisson_lognormal = function(df_samples_subset,
 
   # log mean per condition (same as Poisson regression)
   beta = df_samples_subset %>%
-    group_by_(condition) %>%
+    group_by_at(condition) %>%
     summarise_at(protein_names, function(x) log(mean(x))) %>%
     dplyr::select(protein_names) %>%
     t
@@ -76,33 +76,45 @@ poisson_lognormal = function(df_samples_subset,
   is.neginf = function(x) x == -Inf
   beta[is.neginf(beta)] = -7 # beta[j] ~ normal(0, 7);
 
-  # covariance matrix per condition
-  initcov = function(tfmY) {
-    sigma = sqrt(diag(cov(tfmY)))
-    corY = cor(tfmY)
-    corY[is.na(corY)] = 0
-    if(attr(chol(corY, pivot = TRUE), "rank") == nrow(corY)) {
-      L = t(chol(corY))
-    } else {
-      L = diag(1, nrow(corY))
-    }
-    list(sigma=sigma,L=L)
-  }
+  # regularize and decompose covariance matrix
+  # c is upper bound on condition number:
+  # out$d[1]/out$d[length(out$d)]
+  # math details: http://lagrange.math.siu.edu/Olive/slch6.pdf
+  c = 100
   tfm = function(x) asinh(x/5)
-  cov1 = initcov(tfm(Y[term == 1,]))
-  cov2 = initcov(tfm(Y[term == 2,]))
-  # set to low value when zero
-  cov1$sigma = ifelse(cov1$sigma == 0, 0.01, cov1$sigma)
-  cov2$sigma = ifelse(cov2$sigma == 0, 0.01, cov2$sigma)
+  initcov = function(Y_raw) {
+    # transform raw counts
+    Y_tfm = tfm(Y_raw)
+    # sample standard deviation
+    Y_cov = cov(Y_tfm)
+    sigma = sqrt(diag(Y_cov))
+    # regularize correlation matrix
+    Y_cor = cor(Y_tfm)
+    out = svd(Y_cor)
+    rho = max(0, (out$d[1] - c*out$d[length(out$d)]) / (c - 1) )
+    Y_cor_reg = 1/(1+rho) * (Y_cor + diag(rho, nrow(Y_cor)))
+    # cholesky decomposition of correlation matrix
+    L = t(chol(Y_cor_reg))
+    list(sigma = sigma, L = L)
+  }
+
+  # covariance matrix across cells per level of condition
+  cov1 = initcov(Y[term == 1,])
+  cov2 = initcov(Y[term == 2,])
 
   # covariance matrix across donors
   Y_donor = df_samples_subset %>%
-    group_by_(group) %>%
+    group_by_at(group) %>%
     summarise_at(protein_names, median) %>%
     dplyr::select(protein_names)
-  cov_donor = initcov(tfm(Y_donor))
-  # set to low value when zero
-  cov_donor$sigma = ifelse(cov_donor$sigma == 0, 0.01, cov_donor$sigma)
+  cov_donor = initcov(Y_donor)
+
+  # ggcorrplot::ggcorrplot(cov1$L %*% t(cov1$L))
+  # ggcorrplot::ggcorrplot(cor(tfm(Y[term == 1,])))
+  # ggcorrplot::ggcorrplot(cov2$L %*% t(cov2$L))
+  # ggcorrplot::ggcorrplot(cor(tfm(Y[term == 2,])))
+  # ggcorrplot::ggcorrplot(cor(tfm(Y_donor)))
+  # ggcorrplot::ggcorrplot(cov_donor$L %*% t(cov_donor$L))
 
   # set random effects to zero
   z = matrix(0, nrow = n, ncol = d)
