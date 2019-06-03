@@ -11,20 +11,21 @@ data {
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
   int<lower=1,upper=p> term[n]; // donor indicator
-  matrix[d,d] L_donor;
+  matrix[d,d] L;
+  matrix[d,d] L_term;
+  // matrix[d,d] L_donor;
 }
 transformed data {
   real eta = 1.0; // parameter of lkj prior
-  vector[d] zeros = rep_vector(0, d);
 }
 parameters {
   vector[p] beta[d]; // fixed coefficients
   vector<lower=0>[d] sigma; // random effects std
   vector<lower=0>[d] sigma_term; // random effects std
   vector<lower=0>[d] sigma_donor; // random effects std
-  cholesky_factor_corr[d] L; // cholesky factor protein effects
-  cholesky_factor_corr[d] L_term; // cholesky factor protein effects
-  // cholesky_factor_corr[d] L_donor; // cholesky factor protein effects
+  // cholesky_factor_corr[d] L; // cholesky factor protein effects
+  // cholesky_factor_corr[d] L_term; // cholesky factor protein effects
+  cholesky_factor_corr[d] L_donor; // cholesky factor protein effects
   vector[d] z[n]; // random effects
   vector[d] z_term[n]; // random effects
   vector[d] z_donor[k]; // random effects
@@ -65,9 +66,9 @@ model {
   sigma ~ cauchy(0, 2.5);
   sigma_term ~ cauchy(0, 2.5);
   sigma_donor ~ cauchy(0, 2.5);
-  L ~ lkj_corr_cholesky(eta);
-  L_term ~ lkj_corr_cholesky(eta);
-  // L_donor ~ lkj_corr_cholesky(eta);
+  // L ~ lkj_corr_cholesky(eta);
+  // L_term ~ lkj_corr_cholesky(eta);
+  L_donor ~ lkj_corr_cholesky(eta);
   for (i in 1:n) {
     z[i] ~ std_normal();
     z_term[i] ~ std_normal();
@@ -96,12 +97,12 @@ generated quantities {
   // in-sample prediction
   // int<lower=0> Y_hat[n,d];
   // correlation matrix
-  matrix[d,d] Cor;
-  matrix[d,d] Cor_term;
-  // matrix[d,d] Cor_donor;
-  Cor = L * L';
-  Cor_term = L_term * L_term';
-  // Cor_donor = L_donor * L_donor';
+  // matrix[d,d] Cor;
+  // matrix[d,d] Cor_term;
+  matrix[d,d] Cor_donor;
+  // Cor = L * L';
+  // Cor_term = L_term * L_term';
+  Cor_donor = L_donor * L_donor';
   // for (j in 1:d) {
   //   Y_hat[,j] = poisson_log_rng(
   //     //X * beta[j] +

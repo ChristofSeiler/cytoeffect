@@ -123,12 +123,14 @@ poisson_lognormal = function(df_samples_subset,
   stan_init = list(
     beta = beta,
     sigma = cov1$sigma, sigma_term = cov2$sigma, sigma_donor = cov_donor$sigma,
-    L = cov1$L, L_term = cov2$L, #L_donor = cov_donor$L,
+    #L = cov1$L, L_term = cov2$L,
+    L_donor = cov_donor$L,
     z = z, z_term = z_term, z_donor = z_donor
   )
   stan_data = list(Y = Y, n = n, d = d, p = p,
                    k = k, donor = donor, term = term,
-                   L_donor = cov_donor$L)
+                   L = cov1$L, L_term = cov2$L)
+                   #L_donor = cov_donor$L)
 
   # cluster function
   run_sampling = function(seed) {
@@ -142,7 +144,8 @@ poisson_lognormal = function(df_samples_subset,
                         pars = c("beta",
                                  "sigma","sigma_term","sigma_donor",
                                  # "L","L_term","L_donor",
-                                 "Cor","Cor_term",#"Cor_donor",
+                                 #"Cor","Cor_term",
+                                 "Cor_donor",
                                  "b_donor"
                                  # "Y_hat"
                                  ),
