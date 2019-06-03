@@ -11,11 +11,11 @@ data {
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
   int<lower=1,upper=p> term[n]; // donor indicator
-  cholesky_factor_corr[d] L_donor;
+  corr_matrix[d] Cor_donor;
 }
 transformed data {
   real eta = 1.0; // parameter of lkj prior
-  row_vector[d] zeros = rep_row_vector(0, d);
+  vector[d] zeros = rep_vector(0, d);
 }
 parameters {
   vector[p] beta[d]; // fixed coefficients
@@ -33,7 +33,7 @@ transformed parameters {
   vector[d] b[n]; // random effects
   //vector[d] b_term[n]; // random effects
   vector[d] b_donor[k]; // random effects
-  matrix[d,d] Sigma_donor; // random effects cov matrix
+  cov_matrix[d] Sigma_donor;
   {
     matrix[d,d] Sigma; // random effects cov matrix
     matrix[d,d] Sigma_term; // random effects cov matrix
@@ -58,7 +58,7 @@ transformed parameters {
   //   for (i in 1:k)
   //     b_donor[i] = Sigma * z_donor[i];
   // }
-  Sigma_donor = diag_pre_multiply(sigma_donor, L_donor);
+  Sigma_donor = quad_form_diag(Cor_donor, sigma_donor);
 }
 model {
   // priors
