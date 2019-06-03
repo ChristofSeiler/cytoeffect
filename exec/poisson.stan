@@ -11,7 +11,7 @@ data {
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
   int<lower=1,upper=p> term[n]; // donor indicator
-  cholesky_factor_corr[d] L_donor;
+  matrix[d,d] L_donor;
 }
 transformed data {
   real eta = 1.0; // parameter of lkj prior
@@ -33,7 +33,6 @@ transformed parameters {
   vector[d] b[n]; // random effects
   //vector[d] b_term[n]; // random effects
   vector[d] b_donor[k]; // random effects
-  cov_matrix[d] Sigma_donor;
   {
     matrix[d,d] Sigma; // random effects cov matrix
     matrix[d,d] Sigma_term; // random effects cov matrix
@@ -52,13 +51,12 @@ transformed parameters {
   //   for (i in 1:n)
   //     b_term[i] = X[i,2] * Sigma * z_term[i];
   // }
-  // {
-  //   matrix[d,d] Sigma; // random effects cov matrix
-  //   Sigma = diag_pre_multiply(sigma_donor, L_donor);
-  //   for (i in 1:k)
-  //     b_donor[i] = Sigma * z_donor[i];
-  // }
-  Sigma_donor = diag_pre_multiply(sigma_donor, L_donor);
+  {
+    matrix[d,d] Sigma; // random effects cov matrix
+    Sigma = diag_pre_multiply(sigma_donor, L_donor);
+    for (i in 1:k)
+      b_donor[i] = Sigma * z_donor[i];
+  }
 }
 model {
   // priors
@@ -75,7 +73,7 @@ model {
     z_term[i] ~ std_normal();
   }
   for (i in 1:k)
-    b_donor[i] ~ multi_normal_cholesky(zeros, Sigma_donor);
+    z_donor[i] ~ std_normal();
 
   // likelihood
   for (j in 1:d) {
