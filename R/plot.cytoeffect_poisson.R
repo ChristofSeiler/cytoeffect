@@ -16,12 +16,14 @@
 #'   using \code{\link{poisson_lognormal}}
 #' @param type A string with the parameter to plot:
 #'   \code{type = "beta"}, \code{type = "sigma"}, or \code{type = "Cor"}
+#' @param selection A vector of strings with a selection of protein names to plot
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
 #' # fit = cytoeffect::poisson_lognormal(...)
 #' # plot(fit)
-plot.cytoeffect_poisson = function(obj, type = "beta") {
+plot.cytoeffect_poisson = function(obj, type = "beta",
+                                   selection = obj$protein_names) {
 
   warmup = obj$fit_mcmc@stan_args[[1]]$warmup
   protein_names = obj$protein_names
@@ -50,7 +52,8 @@ plot.cytoeffect_poisson = function(obj, type = "beta") {
 
     # combined plot
     dodge = position_dodge(width = 0.9)
-    ggplot(tb_beta, aes(x = protein_name, y = `50%`, color = condition)) +
+    ggplot(tb_beta %>% dplyr::filter(protein_name %in% selection),
+           aes(x = protein_name, y = `50%`, color = condition)) +
       geom_hline(yintercept = 0,color = "grey") +
       geom_point(size = 2, position = dodge) +
       geom_errorbar(aes(ymin = `2.5%`, ymax = `97.5%`),
