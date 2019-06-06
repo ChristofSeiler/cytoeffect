@@ -136,6 +136,16 @@ poisson_lognormal = function(df_samples_subset,
     stan_file = system.file("exec", "poisson.stan", package = "cytoeffect")
     model = stan_model(file = stan_file, model_name = "poisson")
 
+    # initialize at mode
+    fit_opt = optimizing(model,
+                         data = stan_data,
+                         seed = seed,
+                         init = stan_init,
+                         verbose = TRUE,
+                         constrained = TRUE,
+                         as_vector = FALSE
+    )
+
     # run sampler
     fit_mcmc = sampling(model,
                         pars = c("beta",
@@ -151,7 +161,7 @@ poisson_lognormal = function(df_samples_subset,
                         chains = num_chains,
                         cores = num_chains,
                         seed = seed,
-                        init = rep(list(stan_init), num_chains),
+                        init = rep(list(fit_opt$par), num_chains),
                         save_warmup = FALSE)
     fit_mcmc
   }
