@@ -7,6 +7,7 @@
 #' @import tidyr
 #' @import parallel
 #' @import MASS
+#' @import ggrepel
 #' @export
 #'
 #' @param obj Object of class \code{cytoeffect_poisson} computed
@@ -14,16 +15,21 @@
 #' @param asp Set \code{asp = FALSE} to avoid scaling aspect ratio by eigenvalues
 #' @param ncores Number of cores
 #' @param nsubsample Subsample size for posterior draws
+#' @param cor_scaling_factor Scaling factor for correlation arrows
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
 #' # fit = cytoeffect::poisson_lognormal(...)
 #' # cytoeffect::plot_mds(fit, asp = FALSE)
-plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsample = 100) {
+plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsample = 100,
+                    cor_scaling_factor = 1) {
 
   if (class(obj) != "cytoeffect_poisson")
     stop("Not a cytoeffect_poisson object.")
 
+  arrow_color = "darkgray"
+  marker_color = "black"
+  marker_size = 5
   seed = 0xdada
   stan_pars = rstan::extract(obj$fit_mcmc,
                              pars = c("beta",
@@ -108,7 +114,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
     scale_color_manual(values = c("#5DA5DA", "#FAA43A"),
                        name = obj$condition) +
     geom_density_2d()
-  # + stat_ellipse(type = "t", level = 0.95, linetype = 2, size = 1)
+
   # make circle of correlation plot
   protein_sd = apply(as.data.frame(expr_median)[,obj$protein_names],2,sd)
   # only keep makers that have some variability
@@ -116,26 +122,35 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
   # correlations between variables and MDS axes
   expr_cor = cor(as.data.frame(expr_median)[,protein_selection],
                  expr_median[,c("MDS1","MDS2")]) %>% as.tibble
+  # scaling factor (otherwise too crowded)
+  expr_cor = expr_cor * cor_scaling_factor
   expr_cor %<>% add_column(protein_selection)
   # add arrows coordinates
   expr_cor %<>% add_column(x0 = rep(0,nrow(expr_cor)))
   expr_cor %<>% add_column(y0 = rep(0,nrow(expr_cor)))
-  # add to MDS plot
-  ggmds = ggmds +
-    annotate("segment",
-             x = expr_cor$x0, xend = expr_cor$MDS1,
-             y = expr_cor$y0, yend = expr_cor$MDS2,
-             colour = "black", alpha = 0.5) +
-    annotate("text",
-             x = expr_cor$MDS1, y = expr_cor$MDS2,
-             label = expr_cor$protein_selection)
+
+  # add correlation arrows
+  ggmds = ggmds + annotate("segment",
+                           x = expr_cor$x0, xend = expr_cor$MDS1,
+                           y = expr_cor$y0, yend = expr_cor$MDS2,
+                           colour = arrow_color,
+                           alpha = 1.0,
+                           arrow = arrow(type = "open", length = unit(0.03, "npc")))
+
+  ## add marker names labels
+  ggmds = ggmds + geom_text_repel(data = expr_cor,
+                            aes(x = MDS1, y = MDS2,
+                                label = obj$protein_names),
+                            color = marker_color,
+                            alpha = 1.0)
+
   # add median donors
   expr_median_donor = expr_median %>%
     group_by(.dots = c("donor","term")) %>%
     summarize_at(c("MDS1","MDS2"), median)
   expr_median_donor %<>% add_column(
     color = sapply(expr_median_donor$term,
-                   function(x) if(x == "1st trimester") "#5DA5DA" else "#FAA43A"))
+                   function(x) if(x == expr_median_donor$term[1]) "#5DA5DA" else "#FAA43A"))
   ggmds = ggmds +
     annotate("text",
              x = expr_median_donor$MDS1, y = expr_median_donor$MDS2,
