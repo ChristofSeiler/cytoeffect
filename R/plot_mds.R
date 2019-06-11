@@ -129,6 +129,19 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
   expr_cor %<>% add_column(x0 = rep(0,nrow(expr_cor)))
   expr_cor %<>% add_column(y0 = rep(0,nrow(expr_cor)))
 
+  # add median donors
+  expr_median_donor = expr_median %>%
+    group_by(.dots = c("donor","term")) %>%
+    summarize_at(c("MDS1","MDS2"), median)
+  expr_median_donor %<>% add_column(
+    color = sapply(expr_median_donor$term,
+                   function(x) if(x == expr_median_donor$term[1]) "#5DA5DA" else "#FAA43A"))
+  ggmds = ggmds +
+    annotate("text",
+             x = expr_median_donor$MDS1, y = expr_median_donor$MDS2,
+             label = expr_median_donor$donor, color = expr_median_donor$color) +
+    ggtitle("Posterior MDS of Latent Variable"~mu~"(Aspect Ratio Unscaled)")
+
   # add correlation arrows
   ggmds = ggmds + annotate("segment",
                            x = expr_cor$x0, xend = expr_cor$MDS1,
@@ -143,19 +156,6 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
                                 label = obj$protein_names),
                             color = marker_color,
                             alpha = 1.0)
-
-  # add median donors
-  expr_median_donor = expr_median %>%
-    group_by(.dots = c("donor","term")) %>%
-    summarize_at(c("MDS1","MDS2"), median)
-  expr_median_donor %<>% add_column(
-    color = sapply(expr_median_donor$term,
-                   function(x) if(x == expr_median_donor$term[1]) "#5DA5DA" else "#FAA43A"))
-  ggmds = ggmds +
-    annotate("text",
-             x = expr_median_donor$MDS1, y = expr_median_donor$MDS2,
-             label = expr_median_donor$donor, color = expr_median_donor$color) +
-    ggtitle("Posterior MDS of Latent Variable"~mu~"(Aspect Ratio Unscaled)")
 
   if(asp) {
     # change aspect ratio according to explained variance
