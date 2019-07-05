@@ -32,6 +32,7 @@ parameters {
 transformed parameters {
   vector[d] b[n]; // random effects
   vector[d] b_donor[k]; // random effects
+  matrix[d,r] Q;
   //vector[d] b_term[n]; // random effects
   {
     matrix[d,d] Sigma; // random effects cov matrix
@@ -59,7 +60,6 @@ transformed parameters {
   // }
   // obtain orthogonal matrix Q using polar expansion
   {
-    matrix[d,r] Q;
     matrix[d,r] X;
     vector[r] eval;
     vector[r] eval_trans;
