@@ -15,27 +15,24 @@ data {
 }
 transformed data {
   real eta = 1.0; // parameter of lkj prior
-  vector[d] zeros = rep_vector(0, d);
 }
 parameters {
   vector[p] beta[d]; // fixed coefficients
   vector<lower=0>[d] sigma; // random effects std
   vector<lower=0>[d] sigma_term; // random effects std
-  //vector<lower=0>[d] sigma_donor; // random effects std
+  vector<lower=0>[r] sigma_donor; // random effects std
   cholesky_factor_corr[d] L; // cholesky factor protein effects
   cholesky_factor_corr[d] L_term; // cholesky factor protein effects
   //cholesky_factor_corr[d] L_donor; // cholesky factor protein effects
   vector[d] z[n]; // random effects
   vector[d] z_term[n]; // random effects
-  vector[d] z_donor[k]; // random effects
+  vector[r] z_donor[k]; // random effects
   vector[d*r] z_q; // distribution on X for polar expansion
-  vector[r] lam; // variances for low rank covariance matrix
-  vector[d] b_donor[k]; // random effects
 }
 transformed parameters {
   vector[d] b[n]; // random effects
+  vector[d] b_donor[k]; // random effects
   //vector[d] b_term[n]; // random effects
-  matrix[d,d] QVQt;
   {
     matrix[d,d] Sigma; // random effects cov matrix
     matrix[d,d] Sigma_term; // random effects cov matrix
@@ -62,18 +59,22 @@ transformed parameters {
   // }
   // obtain orthogonal matrix Q using polar expansion
   {
+    vector[d] out;
     matrix[d,r] Q;
     matrix[d,r] X;
     vector[r] eval;
     vector[r] eval_trans;
     matrix[r,r] evec;
+    matrix[d,r] Sigma_r; // random effects cov matrix
     X = to_matrix(z_q, d, r);
     eval = eigenvalues_sym(X'*X);
     for(l in 1:r)
       eval_trans[l] = 1/sqrt(eval[l]);
     evec = eigenvectors_sym(X'*X);
     Q = X*evec*diag_matrix(eval_trans)*evec';
-    QVQt = quad_form(diag_matrix(lam),Q');
+    Sigma_r = diag_post_multiply(Q, sigma_donor);
+    for (i in 1:k)
+      b_donor[i] = Sigma_r * z_donor[i];
   }
 }
 model {
@@ -82,7 +83,7 @@ model {
     beta[j] ~ normal(0, 7);
   sigma ~ cauchy(0, 2.5);
   sigma_term ~ cauchy(0, 2.5);
-  //sigma_donor ~ cauchy(0, 2.5);
+  sigma_donor ~ cauchy(0, 2.5);
   L ~ lkj_corr_cholesky(eta);
   L_term ~ lkj_corr_cholesky(eta);
   //L_donor ~ lkj_corr_cholesky(eta);
@@ -92,10 +93,7 @@ model {
   }
   for (i in 1:k)
     z_donor[i] ~ std_normal();
-  lam ~ normal(0, 10);
   z_q ~ std_normal();
-  for (i in 1:k)
-    b_donor[i] ~ multi_normal(zeros, QVQt);
   // likelihood
   for (j in 1:d) {
     // Y[i,j] ~ poisson_log(
