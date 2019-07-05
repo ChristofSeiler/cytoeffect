@@ -62,12 +62,12 @@ transformed parameters {
   // }
   // obtain orthogonal matrix Q using polar expansion
   {
-    matrix[p,r] Q;
-    matrix[p,r] X;
+    matrix[d,r] Q;
+    matrix[d,r] X;
     vector[r] eval;
     vector[r] eval_trans;
     matrix[r,r] evec;
-    X = to_matrix(z_q, p, r);
+    X = to_matrix(z_q, d, r);
     eval = eigenvalues_sym(X'*X);
     for(l in 1:r)
       eval_trans[l] = 1/sqrt(eval[l]);
