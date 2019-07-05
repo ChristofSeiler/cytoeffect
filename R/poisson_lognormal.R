@@ -63,9 +63,10 @@ poisson_lognormal = function(df_samples_subset,
     as.factor() %>%
     as.integer()
   k = length(table(donor))
+  r = 2 # rank
   stan_data = list(Y = Y, n = n, d = d, p = p,
                    k = k, donor = donor, term = term,
-                   r = 2)
+                   r = r)
 
   # prepare starting point for sampler
 
@@ -122,15 +123,15 @@ poisson_lognormal = function(df_samples_subset,
   # set random effects to zero
   z = matrix(0, nrow = n, ncol = d)
   z_term = matrix(0, nrow = n, ncol = d)
-  #z_donor = matrix(0, nrow = k, ncol = d)
+  z_donor = matrix(0, nrow = k, ncol = r)
   stan_init = list(
     beta = beta,
     sigma = cov1$sigma, sigma_term = cov2$sigma,
     #sigma_donor = cov_donor$sigma,
     L = cov1$L, L_term = cov2$L,
     #L_donor = cov_donor$L,
-    z = z, z_term = z_term
-    #z_donor = z_donor
+    z = z, z_term = z_term,
+    z_donor = z_donor
   )
 
   # cluster function

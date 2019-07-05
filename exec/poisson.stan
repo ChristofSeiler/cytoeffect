@@ -59,7 +59,6 @@ transformed parameters {
   // }
   // obtain orthogonal matrix Q using polar expansion
   {
-    vector[d] out;
     matrix[d,r] Q;
     matrix[d,r] X;
     vector[r] eval;
