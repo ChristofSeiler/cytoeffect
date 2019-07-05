@@ -138,17 +138,18 @@ poisson_lognormal = function(df_samples_subset,
 
     # compile model
     stan_file = system.file("exec", "poisson.stan", package = "cytoeffect")
+    #stan_file = "../../exec/poisson.stan"
     model = stan_model(file = stan_file, model_name = "poisson")
 
     # run sampler
     fit_mcmc = sampling(model,
                         pars = c("beta",
                                  "sigma","sigma_term",
-                                 #"sigma_donor",
+                                 "sigma_donor",
                                  # "L","L_term","L_donor",
                                  "Cor","Cor_term",
+                                 "Q",
                                  #"Cor_donor",
-                                 "QVQt",
                                  "b_donor"
                                  # "Y_hat"
                                  ),
