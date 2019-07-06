@@ -174,13 +174,13 @@ pars_str = "beta"
 rstan::traceplot(obj$fit_mcmc, inc_warmup = FALSE, pars = pars_str)
 pars = rstan::extract(obj$fit_mcmc, pars = c("Q", "sigma_donor"))
 list_pars = lapply(1:nrow(pars$Q), function(i) 
-  cor(pars$Q[i,,] %*% diag(pars$sigma_donor[i,]) %*% t(pars$Q[i,,]))
+  pars$Q[i,,] %*% diag(pars$sigma_donor[i,]) %*% t(pars$Q[i,,])
   )
 arr_pars = simplify2array(list_pars)
 tibble(
   k = 1:dim(arr_pars)[3],
-  cor = arr_pars[3,6,]
-) %>% ggplot(aes(k, cor)) + 
+  cov = arr_pars[3,6,]
+) %>% ggplot(aes(k, cov)) + 
   geom_line()
 ```
 
