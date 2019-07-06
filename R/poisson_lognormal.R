@@ -149,7 +149,7 @@ poisson_lognormal = function(df_samples_subset,
                                  "sigma_donor",
                                  # "L","L_term","L_donor",
                                  "Cor","Cor_term",
-                                 "Q",
+                                 "Q","Cov_donor",
                                  #"Cor_donor",
                                  "b_donor"
                                  # "Y_hat"

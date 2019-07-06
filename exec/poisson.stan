@@ -2,6 +2,23 @@
  * Multivariate Poisson-log Normal model
  * Author: Christof Seiler
  */
+functions {
+  matrix polar(matrix X) {
+    int d = dims(X)[1];
+    int r = dims(X)[2];
+    matrix[d,r] Q;
+    vector[r] eval;
+    vector[r] eval_trans;
+    matrix[r,r] evec;
+
+    eval = eigenvalues_sym(X'*X);
+    for(l in 1:r)
+      eval_trans[l] = 1/sqrt(eval[l]);
+    evec = eigenvectors_sym(X'*X);
+    Q = X*evec*diag_matrix(eval_trans)*evec';
+    return Q;
+  }
+}
 data {
   int<lower=1> n; // num of cells
   int<lower=1> d; // num of markers
@@ -61,16 +78,9 @@ transformed parameters {
   // obtain orthogonal matrix Q using polar expansion
   {
     matrix[d,r] X;
-    vector[r] eval;
-    vector[r] eval_trans;
-    matrix[r,r] evec;
     matrix[d,r] Sigma_r; // random effects cov matrix
     X = to_matrix(z_q, d, r);
-    eval = eigenvalues_sym(X'*X);
-    for(l in 1:r)
-      eval_trans[l] = 1/sqrt(eval[l]);
-    evec = eigenvectors_sym(X'*X);
-    Q = X*evec*diag_matrix(eval_trans)*evec';
+    Q = polar(X);
     Sigma_r = diag_post_multiply(Q, sigma_donor);
     for (i in 1:k)
       b_donor[i] = Sigma_r * z_donor[i];
@@ -116,9 +126,11 @@ generated quantities {
   // correlation matrix
   matrix[d,d] Cor;
   matrix[d,d] Cor_term;
+  matrix[d,d] Cov_donor;
   //matrix[d,d] Cor_donor;
   Cor = L * L';
   Cor_term = L_term * L_term';
+  Cov_donor = quad_form(diag_matrix(square(sigma_donor)), Q');
   //Cor_donor = L_donor * L_donor';
   // for (j in 1:d) {
   //   Y_hat[,j] = poisson_log_rng(
