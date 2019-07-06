@@ -300,6 +300,9 @@ Plot posterior correlations.
 ```{r posterior_cor}
 plist = plot(obj, type = "Cor")
 plist
+plot(obj, type = "Q")
+plot(obj, type = "Q")
+plot(obj, type = "Q")
 ```
 
 Multivariate posterior MDS plots.
@@ -439,7 +442,7 @@ Predictive distribution marginalized over cell random effects.
 stan_pars = rstan::extract(obj$fit_mcmc, 
                            pars = c("beta",
                                     "sigma","sigma_term","sigma_donor",
-                                    "Cor","Cor_term","Cor_donor"))
+                                    "Cor","Cor_term","Q"))
 condition = "term"
 term = obj$df_samples_subset %>%
     pull(condition) %>%
@@ -465,8 +468,8 @@ sample_y_hat = function(k = 1) {
     Cov = diag(sigma) %*% Cor %*% diag(sigma)
     b = mvrnorm(n = n_cells_cond, mu, Cov)
     sigma_donor = stan_pars$sigma_donor[k,]
-    Cor_donor = stan_pars$Cor_donor[k,,]
-    Cov_donor = diag(sigma_donor) %*% Cor_donor %*% diag(sigma_donor)
+    Q = stan_pars$Q[k,,]
+    Cov_donor = Q %*% diag(sigma_donor^2) %*% t(Q)
     b_donor = mvrnorm(n = n_cells_cond, mu, Cov_donor)
     count = exp(beta_rep + b + b_donor)
     count = matrix(rpois(length(count), count),
