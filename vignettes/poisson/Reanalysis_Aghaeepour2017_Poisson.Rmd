@@ -174,7 +174,7 @@ pars_str = "beta"
 rstan::traceplot(obj$fit_mcmc, inc_warmup = FALSE, pars = pars_str)
 pars = rstan::extract(obj$fit_mcmc, pars = c("Q", "sigma_donor"))
 list_pars = lapply(1:nrow(pars$Q), function(i) 
-  pars$Q[i,,] %*% diag(pars$sigma_donor[i,]) %*% t(pars$Q[i,,])
+  pars$Q[i,,] %*% diag(pars$sigma_donor[i,]^2) %*% t(pars$Q[i,,])
   )
 arr_pars = simplify2array(list_pars)
 tibble(

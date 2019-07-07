@@ -18,6 +18,17 @@ functions {
     Q = X*evec*diag_matrix(eval_trans)*evec';
     return Q;
   }
+  matrix cov2cor(matrix Q, vector sigma) {
+    int d = dims(Q)[1];
+    vector[d] sig;
+    matrix[d,d] Cov;
+    matrix[d,d] Cor;
+    Cov = quad_form(diag_matrix(square(sigma)), Q');
+    for(i in 1:d)
+      sig[i] = 1/sqrt(sig[i]);
+    Cor = quad_form_diag(Cov, sig);
+    return Cor;
+  }
 }
 data {
   int<lower=1> n; // num of cells
@@ -126,11 +137,11 @@ generated quantities {
   // correlation matrix
   matrix[d,d] Cor;
   matrix[d,d] Cor_term;
-  matrix[d,d] Cov_donor;
+  matrix[d,d] Cor_donor;
   //matrix[d,d] Cor_donor;
   Cor = L * L';
   Cor_term = L_term * L_term';
-  Cov_donor = quad_form(diag_matrix(square(sigma_donor)), Q');
+  Cor_donor = cov2cor(Q, sigma_donor);
   //Cor_donor = L_donor * L_donor';
   // for (j in 1:d) {
   //   Y_hat[,j] = poisson_log_rng(
