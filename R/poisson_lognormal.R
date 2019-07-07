@@ -84,27 +84,27 @@ poisson_lognormal = function(df_samples_subset,
   # c is upper bound on condition number:
   # out$d[1]/out$d[length(out$d)]
   # math details: http://lagrange.math.siu.edu/Olive/slch6.pdf
-  c = 100
-  tfm = function(x) asinh(x/5)
-  initcov = function(Y_raw) {
-    # transform raw counts
-    Y_tfm = tfm(Y_raw)
-    # sample standard deviation
-    Y_cov = cov(Y_tfm)
-    sigma = sqrt(diag(Y_cov))
-    # regularize correlation matrix
-    Y_cor = cor(Y_tfm)
-    out = svd(Y_cor)
-    rho = max(0, (out$d[1] - c*out$d[length(out$d)]) / (c - 1) )
-    Y_cor_reg = 1/(1+rho) * (Y_cor + diag(rho, nrow(Y_cor)))
-    # cholesky decomposition of correlation matrix
-    L = t(chol(Y_cor_reg))
-    list(sigma = sigma, L = L)
-  }
+  # c = 100
+  # tfm = function(x) asinh(x/5)
+  # initcov = function(Y_raw) {
+  #   # transform raw counts
+  #   Y_tfm = tfm(Y_raw)
+  #   # sample standard deviation
+  #   Y_cov = cov(Y_tfm)
+  #   sigma = sqrt(diag(Y_cov))
+  #   # regularize correlation matrix
+  #   Y_cor = cor(Y_tfm)
+  #   out = svd(Y_cor)
+  #   rho = max(0, (out$d[1] - c*out$d[length(out$d)]) / (c - 1) )
+  #   Y_cor_reg = 1/(1+rho) * (Y_cor + diag(rho, nrow(Y_cor)))
+  #   # cholesky decomposition of correlation matrix
+  #   L = t(chol(Y_cor_reg))
+  #   list(sigma = sigma, L = L)
+  # }
 
   # covariance matrix across cells per level of condition
-  cov1 = initcov(Y[term == 1,])
-  cov2 = initcov(Y[term == 2,])
+  # cov1 = initcov(Y[term == 1,])
+  # cov2 = initcov(Y[term == 2,])
 
   # covariance matrix across donors
   # Y_donor = df_samples_subset %>%
@@ -121,14 +121,14 @@ poisson_lognormal = function(df_samples_subset,
   # ggcorrplot::ggcorrplot(cov_donor$L %*% t(cov_donor$L))
 
   # set random effects to zero
-  z = matrix(0, nrow = n, ncol = d)
-  z_term = matrix(0, nrow = n, ncol = d)
+  z = matrix(0, nrow = n, ncol = r)
+  z_term = matrix(0, nrow = n, ncol = r)
   z_donor = matrix(0, nrow = k, ncol = r)
   stan_init = list(
     beta = beta,
-    sigma = cov1$sigma, sigma_term = cov2$sigma,
+    #sigma = cov1$sigma, sigma_term = cov2$sigma,
     #sigma_donor = cov_donor$sigma,
-    L = cov1$L, L_term = cov2$L,
+    #L = cov1$L, L_term = cov2$L,
     #L_donor = cov_donor$L,
     z = z, z_term = z_term,
     z_donor = z_donor
@@ -145,12 +145,10 @@ poisson_lognormal = function(df_samples_subset,
     # run sampler
     fit_mcmc = sampling(model,
                         pars = c("beta",
-                                 "sigma","sigma_term",
-                                 "sigma_donor",
+                                 "sigma","sigma_term","sigma_donor",
                                  # "L","L_term","L_donor",
-                                 "Cor","Cor_term",
-                                 "Q","Cov_donor",
-                                 #"Cor_donor",
+                                 "Q","Q_term","Q_donor",
+                                 "Cor","Cor_term","Cor_donor",
                                  "b_donor"
                                  # "Y_hat"
                                  ),

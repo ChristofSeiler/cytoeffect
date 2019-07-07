@@ -51,8 +51,8 @@ parameters {
   //cholesky_factor_corr[d] L; // cholesky factor protein effects
   //cholesky_factor_corr[d] L_term; // cholesky factor protein effects
   //cholesky_factor_corr[d] L_donor; // cholesky factor protein effects
-  vector[d] z[n]; // random effects
-  vector[d] z_term[n]; // random effects
+  vector[r] z[n]; // random effects
+  vector[r] z_term[n]; // random effects
   vector[r] z_donor[k]; // random effects
   vector[d*r] x; // distribution on X for polar expansion
   vector[d*r] x_term; // distribution on X for polar expansion
