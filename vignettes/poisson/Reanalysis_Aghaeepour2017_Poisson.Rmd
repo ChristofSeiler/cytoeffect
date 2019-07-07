@@ -170,18 +170,8 @@ if(file.exists(prefit)) {
 Postprocessing of posterior samples. Traceplot of posterior samples.
 
 ```{r post_sampling, fig.wide=TRUE}
-pars_str = "beta"
+pars_str = "sigma_donor"
 rstan::traceplot(obj$fit_mcmc, inc_warmup = FALSE, pars = pars_str)
-pars = rstan::extract(obj$fit_mcmc, pars = c("Q", "sigma_donor"))
-list_pars = lapply(1:nrow(pars$Q), function(i) 
-  pars$Q[i,,] %*% diag(pars$sigma_donor[i,]^2) %*% t(pars$Q[i,,])
-  )
-arr_pars = simplify2array(list_pars)
-tibble(
-  k = 1:dim(arr_pars)[3],
-  cov = arr_pars[3,6,]
-) %>% ggplot(aes(k, cov)) + 
-  geom_line()
 ```
 
 Some more MCMC diagnostics. According to empirically findings, Rhat > 1.1 is usually indicative of problems in the fit.
@@ -189,7 +179,7 @@ Some more MCMC diagnostics. According to empirically findings, Rhat > 1.1 is usu
 ```{r mcmc_diagnostics}
 pars = c("beta",
          "sigma","sigma_term","sigma_donor",
-         "Cor","Cor_term","Cov_donor",
+         "Cor","Cor_term","Cor_donor",
          "b_donor")
 tb = summary(obj$fit_mcmc, 
              pars = pars)$summary %>% 
