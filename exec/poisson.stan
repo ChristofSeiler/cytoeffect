@@ -73,7 +73,7 @@ transformed parameters {
     Q = polar(X);
     Sigma = diag_post_multiply(Q, sigma);
     X = to_matrix(x_term, d, r);
-    Q = polar(X);
+    Q_term = polar(X);
     Sigma_term = diag_post_multiply(Q_term, sigma_term);
     for (i in 1:n) {
       if (term[i] == 1)
@@ -82,7 +82,7 @@ transformed parameters {
         b[i] = Sigma_term * z_term[i];
     }
     X = to_matrix(x_donor, d, r);
-    Q = polar(X);
+    Q_donor = polar(X);
     Sigma_donor = diag_post_multiply(Q_donor, sigma_donor);
     for (i in 1:k)
       b_donor[i] = Sigma_donor * z_donor[i];

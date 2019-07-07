@@ -121,17 +121,17 @@ poisson_lognormal = function(df_samples_subset,
   # ggcorrplot::ggcorrplot(cov_donor$L %*% t(cov_donor$L))
 
   # set random effects to zero
-  z = matrix(0, nrow = n, ncol = r)
-  z_term = matrix(0, nrow = n, ncol = r)
-  z_donor = matrix(0, nrow = k, ncol = r)
+  # z = matrix(0, nrow = n, ncol = r)
+  # z_term = matrix(0, nrow = n, ncol = r)
+  # z_donor = matrix(0, nrow = k, ncol = r)
   stan_init = list(
-    beta = beta,
+    beta = beta#,
     #sigma = cov1$sigma, sigma_term = cov2$sigma,
     #sigma_donor = cov_donor$sigma,
     #L = cov1$L, L_term = cov2$L,
     #L_donor = cov_donor$L,
-    z = z, z_term = z_term,
-    z_donor = z_donor
+    #z = z, z_term = z_term,
+    #z_donor = z_donor
   )
 
   # cluster function
@@ -143,6 +143,15 @@ poisson_lognormal = function(df_samples_subset,
     model = stan_model(file = stan_file, model_name = "poisson")
 
     # run sampler
+    fit_mle = optimizing(model,
+                         data = stan_data,
+                         init = stan_init,
+                         as_vector = FALSE,
+                         verbose = TRUE)
+    stan_init = fit_mle$par[c("beta",
+                              "sigma","sigma_term","sigma_donor",
+                              "z","z_term","z_donor",
+                              "x","x_term","x_donor")]
     fit_mcmc = sampling(model,
                         pars = c("beta",
                                  "sigma","sigma_term","sigma_donor",
