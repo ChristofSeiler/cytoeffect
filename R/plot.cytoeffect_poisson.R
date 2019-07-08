@@ -65,29 +65,25 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
 
   } else if (type == "sigma") {
 
-    sigma_donor = rstan::extract(obj$fit_mcmc, pars = "sigma_donor")[[1]]
-    Q = rstan::extract(obj$fit_mcmc, pars = "Q")[[1]]
-    i = sample(nrow(Q), 1)
-    qvtq = lapply(1:nrow(Q), function(i) {
-      cov = Q[i,,] %*% diag(sigma_donor[i,]^2) %*% t(Q[i,,])
-      sqrt(diag(cov))
-    }) %>% bind_cols()
-    tb_donor = apply(
-      qvtq, 1, function(x)
-        quantile(x, probs = c(0.025, 0.5, 0.975))
-      ) %>% t %>% as_tibble %>%
-      add_column(protein_name = protein_names) %>%
-      add_column(type = rep("donor", length(protein_names)))
-
-    tb_sigma = summary(obj$fit_mcmc, pars = c("sigma","sigma_term"),#,"sigma_donor"),
-                       probs = c(0.025, 0.5, 0.975))
-    tb_sigma = tb_sigma$summary[,c("2.5%","50%","97.5%")]
-    tb_sigma %<>% as_tibble()
-    tb_sigma %<>% add_column(protein_name = rep(protein_names, 2))
-    tb_sigma %<>% add_column(type = c(rep(conditions[1], length(protein_names)),
-                                      rep(conditions[2], length(protein_names))))
-
-    tb_sigma %<>% bind_rows(tb_donor)
+    to_tb = function(par_sigma, par_q, type_name) {
+      sigma = rstan::extract(obj$fit_mcmc, pars = par_sigma)[[1]]
+      Q = rstan::extract(obj$fit_mcmc, pars = par_q)[[1]]
+      qvtq = lapply(1:nrow(Q), function(i) {
+        cov = Q[i,,] %*% diag(sigma[i,]^2) %*% t(Q[i,,])
+        sqrt(diag(cov))
+      }) %>% bind_cols()
+      tb = apply(
+        qvtq, 1, function(x)
+          quantile(x, probs = c(0.025, 0.5, 0.975))
+        ) %>% t %>% as_tibble %>%
+        add_column(protein_name = protein_names) %>%
+        add_column(type = rep(type_name, length(protein_names)))
+      tb
+    }
+    tb_donor = to_tb(par_sigma = "sigma", par_q = "Q", type_name = conditions[1])
+    tb_cond1 = to_tb(par_sigma = "sigma_term", par_q = "Q_term", type_name = conditions[2])
+    tb_cond2 = to_tb(par_sigma = "sigma_donor", par_q = "Q_donor", type_name = "donor")
+    tb_sigma = bind_rows(tb_donor, tb_cond1, tb_cond2)
     tb_sigma$type %<>% factor(levels = c(conditions,"donor"))
     dodge = position_dodge(width = 0.9)
     ggplot(tb_sigma, aes(x = protein_name, y = `50%`, color = type)) +
@@ -101,7 +97,7 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
 
   } else if (type == "Cor") {
 
-    var_names = c("Cor","Cor_term")#,"Cor_donor")
+    var_names = c("Cor","Cor_term","Cor_donor")
     display_names = c(conditions,"donor")
     lapply(1:length(var_names), function(i) {
       cor = rstan::extract(obj$fit_mcmc, pars = var_names[i])[[1]]
@@ -114,20 +110,6 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
         theme(panel.grid.major = element_blank(),
               panel.grid.minor = element_blank())
     })
-
-  } else if(type == "Q") {
-
-    sigma_donor = rstan::extract(obj$fit_mcmc, pars = "sigma_donor")[[1]]
-    Q = rstan::extract(obj$fit_mcmc, pars = "Q")[[1]]
-    i = sample(nrow(Q), 1)
-    cori = cor(Q[i,,] %*% diag(sigma_donor[i,]^2) %*% t(Q[i,,]))
-    colnames(cori) = rownames(cori) = protein_names
-    ggcorrplot(cori, hc.order = FALSE, type = "lower",
-               outline.col = "lightgray",
-               colors = c("#6D9EC1", "white", "#E46726")) +
-      ggtitle(paste0("Marker Correlations (k = ",i,")")) +
-      theme(panel.grid.major = element_blank(),
-            panel.grid.minor = element_blank())
 
   } else {
 
