@@ -64,7 +64,6 @@ poisson_lognormal = function(df_samples_subset,
     as.factor() %>%
     as.integer()
   k = length(table(donor))
-  r = 3 # rank
   stan_data = list(Y = Y, n = n, d = d, p = p,
                    k = k, donor = donor, term = term,
                    r = rank)
@@ -178,7 +177,7 @@ poisson_lognormal = function(df_samples_subset,
     # model_eb = stan_model(file = stan_file, model_name = "poisson_eb")
     # stan_data = list(Y = Y, n = n, d = d, p = p,
     #                  k = k, donor = donor, term = term,
-    #                  r = r,
+    #                  r = rank,
     #                  b = fit_mle$par$b)
     # fit_mle = optimizing(model_eb,
     #                      data = stan_data,
