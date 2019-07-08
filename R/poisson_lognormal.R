@@ -185,6 +185,16 @@ poisson_lognormal = function(df_samples_subset,
     #                      as_vector = FALSE,
     #                      hessian = TRUE,
     #                      verbose = TRUE)
+    # neg_hessian = -fit_mle$hessian
+    # cond1 = paste0("beta.",1:10,".1")
+    # cond2 = paste0("beta.",1:10,".2")
+    # beta_names = c(cond1, cond2)
+    # beta_sd = sqrt(1/diag(neg_hessian[beta_names, beta_names]))
+    # tibble(
+    #   protein_names,
+    #   beta_sd[cond1],
+    #   beta_sd[cond2]
+    # )
 
   }
 
