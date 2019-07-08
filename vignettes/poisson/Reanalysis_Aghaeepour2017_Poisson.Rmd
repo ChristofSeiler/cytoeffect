@@ -173,23 +173,14 @@ Postprocessing of posterior samples. Traceplot of posterior samples.
 ```{r post_sampling, fig.wide=TRUE}
 pars_str = "beta"
 rstan::traceplot(obj$fit_mcmc, inc_warmup = FALSE, pars = pars_str)
-# traceplot for covariance from orthogonal matrix Q
-stan_pars = rstan::extract(obj$fit_mcmc, 
-                           pars = c("sigma","sigma_term","sigma_donor",
-                                    "Q","Q_term","Q_donor"))
-cors = lapply(1:nrow(pars$Q), function(k) {
-  sigma = stan_pars$sigma_donor[k,]
-  Q = stan_pars$Q_donor[k,,]
-  cor = cov2cor(Q %*% diag(sigma^2) %*% t(Q))
-  cor
-})
-cors_arr = simplify2array(cors)
-tb = tibble(
-  chain = rep(paste(1:8), each = 125),
-  k = 1:dim(cors_arr)[3],
-  cor = cors_arr[3,6,]
-  )
-ggplot(tb, aes(k, cor, color = chain)) + geom_line()
+# test case
+stan_pars = rstan::extract(obj$fit_mcmc,
+                           pars = c("sigma_donor", "Q_donor", "Cor_donor"))
+k = 100
+sigma = stan_pars$sigma_donor[k,]
+Q = stan_pars$Q_donor[k,,]
+cor = cov2cor(Q %*% diag(sigma^2) %*% t(Q))
+range(cor - stan_pars$Cor_donor[k,,])
 ```
 
 Some more MCMC diagnostics. According to empirically findings, Rhat > 1.1 is usually indicative of problems in the fit.
@@ -318,9 +309,6 @@ Plot posterior correlations.
 ```{r posterior_cor}
 plist = plot(obj, type = "Cor")
 plist
-plot(obj, type = "Q")
-plot(obj, type = "Q")
-plot(obj, type = "Q")
 ```
 
 Multivariate posterior MDS plots.
