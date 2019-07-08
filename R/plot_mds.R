@@ -33,8 +33,8 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
   seed = 0xdada
   stan_pars = rstan::extract(obj$fit_mcmc,
                              pars = c("beta",
-                                      "sigma","sigma_term","sigma_donor",
-                                      "Cor","Cor_term",
+                                      "sigma","sigma_term",
+                                      "Q","Q_term",
                                       "b_donor"))
   condition_index = seq(obj$conditions)
   donor = obj$df_samples_subset %>%
@@ -52,14 +52,12 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
     # cell random effect
     if(tb_info$term_index == 1) {
       sigma = stan_pars$sigma[k,]
-      Cor = stan_pars$Cor[k,,]
+      Q = stan_pars$Q[k,,]
     } else {
       sigma = stan_pars$sigma_term[k,]
-      Cor = stan_pars$Cor_term[k,,]
+      Q = stan_pars$Q_term[k,,]
     }
-    sigma = stan_pars$sigma[k,]
-    Cor = stan_pars$Cor[k,,]
-    Cov = diag(sigma) %*% Cor %*% diag(sigma)
+    Cov = Q %*% diag(sigma^2) %*% t(Q)
     b = mvrnorm(n = tb_info$n, mu, Cov)
     # donor random effect
     b_donor = stan_pars$b_donor[k, tb_info$donor_index, ]

@@ -24,6 +24,7 @@ functions {
     matrix[d,d] Cov;
     matrix[d,d] Cor;
     Cov = quad_form(diag_matrix(square(sigma)), Q');
+    sig = diagonal(Cov);
     for(i in 1:d)
       sig[i] = 1/sqrt(sig[i]);
     Cor = quad_form_diag(Cov, sig);

@@ -29,6 +29,7 @@ poisson_lognormal = function(df_samples_subset,
                              protein_names,
                              condition,
                              group,
+                             rank,
                              iter = 325,
                              warmup = 200,
                              num_chains = 4) {
@@ -66,7 +67,7 @@ poisson_lognormal = function(df_samples_subset,
   r = 3 # rank
   stan_data = list(Y = Y, n = n, d = d, p = p,
                    k = k, donor = donor, term = term,
-                   r = r)
+                   r = rank)
 
   # prepare starting point for sampler
 
@@ -170,6 +171,22 @@ poisson_lognormal = function(df_samples_subset,
                         init = rep(list(stan_init), num_chains),
                         save_warmup = FALSE)
     fit_mcmc
+
+    # # Laplace approximation
+    # stan_file = system.file("exec", "poisson_eb.stan", package = "cytoeffect")
+    # #stan_file = "../../exec/poisson_eb.stan"
+    # model_eb = stan_model(file = stan_file, model_name = "poisson_eb")
+    # stan_data = list(Y = Y, n = n, d = d, p = p,
+    #                  k = k, donor = donor, term = term,
+    #                  r = r,
+    #                  b = fit_mle$par$b)
+    # fit_mle = optimizing(model_eb,
+    #                      data = stan_data,
+    #                      init = stan_init,
+    #                      as_vector = FALSE,
+    #                      hessian = TRUE,
+    #                      verbose = TRUE)
+
   }
 
   # preapte and submit cluster job

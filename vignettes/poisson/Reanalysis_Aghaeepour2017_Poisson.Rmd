@@ -159,6 +159,7 @@ if(file.exists(prefit)) {
 } else {
   obj = cytoeffect::poisson_lognormal(df_samples_subset, protein_names, 
                                       condition = "term", group = "donor",
+                                      rank = 3,
                                       iter = 325, warmup = 200,
                                       num_chains = ncores)
   save(obj,file = prefit)
@@ -170,8 +171,25 @@ if(file.exists(prefit)) {
 Postprocessing of posterior samples. Traceplot of posterior samples.
 
 ```{r post_sampling, fig.wide=TRUE}
-pars_str = "sigma_donor"
+pars_str = "beta"
 rstan::traceplot(obj$fit_mcmc, inc_warmup = FALSE, pars = pars_str)
+# traceplot for covariance from orthogonal matrix Q
+stan_pars = rstan::extract(obj$fit_mcmc, 
+                           pars = c("sigma","sigma_term","sigma_donor",
+                                    "Q","Q_term","Q_donor"))
+cors = lapply(1:nrow(pars$Q), function(k) {
+  sigma = stan_pars$sigma_donor[k,]
+  Q = stan_pars$Q_donor[k,,]
+  cor = cov2cor(Q %*% diag(sigma^2) %*% t(Q))
+  cor
+})
+cors_arr = simplify2array(cors)
+tb = tibble(
+  chain = rep(paste(1:8), each = 125),
+  k = 1:dim(cors_arr)[3],
+  cor = cors_arr[3,6,]
+  )
+ggplot(tb, aes(k, cor, color = chain)) + geom_line()
 ```
 
 Some more MCMC diagnostics. According to empirically findings, Rhat > 1.1 is usually indicative of problems in the fit.
@@ -442,7 +460,7 @@ Predictive distribution marginalized over cell random effects.
 stan_pars = rstan::extract(obj$fit_mcmc, 
                            pars = c("beta",
                                     "sigma","sigma_term","sigma_donor",
-                                    "Cor","Cor_term","Q"))
+                                    "Q","Q_term","Q_donor"))
 condition = "term"
 term = obj$df_samples_subset %>%
     pull(condition) %>%
@@ -460,16 +478,16 @@ sample_y_hat = function(k = 1) {
     beta_rep = sapply(beta[,cond], rep, n_cells_cond)
     if(cond == 1) {
       sigma = stan_pars$sigma[k,]
-      Cor = stan_pars$Cor[k,,]
+      Q = stan_pars$Q[k,,]
     } else {
       sigma = stan_pars$sigma_term[k,]
-      Cor = stan_pars$Cor_term[k,,]
+      Q = stan_pars$Q_term[k,,]
     }
-    Cov = diag(sigma) %*% Cor %*% diag(sigma)
+    Cov = Q %*% diag(sigma^2) %*% t(Q)
     b = mvrnorm(n = n_cells_cond, mu, Cov)
     sigma_donor = stan_pars$sigma_donor[k,]
-    Q = stan_pars$Q[k,,]
-    Cov_donor = Q %*% diag(sigma_donor^2) %*% t(Q)
+    Q_donor = stan_pars$Q_donor[k,,]
+    Cov_donor = Q_donor %*% diag(sigma_donor^2) %*% t(Q_donor)
     b_donor = mvrnorm(n = n_cells_cond, mu, Cov_donor)
     count = exp(beta_rep + b + b_donor)
     count = matrix(rpois(length(count), count),
