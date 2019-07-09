@@ -29,7 +29,8 @@ poisson_lognormal = function(df_samples_subset,
                              protein_names,
                              condition,
                              group,
-                             rank,
+                             r_cell,
+                             r_donor,
                              iter = 325,
                              warmup = 200,
                              num_chains = 4) {
@@ -66,7 +67,7 @@ poisson_lognormal = function(df_samples_subset,
   k = length(table(donor))
   stan_data = list(Y = Y, n = n, d = d, p = p,
                    k = k, donor = donor, term = term,
-                   r = rank)
+                   r_cell = r_cell, r_donor = r_donor)
 
   # prepare starting point for sampler
 
@@ -106,12 +107,25 @@ poisson_lognormal = function(df_samples_subset,
   # cov1 = initcov(Y[term == 1,])
   # cov2 = initcov(Y[term == 2,])
 
+  Y_term_svd = svd(cov(Y[term == 1,]))
+  sigma = sqrt(Y_term_svd$d[1:r_cell])
+  Q = Y_term_svd$u[,1:r_cell]
+  x = c(Q)
+
+  Y_term_svd = svd(cov(Y[term == 2,]))
+  sigma_term = sqrt(Y_term_svd$d[1:r_cell])
+  Q_term = Y_term_svd$u[,1:r_cell]
+  x_term = c(Q_term)
+
   # covariance matrix across donors
-  # Y_donor = df_samples_subset %>%
-  #   group_by_at(group) %>%
-  #   summarise_at(protein_names, median) %>%
-  #   dplyr::select(protein_names)
-  # svd_out = svd(cov(Y_donor))
+  Y_donor = df_samples_subset %>%
+    group_by_at(group) %>%
+    summarise_at(protein_names, median) %>%
+    dplyr::select(protein_names)
+  Y_donor_svd = svd(cov(Y_donor))
+  sigma_donor = sqrt(Y_donor_svd$d[1:r_donor])
+  Q_donor = Y_donor_svd$u[,1:r_donor]
+  x_donor = c(Q_donor)
 
   # ggcorrplot::ggcorrplot(cov1$L %*% t(cov1$L))
   # ggcorrplot::ggcorrplot(cor(tfm(Y[term == 1,])))
@@ -125,13 +139,9 @@ poisson_lognormal = function(df_samples_subset,
   # z_term = matrix(0, nrow = n, ncol = r)
   # z_donor = matrix(0, nrow = k, ncol = r)
   stan_init = list(
-    beta = beta#,
-    #sigma = cov1$sigma, sigma_term = cov2$sigma,
-    #sigma_donor = cov_donor$sigma,
-    #L = cov1$L, L_term = cov2$L,
-    #L_donor = cov_donor$L,
-    #z = z, z_term = z_term,
-    #z_donor = z_donor
+    beta = beta,
+    sigma = sigma, sigma_term = sigma_term, sigma_donor = sigma_donor,
+    x = x, x_term = x_term, x_donor = x_donor
   )
 
   # cluster function
@@ -142,16 +152,16 @@ poisson_lognormal = function(df_samples_subset,
     #stan_file = "../../exec/poisson.stan"
     model = stan_model(file = stan_file, model_name = "poisson")
 
-    # run sampler
-    fit_mle = optimizing(model,
-                         data = stan_data,
-                         init = stan_init,
-                         as_vector = FALSE,
-                         verbose = TRUE)
-    stan_init = fit_mle$par[c("beta",
-                              "sigma","sigma_term","sigma_donor",
-                              "z","z_term","z_donor",
-                              "x","x_term","x_donor")]
+    # # run sampler
+    # fit_mle = optimizing(model,
+    #                      data = stan_data,
+    #                      init = stan_init,
+    #                      as_vector = FALSE,
+    #                      verbose = TRUE)
+    # stan_init = fit_mle$par[c("beta",
+    #                           "sigma","sigma_term","sigma_donor",
+    #                           "z","z_term","z_donor",
+    #                           "x","x_term","x_donor")]
     fit_mcmc = sampling(model,
                         pars = c("beta",
                                  "sigma","sigma_term","sigma_donor",
@@ -211,7 +221,7 @@ poisson_lognormal = function(df_samples_subset,
 
   # create cytoeffect class
   obj = list(fit_mcmc = fit_mcmc,
-             fit_mle = fit_mle,
+             #fit_mle = fit_mle,
              df_samples_subset = df_samples_subset,
              protein_names = protein_names,
              condition = condition,

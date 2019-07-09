@@ -159,7 +159,7 @@ if(file.exists(prefit)) {
 } else {
   obj = cytoeffect::poisson_lognormal(df_samples_subset, protein_names, 
                                       condition = "term", group = "donor",
-                                      rank = 3,
+                                      r_cell = 3, r_donor = 3,
                                       iter = 325, warmup = 200,
                                       num_chains = ncores)
   save(obj,file = prefit)
@@ -318,7 +318,6 @@ cytoeffect::plot_mds(obj)
 ggsave(filename = "posterior_mds_latent_variable_mu_scaled.pdf", width = 10, height = 5)
 cytoeffect::plot_mds(obj, asp = FALSE)
 ggsave(filename = "posterior_mds_latent_variable_mu_unscaled.pdf", width = 10, height = 5)
-cytoeffect::plot_mds_mle(obj, asp = FALSE)
 ```
 
 Pairwise correlation change between conditions.

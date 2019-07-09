@@ -39,42 +39,44 @@ data {
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
   int<lower=1,upper=p> term[n]; // condition indicator
-  int<lower=1> r; // Rank of latent matrix
+  int<lower=1> r_cell; // Rank of latent matrix
+  int<lower=1> r_donor; // Rank of latent matrix
 }
 //transformed data {
 //  real eta = 1.0; // parameter of lkj prior
 //}
 parameters {
   vector[p] beta[d]; // fixed coefficients
-  vector<lower=0>[r] sigma; // random effects std
-  vector<lower=0>[r] sigma_term; // random effects std
-  vector<lower=0>[r] sigma_donor; // random effects std
+  vector<lower=0>[r_cell] sigma; // random effects std
+  vector<lower=0>[r_cell] sigma_term; // random effects std
+  vector<lower=0>[r_donor] sigma_donor; // random effects std
   //cholesky_factor_corr[d] L; // cholesky factor protein effects
   //cholesky_factor_corr[d] L_term; // cholesky factor protein effects
   //cholesky_factor_corr[d] L_donor; // cholesky factor protein effects
-  vector[r] z[n]; // random effects
-  vector[r] z_term[n]; // random effects
-  vector[r] z_donor[k]; // random effects
-  vector[d*r] x; // distribution on X for polar expansion
-  vector[d*r] x_term; // distribution on X for polar expansion
-  vector[d*r] x_donor; // distribution on X for polar expansion
+  vector[r_cell] z[n]; // random effects
+  vector[r_cell] z_term[n]; // random effects
+  vector[r_donor] z_donor[k]; // random effects
+  vector[d*r_cell] x; // distribution on X for polar expansion
+  vector[d*r_cell] x_term; // distribution on X for polar expansion
+  vector[d*r_donor] x_donor; // distribution on X for polar expansion
 }
 transformed parameters {
   vector[d] b[n]; // random effects
   vector[d] b_donor[k]; // random effects
-  matrix[d,r] Q;
-  matrix[d,r] Q_term;
-  matrix[d,r] Q_donor;
+  matrix[d,r_cell] Q;
+  matrix[d,r_cell] Q_term;
+  matrix[d,r_donor] Q_donor;
   {
-    matrix[d,r] Sigma;
-    matrix[d,r] Sigma_term;
-    matrix[d,r] Sigma_donor;
-    matrix[d,r] X;
-    X = to_matrix(x, d, r);
-    Q = polar(X);
+    matrix[d,r_cell] Sigma;
+    matrix[d,r_cell] Sigma_term;
+    matrix[d,r_donor] Sigma_donor;
+    matrix[d,r_cell] X_cell;
+    matrix[d,r_donor] X_donor;
+    X_cell = to_matrix(x, d, r_cell);
+    Q = polar(X_cell);
     Sigma = diag_post_multiply(Q, sigma);
-    X = to_matrix(x_term, d, r);
-    Q_term = polar(X);
+    X_cell = to_matrix(x_term, d, r_cell);
+    Q_term = polar(X_cell);
     Sigma_term = diag_post_multiply(Q_term, sigma_term);
     for (i in 1:n) {
       if (term[i] == 1)
@@ -82,8 +84,8 @@ transformed parameters {
       else
         b[i] = Sigma_term * z_term[i];
     }
-    X = to_matrix(x_donor, d, r);
-    Q_donor = polar(X);
+    X_donor = to_matrix(x_donor, d, r_donor);
+    Q_donor = polar(X_donor);
     Sigma_donor = diag_post_multiply(Q_donor, sigma_donor);
     for (i in 1:k)
       b_donor[i] = Sigma_donor * z_donor[i];
