@@ -46,9 +46,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
   sample_condition_donor = function(k, tb_info) {
     set.seed(seed)
     # fixed effects
-    beta = stan_pars$beta[k,,]
-    mu = rep(0, length(obj$protein_names))
-    beta_rep = sapply(beta[,tb_info$term_index], rep, tb_info$n)
+    beta = stan_pars$beta[k,,tb_info$term_index]
     # cell random effect
     if(tb_info$term_index == 1) {
       sigma = stan_pars$sigma[k,]
@@ -58,11 +56,10 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
       Q = stan_pars$Q_term[k,,]
     }
     Cov = Q %*% diag(sigma^2) %*% t(Q)
-    b = mvrnorm(n = tb_info$n, mu, Cov)
     # donor random effect
-    b_donor = stan_pars$b_donor[k, tb_info$donor_index, ]
+    b_donor = stan_pars$b_donor[k,tb_info$donor_index,]
     # combine
-    mu = beta_rep + b + sapply(b_donor, rep, tb_info$n)
+    mu = mvrnorm(n = tb_info$n, beta + b_donor, Cov)
     mu %<>% as.tibble
     names(mu) = obj$protein_names
     mu %<>% add_column(term  = tb_info$term)

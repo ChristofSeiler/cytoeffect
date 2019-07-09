@@ -211,6 +211,7 @@ poisson_lognormal = function(df_samples_subset,
 
   # create cytoeffect class
   obj = list(fit_mcmc = fit_mcmc,
+             fit_mle = fit_mle,
              df_samples_subset = df_samples_subset,
              protein_names = protein_names,
              condition = condition,
