@@ -64,7 +64,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
     # donor random effect
     b_donor = stan_pars$b_donor[k, tb_info$donor_index, ]
     # combine
-    mu = beta_rep + b + b_donor
+    mu = beta_rep + b + sapply(b_donor, rep, tb_info$n)
     mu %<>% as.tibble
     names(mu) = obj$protein_names
     mu %<>% add_column(term  = tb_info$term)
