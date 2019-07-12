@@ -5,7 +5,7 @@
 \title{Plot Multivariate Posterior Summaries for Poisson Log-Normal Mixed Model}
 \usage{
 plot_mds(obj, asp = TRUE, ncores = parallel::detectCores(),
-  nsubsample = 100, cor_scaling_factor = 1)
+  thinning = 100, cor_scaling_factor = 1, show_donors = TRUE)
 }
 \arguments{
 \item{obj}{Object of class \code{cytoeffect_poisson} computed
@@ -15,9 +15,11 @@ using \code{\link{poisson_lognormal}}}
 
 \item{ncores}{Number of cores}
 
-\item{nsubsample}{Subsample size for posterior draws}
+\item{thinning}{Number of posterior draws after thinning}
 
 \item{cor_scaling_factor}{Scaling factor for correlation arrows}
+
+\item{show_donors}{Add individual donor effect}
 }
 \value{
 \code{\link[ggplot2]{ggplot2}} object
