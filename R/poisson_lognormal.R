@@ -174,7 +174,7 @@ poisson_lognormal = function(df_samples_subset,
                       warmup = warmup,
                       chains = num_chains,
                       cores = num_chains,
-                      seed = seed,
+                      seed = 1,
                       init = rep(list(stan_init), num_chains),
                       save_warmup = FALSE)
 
