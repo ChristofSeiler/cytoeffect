@@ -145,80 +145,63 @@ poisson_lognormal = function(df_samples_subset,
     z = z, z_term = z_term, z_donor = z_donor
   )
 
-  # cluster function
-  run_sampling = function(seed) {
+  # compile model
+  stan_file = system.file("exec", "poisson.stan", package = "cytoeffect")
+  #stan_file = "../../exec/poisson.stan"
+  model = stan_model(file = stan_file, model_name = "poisson")
 
-    # compile model
-    stan_file = system.file("exec", "poisson.stan", package = "cytoeffect")
-    #stan_file = "../../exec/poisson.stan"
-    model = stan_model(file = stan_file, model_name = "poisson")
+  # # run sampler
+  # fit_mle = optimizing(model,
+  #                      data = stan_data,
+  #                      init = stan_init,
+  #                      as_vector = FALSE,
+  #                      verbose = TRUE)
+  # stan_init = fit_mle$par[c("beta",
+  #                           "sigma","sigma_term","sigma_donor",
+  #                           "z","z_term","z_donor",
+  #                           "x","x_term","x_donor")]
+  fit_mcmc = sampling(model,
+                      pars = c("beta",
+                               "sigma","sigma_term","sigma_donor",
+                               # "L","L_term","L_donor",
+                               "Q","Q_term","Q_donor",
+                               "Cor","Cor_term","Cor_donor",
+                               "b_donor"
+                               # "Y_hat"
+                               ),
+                      data = stan_data,
+                      iter = iter,
+                      warmup = warmup,
+                      chains = num_chains,
+                      cores = num_chains,
+                      seed = seed,
+                      init = rep(list(stan_init), num_chains),
+                      save_warmup = FALSE)
 
-    # # run sampler
-    # fit_mle = optimizing(model,
-    #                      data = stan_data,
-    #                      init = stan_init,
-    #                      as_vector = FALSE,
-    #                      verbose = TRUE)
-    # stan_init = fit_mle$par[c("beta",
-    #                           "sigma","sigma_term","sigma_donor",
-    #                           "z","z_term","z_donor",
-    #                           "x","x_term","x_donor")]
-    fit_mcmc = sampling(model,
-                        pars = c("beta",
-                                 "sigma","sigma_term","sigma_donor",
-                                 # "L","L_term","L_donor",
-                                 "Q","Q_term","Q_donor",
-                                 "Cor","Cor_term","Cor_donor",
-                                 "b_donor"
-                                 # "Y_hat"
-                                 ),
-                        data = stan_data,
-                        iter = iter,
-                        warmup = warmup,
-                        chains = num_chains,
-                        cores = num_chains,
-                        seed = seed,
-                        init = rep(list(stan_init), num_chains),
-                        save_warmup = FALSE)
-    fit_mcmc
-
-    # # Laplace approximation
-    # stan_file = system.file("exec", "poisson_eb.stan", package = "cytoeffect")
-    # #stan_file = "../../exec/poisson_eb.stan"
-    # model_eb = stan_model(file = stan_file, model_name = "poisson_eb")
-    # stan_data = list(Y = Y, n = n, d = d, p = p,
-    #                  k = k, donor = donor, term = term,
-    #                  r = rank,
-    #                  b = fit_mle$par$b)
-    # fit_mle = optimizing(model_eb,
-    #                      data = stan_data,
-    #                      init = stan_init,
-    #                      as_vector = FALSE,
-    #                      hessian = TRUE,
-    #                      verbose = TRUE)
-    # neg_hessian = -fit_mle$hessian
-    # cond1 = paste0("beta.",1:10,".1")
-    # cond2 = paste0("beta.",1:10,".2")
-    # beta_names = c(cond1, cond2)
-    # beta_sd = sqrt(1/diag(neg_hessian[beta_names, beta_names]))
-    # tibble(
-    #   protein_names,
-    #   beta_sd[cond1],
-    #   beta_sd[cond2]
-    # )
-
-  }
-
-  # preapte and submit cluster job
-  current_time = Sys.time() %>%
-    str_replace_all(":","") %>%
-    str_replace_all("-| ","_")
-  reg = makeRegistry(file.dir = paste0("registry_",current_time),
-                     packages = "rstan")
-  batchMap(run_sampling, seed = 1)
-  submitJobs()
-  waitForJobs()
-  fit_mcmc = reduceResultsList()[[1]]
+  # # Laplace approximation
+  # stan_file = system.file("exec", "poisson_eb.stan", package = "cytoeffect")
+  # #stan_file = "../../exec/poisson_eb.stan"
+  # model_eb = stan_model(file = stan_file, model_name = "poisson_eb")
+  # stan_data = list(Y = Y, n = n, d = d, p = p,
+  #                  k = k, donor = donor, term = term,
+  #                  r = rank,
+  #                  b = fit_mle$par$b)
+  # fit_mle = optimizing(model_eb,
+  #                      data = stan_data,
+  #                      init = stan_init,
+  #                      as_vector = FALSE,
+  #                      hessian = TRUE,
+  #                      verbose = TRUE)
+  # neg_hessian = -fit_mle$hessian
+  # cond1 = paste0("beta.",1:10,".1")
+  # cond2 = paste0("beta.",1:10,".2")
+  # beta_names = c(cond1, cond2)
+  # beta_sd = sqrt(1/diag(neg_hessian[beta_names, beta_names]))
+  # tibble(
+  #   protein_names,
+  #   beta_sd[cond1],
+  #   beta_sd[cond2]
+  # )
 
   # create cytoeffect class
   obj = list(fit_mcmc = fit_mcmc,
