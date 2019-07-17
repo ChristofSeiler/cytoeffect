@@ -135,9 +135,9 @@ poisson_lognormal = function(df_samples_subset,
   # ggcorrplot::ggcorrplot(cov_donor$L %*% t(cov_donor$L))
 
   # set random effects to zero
-  z = matrix(0, nrow = n, ncol = r)
-  z_term = matrix(0, nrow = n, ncol = r)
-  z_donor = matrix(0, nrow = k, ncol = r)
+  z = matrix(0, nrow = n, ncol = r_cell)
+  z_term = matrix(0, nrow = n, ncol = r_cell)
+  z_donor = matrix(0, nrow = k, ncol = r_donor)
   stan_init = list(
     beta = beta,
     sigma = sigma, sigma_term = sigma_term, sigma_donor = sigma_donor,
