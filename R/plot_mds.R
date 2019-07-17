@@ -14,15 +14,15 @@
 #'   using \code{\link{poisson_lognormal}}
 #' @param asp Set \code{asp = FALSE} to avoid scaling aspect ratio by eigenvalues
 #' @param ncores Number of cores
-#' @param nsubsample Subsample size for posterior draws
+#' @param thinning Number of posterior draws after thinning
 #' @param cor_scaling_factor Scaling factor for correlation arrows
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
 #' # fit = cytoeffect::poisson_lognormal(...)
 #' # cytoeffect::plot_mds(fit, asp = FALSE)
-plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsample = 100,
-                    cor_scaling_factor = 1) {
+plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning = 100,
+                    cor_scaling_factor = 1, show_donors = TRUE) {
 
   if (class(obj) != "cytoeffect_poisson")
     stop("Not a cytoeffect_poisson object.")
@@ -56,10 +56,14 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
       Q = stan_pars$Q_term[k,,]
     }
     Cov = Q %*% diag(sigma^2) %*% t(Q)
-    # donor random effect
-    b_donor = stan_pars$b_donor[k,tb_info$donor_index,]
     # combine
-    mu = mvrnorm(n = tb_info$n, beta + b_donor, Cov)
+    if(show_donors) {
+      # donor random effect
+      b_donor = stan_pars$b_donor[k,tb_info$donor_index,]
+      mu = mvrnorm(n = tb_info$n, beta + b_donor, Cov)
+    } else {
+      mu = mvrnorm(n = tb_info$n, beta, Cov)
+    }
     mu %<>% as.tibble
     names(mu) = obj$protein_names
     mu %<>% add_column(term  = tb_info$term)
@@ -88,7 +92,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
   # sample all tables
   sample_info_k = c("donor","term","k")
   set.seed(seed)
-  expr_median = mclapply(sample(1:nrow(stan_pars$beta), nsubsample),
+  expr_median = mclapply(round(seq(1, nrow(stan_pars$beta), length.out = thinning)),
                          function(i) {
                            sample_mu_hat(k = i) %>%
                              group_by(.dots = sample_info_k) %>%
@@ -125,17 +129,18 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
   expr_cor %<>% add_column(y0 = rep(0,nrow(expr_cor)))
 
   # add median donors
-  expr_median_donor = expr_median %>%
-    group_by(.dots = c("donor","term")) %>%
-    summarize_at(c("MDS1","MDS2"), median)
-  expr_median_donor %<>% add_column(
-    color = sapply(expr_median_donor$term,
-                   function(x) if(x == expr_median_donor$term[1]) "#5DA5DA" else "#FAA43A"))
-  ggmds = ggmds +
-    annotate("text",
-             x = expr_median_donor$MDS1, y = expr_median_donor$MDS2,
-             label = expr_median_donor$donor, color = expr_median_donor$color) +
-    ggtitle("Posterior MDS of Latent Variable"~mu~"(Aspect Ratio Unscaled)")
+  if(show_donors) {
+    expr_median_donor = expr_median %>%
+      group_by(.dots = c("donor","term")) %>%
+      summarize_at(c("MDS1","MDS2"), median)
+    expr_median_donor %<>% add_column(
+      color = sapply(expr_median_donor$term,
+                     function(x) if(x == expr_median_donor$term[1]) "#5DA5DA" else "#FAA43A"))
+    ggmds = ggmds +
+      annotate("text",
+               x = expr_median_donor$MDS1, y = expr_median_donor$MDS2,
+               label = expr_median_donor$donor, color = expr_median_donor$color)
+  }
 
   # add correlation arrows
   ggmds = ggmds + annotate("segment",
@@ -147,10 +152,11 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), nsubsampl
 
   ## add marker names labels
   ggmds = ggmds + geom_text_repel(data = expr_cor,
-                            aes(x = MDS1, y = MDS2,
-                                label = obj$protein_names),
-                            color = marker_color,
-                            alpha = 1.0)
+                                  aes(x = MDS1, y = MDS2,
+                                      label = obj$protein_names),
+                                  color = marker_color,
+                                  alpha = 1.0) +
+    ggtitle("Posterior MDS of Latent Variable"~mu~"(Aspect Ratio Unscaled)")
 
   if(asp) {
     # change aspect ratio according to explained variance

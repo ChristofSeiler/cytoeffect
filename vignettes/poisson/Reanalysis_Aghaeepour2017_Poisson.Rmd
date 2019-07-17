@@ -318,6 +318,9 @@ cytoeffect::plot_mds(obj)
 ggsave(filename = "posterior_mds_latent_variable_mu_scaled.pdf", width = 10, height = 5)
 cytoeffect::plot_mds(obj, asp = FALSE)
 ggsave(filename = "posterior_mds_latent_variable_mu_unscaled.pdf", width = 10, height = 5)
+cytoeffect::plot_mds(obj, asp = FALSE, show_donors = FALSE)
+ggsave(filename = "posterior_mds_latent_variable_mu_unscaled_no_donors.pdf", 
+       width = 10, height = 5)
 ```
 
 Pairwise correlation change between conditions.
