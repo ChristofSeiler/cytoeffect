@@ -46,8 +46,6 @@ poisson_lognormal = function(df_samples_subset,
     stop("condition variables should have two levels")
 
   # prepare input data
-  #df_samples_subset$group_condition = paste0(pull(df_samples_subset, group), "_",
-  #                                      pull(df_samples_subset, condition))
   Y = df_samples_subset %>% dplyr::select(protein_names) %>% as.matrix()
   #X = model.matrix(formula(paste("~",condition)), data = df_samples_subset)
   term = df_samples_subset %>%
@@ -135,9 +133,9 @@ poisson_lognormal = function(df_samples_subset,
   # ggcorrplot::ggcorrplot(cov_donor$L %*% t(cov_donor$L))
 
   # set random effects to zero
-  z = matrix(0, nrow = n, ncol = r_cell)
-  z_term = matrix(0, nrow = n, ncol = r_cell)
-  z_donor = matrix(0, nrow = k, ncol = r_donor)
+  z = rep(0, table(term)[1]*r_cell);
+  z_term = rep(0, table(term)[2]*r_cell);
+  z_donor = rep(0, k*r_donor)
   stan_init = list(
     beta = beta,
     sigma = sigma, sigma_term = sigma_term, sigma_donor = sigma_donor,
@@ -163,11 +161,9 @@ poisson_lognormal = function(df_samples_subset,
   fit_mcmc = sampling(model,
                       pars = c("beta",
                                "sigma","sigma_term","sigma_donor",
-                               # "L","L_term","L_donor",
                                "Q","Q_term","Q_donor",
                                "Cor","Cor_term","Cor_donor",
                                "b_donor"
-                               # "Y_hat"
                                ),
                       data = stan_data,
                       iter = iter,

@@ -494,7 +494,7 @@ Y_hat = sample_y_hat(k = 1)
 Y_hat %>% 
   group_by(term) %>% 
   summarize_at(protein_names, median)
-df_samples_subset %>% 
+obj$df_samples_subset %>% 
   group_by(term) %>% 
   summarize_at(protein_names, median)
 ```
@@ -522,7 +522,7 @@ test_stat_a = function(df_tfm, df_median) {
        df_tfm$pSTAT3 > df_median$pSTAT3 & 
        df_tfm$pSTAT5 > df_median$pSTAT5) * 100
 }
-gof_obsv_a = gof(df_samples_subset, test_stat_a)
+gof_obsv_a = gof(obj$df_samples_subset, test_stat_a)
 gof_pred_a = mclapply(1:dim(stan_pars$beta)[1], function(k) gof(sample_y_hat(k), test_stat_a),
                       mc.cores = ncores) %>% bind_rows()
 gof_obsv_a %<>% mutate(subset = "Cell Subset A")
@@ -537,7 +537,7 @@ test_stat_b = function(df_tfm, df_median) {
        df_tfm$pSTAT3 < df_median$pSTAT3 & 
        df_tfm$pSTAT5 < df_median$pSTAT5) * 100
 }
-gof_obsv_b = gof(df_samples_subset, test_stat_b)
+gof_obsv_b = gof(obj$df_samples_subset, test_stat_b)
 gof_pred_b = mclapply(1:dim(stan_pars$beta)[1], function(k) gof(sample_y_hat(k), test_stat_b),
                       mc.cores = ncores) %>% bind_rows()
 gof_obsv_b %<>% mutate(subset = "Cell Subset B")
@@ -551,7 +551,7 @@ test_stat_c = function(df_tfm, df_median) {
   mean(df_tfm$pERK1_2  == 0 & 
        df_tfm$pMAPKAPK > df_median$pMAPKAPK) * 100
 }
-gof_obsv_c = gof(df_samples_subset, test_stat_c)
+gof_obsv_c = gof(obj$df_samples_subset, test_stat_c)
 gof_pred_c = mclapply(1:dim(stan_pars$beta)[1], function(k) gof(sample_y_hat(k), test_stat_c),
                       mc.cores = ncores) %>% bind_rows()
 gof_obsv_c %<>% mutate(subset = "Cell Subset C")
@@ -566,7 +566,7 @@ test_stat_d = function(df_tfm, df_median) {
        df_tfm$pMAPKAPK > df_median$pMAPKAPK
        ) * 100
 }
-gof_obsv_d = gof(df_samples_subset, test_stat_d)
+gof_obsv_d = gof(obj$df_samples_subset, test_stat_d)
 gof_pred_d = mclapply(1:dim(stan_pars$beta)[1], function(k) gof(sample_y_hat(k), test_stat_d),
                       mc.cores = ncores) %>% bind_rows()
 gof_obsv_d %<>% mutate(subset = "Cell Subset D")

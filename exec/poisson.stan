@@ -39,56 +39,68 @@ data {
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
   int<lower=1,upper=p> term[n]; // condition indicator
-  int<lower=1> r_cell; // Rank of latent matrix
-  int<lower=1> r_donor; // Rank of latent matrix
+  int<lower=1> r_cell; // rank of latent matrix
+  int<lower=1> r_donor; // rank of latent matrix
 }
-//transformed data {
-//  real eta = 1.0; // parameter of lkj prior
-//}
+transformed data {
+  int<lower=1,upper=n> index_sorted[n] = sort_indices_asc(term);
+  int<lower=1,upper=p> term_sorted[n] = term[index_sorted];
+  int<lower=1,upper=n> n_ref_cond = rank(term_sorted, n);
+  int<lower=1,upper=n> n_tar_cond = n-n_ref_cond;
+  int<lower=1,upper=k> donor_sorted[n] = donor[index_sorted];
+  int<lower=0> Y_sorted[n,d] = Y[index_sorted,];
+}
 parameters {
   vector[p] beta[d]; // fixed coefficients
   vector<lower=0>[r_cell] sigma; // random effects std
   vector<lower=0>[r_cell] sigma_term; // random effects std
   vector<lower=0>[r_donor] sigma_donor; // random effects std
-  //cholesky_factor_corr[d] L; // cholesky factor protein effects
-  //cholesky_factor_corr[d] L_term; // cholesky factor protein effects
-  //cholesky_factor_corr[d] L_donor; // cholesky factor protein effects
-  vector[r_cell] z[n]; // random effects
-  vector[r_cell] z_term[n]; // random effects
-  vector[r_donor] z_donor[k]; // random effects
+  vector[n_ref_cond*r_cell] z; // random effects
+  vector[n_tar_cond*r_cell] z_term; // random effects
+  vector[k*r_donor] z_donor; // random effects
   vector[d*r_cell] x; // distribution on X for polar expansion
   vector[d*r_cell] x_term; // distribution on X for polar expansion
   vector[d*r_donor] x_donor; // distribution on X for polar expansion
 }
 transformed parameters {
-  vector[d] b[n]; // random effects
-  vector[d] b_donor[k]; // random effects
+  matrix[n,d] b; // random effects
+  matrix[k,d] b_donor;
   matrix[d,r_cell] Q;
+  matrix[r_cell,d] Sigma_t;
   matrix[d,r_cell] Q_term;
+  matrix[r_cell,d] Sigma_term_t;
   matrix[d,r_donor] Q_donor;
+  matrix[r_donor,d] Sigma_donor_t;
   {
-    matrix[d,r_cell] Sigma;
-    matrix[d,r_cell] Sigma_term;
-    matrix[d,r_donor] Sigma_donor;
-    matrix[d,r_cell] X_cell;
-    matrix[d,r_donor] X_donor;
-    X_cell = to_matrix(x, d, r_cell);
-    Q = polar(X_cell);
-    Sigma = diag_post_multiply(Q, sigma);
-    X_cell = to_matrix(x_term, d, r_cell);
-    Q_term = polar(X_cell);
-    Sigma_term = diag_post_multiply(Q_term, sigma_term);
-    for (i in 1:n) {
-      if (term[i] == 1)
-        b[i] = Sigma * z[i];
-      else
-        b[i] = Sigma_term * z_term[i];
-    }
-    X_donor = to_matrix(x_donor, d, r_donor);
-    Q_donor = polar(X_donor);
-    Sigma_donor = diag_post_multiply(Q_donor, sigma_donor);
-    for (i in 1:k)
-      b_donor[i] = Sigma_donor * z_donor[i];
+    matrix[d,r_cell] X_ref;
+    matrix[n_ref_cond,r_cell] Z_ref;
+    matrix[n_ref_cond,d] b_ref;
+    matrix[d,r_cell] X_tar;
+    matrix[n_tar_cond,r_cell] Z_tar;
+    matrix[n_tar_cond,d] b_tar;
+    // reference level
+    X_ref = to_matrix(x, d, r_cell);
+    Q = polar(X_ref);
+    Sigma_t = diag_post_multiply(Q, sigma)';
+    Z_ref = to_matrix(z, n_ref_cond, r_cell);
+    b_ref = Z_ref * Sigma_t;
+    // target level
+    X_tar = to_matrix(x_term, d, r_cell);
+    Q_term = polar(X_tar);
+    Sigma_term_t = diag_post_multiply(Q_term, sigma_term)';
+    Z_tar = to_matrix(z_term, n_tar_cond, r_cell);
+    b_tar = Z_tar * Sigma_term_t;
+    // combine levels
+    b = append_row(b_ref, b_tar);
+  }
+  {
+    matrix[d,r_donor] X;
+    matrix[k,r_donor] Z;
+    X = to_matrix(x_donor, d, r_donor);
+    Q_donor = polar(X);
+    Sigma_donor_t = diag_post_multiply(Q_donor, sigma_donor)';
+    Z = to_matrix(z_donor, k, r_donor);
+    b_donor = Z * Sigma_donor_t;
   }
 }
 model {
@@ -98,55 +110,27 @@ model {
   sigma ~ cauchy(0, 2.5);
   sigma_term ~ cauchy(0, 2.5);
   sigma_donor ~ cauchy(0, 2.5);
-  //L ~ lkj_corr_cholesky(eta);
-  //L_term ~ lkj_corr_cholesky(eta);
-  //L_donor ~ lkj_corr_cholesky(eta);
-  for (i in 1:n) {
-    z[i] ~ std_normal();
-    z_term[i] ~ std_normal();
-  }
-  for (i in 1:k)
-    z_donor[i] ~ std_normal();
+  z ~ std_normal();
+  z_term ~ std_normal();
+  z_donor ~ std_normal();
   x ~ std_normal();
   x_term ~ std_normal();
   x_donor ~ std_normal();
   // likelihood
   for (j in 1:d) {
-    // Y[i,j] ~ poisson_log(
-    //   X[i] * beta[j] +
-    //   gamma_beta_cov_x[i,j] +
-    //   b[i,j] +
-    //   b_donor[donor[i],j]
-    // );
-    Y[,j] ~ poisson_log(
-      //X * beta[j] +
-      beta[j,term] +
+    Y_sorted[,j] ~ poisson_log(
+      beta[j,term_sorted] +
       to_vector(b[,j]) +
-      //to_vector(b_term[,j]) +
-      to_vector(b_donor[donor,j])
+      to_vector(b_donor[donor_sorted,j])
     );
   }
 }
 generated quantities {
-  // in-sample prediction
-  // int<lower=0> Y_hat[n,d];
   // correlation matrix
   matrix[d,d] Cor;
   matrix[d,d] Cor_term;
   matrix[d,d] Cor_donor;
-  //Cor = L * L';
-  //Cor_term = L_term * L_term';
-  //Cor_donor = L_donor * L_donor';
   Cor = cov2cor(Q, sigma);
   Cor_term = cov2cor(Q_term, sigma_term);
   Cor_donor = cov2cor(Q_donor, sigma_donor);
-  // for (j in 1:d) {
-  //   Y_hat[,j] = poisson_log_rng(
-  //     //X * beta[j] +
-  //     beta[j,term] +
-  //     to_vector(b[,j]) +
-  //     //to_vector(b_term[,j]) +
-  //     to_vector(b_donor[donor,j])
-  //   );
-  // }
 }
