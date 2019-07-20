@@ -51,7 +51,7 @@ transformed data {
   int<lower=0> Y_sorted[n,d] = Y[index_sorted,];
 }
 parameters {
-  vector[p] beta[d]; // fixed coefficients
+  matrix[d,p] beta; // fixed coefficients
   vector<lower=0>[r_cell] sigma; // random effects std
   vector<lower=0>[r_cell] sigma_term; // random effects std
   vector<lower=0>[r_donor] sigma_donor; // random effects std
@@ -63,7 +63,6 @@ parameters {
   vector[d*r_donor] x_donor; // distribution on X for polar expansion
 }
 transformed parameters {
-  matrix[n,d] b; // random effects
   matrix[k,d] b_donor;
   matrix[d,r_cell] Q;
   matrix[r_cell,d] Sigma_t;
@@ -73,25 +72,15 @@ transformed parameters {
   matrix[r_donor,d] Sigma_donor_t;
   {
     matrix[d,r_cell] X_ref;
-    matrix[n_ref_cond,r_cell] Z_ref;
-    matrix[n_ref_cond,d] b_ref;
     matrix[d,r_cell] X_tar;
-    matrix[n_tar_cond,r_cell] Z_tar;
-    matrix[n_tar_cond,d] b_tar;
     // reference level
     X_ref = to_matrix(x, d, r_cell);
     Q = polar(X_ref);
     Sigma_t = diag_post_multiply(Q, sigma)';
-    Z_ref = to_matrix(z, n_ref_cond, r_cell);
-    b_ref = Z_ref * Sigma_t;
     // target level
     X_tar = to_matrix(x_term, d, r_cell);
     Q_term = polar(X_tar);
     Sigma_term_t = diag_post_multiply(Q_term, sigma_term)';
-    Z_tar = to_matrix(z_term, n_tar_cond, r_cell);
-    b_tar = Z_tar * Sigma_term_t;
-    // combine levels
-    b = append_row(b_ref, b_tar);
   }
   {
     matrix[d,r_donor] X;
@@ -116,13 +105,28 @@ model {
   x ~ std_normal();
   x_term ~ std_normal();
   x_donor ~ std_normal();
-  // likelihood
-  for (j in 1:d) {
-    Y_sorted[,j] ~ poisson_log(
-      beta[j,term_sorted] +
-      to_vector(b[,j]) +
-      to_vector(b_donor[donor_sorted,j])
-    );
+  {
+    matrix[n,d] b; // random effects
+    matrix[n_ref_cond,r_cell] Z_ref;
+    matrix[n_ref_cond,d] b_ref;
+    matrix[n_tar_cond,r_cell] Z_tar;
+    matrix[n_tar_cond,d] b_tar;
+    // reference level
+    Z_ref = to_matrix(z, n_ref_cond, r_cell);
+    b_ref = Z_ref * Sigma_t;
+    // target level
+    Z_tar = to_matrix(z_term, n_tar_cond, r_cell);
+    b_tar = Z_tar * Sigma_term_t;
+    // combine levels
+    b = append_row(b_ref, b_tar);
+    // likelihood
+    for (j in 1:d) {
+      Y_sorted[,j] ~ poisson_log(
+        to_vector(beta[j,term_sorted]) +
+        to_vector(b[,j]) +
+        to_vector(b_donor[donor_sorted,j])
+      );
+    }
   }
 }
 generated quantities {
