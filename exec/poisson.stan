@@ -35,7 +35,7 @@ data {
   int<lower=1> n; // num of cells
   int<lower=1> d; // num of markers
   int<lower=1> p; // num of explanatory variables (including intercept)
-  int<lower=0> Y[n,d]; // observed cell counts
+  int<lower=0> Y[d,n]; // observed cell counts
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
   int<lower=1,upper=p> term[n]; // condition indicator
@@ -48,7 +48,8 @@ transformed data {
   int<lower=1,upper=n> n_ref_cond = rank(term_sorted, n);
   int<lower=1,upper=n> n_tar_cond = n-n_ref_cond;
   int<lower=1,upper=k> donor_sorted[n] = donor[index_sorted];
-  int<lower=0> Y_sorted[n,d] = Y[index_sorted,];
+  int<lower=0> Y_sorted[d,n] = Y[,index_sorted];
+  int<lower=0> y_sorted[d*n] = to_array_1d(Y_sorted);
 }
 parameters {
   matrix[d,p] beta; // fixed coefficients
@@ -106,7 +107,7 @@ model {
   x_term ~ std_normal();
   x_donor ~ std_normal();
   {
-    matrix[n,d] b; // random effects
+    matrix[n,d] b;
     matrix[n_ref_cond,r_cell] Z_ref;
     matrix[n_ref_cond,d] b_ref;
     matrix[n_tar_cond,r_cell] Z_tar;
@@ -120,13 +121,9 @@ model {
     // combine levels
     b = append_row(b_ref, b_tar);
     // likelihood
-    for (j in 1:d) {
-      Y_sorted[,j] ~ poisson_log(
-        to_vector(beta[j,term_sorted]) +
-        to_vector(b[,j]) +
-        to_vector(b_donor[donor_sorted,j])
+    y_sorted ~ poisson_log(
+      to_vector(beta'[term_sorted,] + b + b_donor[donor_sorted,])
       );
-    }
   }
 }
 generated quantities {

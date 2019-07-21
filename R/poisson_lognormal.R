@@ -63,7 +63,7 @@ poisson_lognormal = function(df_samples_subset,
     as.factor() %>%
     as.integer()
   k = length(table(donor))
-  stan_data = list(Y = Y, n = n, d = d, p = p,
+  stan_data = list(Y = t(Y), n = n, d = d, p = p,
                    k = k, donor = donor, term = term,
                    r_cell = r_cell, r_donor = r_donor)
 
