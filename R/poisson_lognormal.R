@@ -172,7 +172,8 @@ poisson_lognormal = function(df_samples_subset,
                       cores = num_chains,
                       seed = 1,
                       init = rep(list(stan_init), num_chains),
-                      save_warmup = FALSE)
+                      save_warmup = FALSE,
+                      control = list(adapt_delta = 0.99))
 
   # # Laplace approximation
   # stan_file = system.file("exec", "poisson_eb.stan", package = "cytoeffect")
