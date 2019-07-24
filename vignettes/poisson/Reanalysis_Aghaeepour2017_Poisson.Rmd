@@ -465,7 +465,7 @@ sample_y_hat = function(k = 1) {
   lapply(1:2, function(cond) {
     n_cells_cond = table(term)[cond]
     beta = stan_pars$beta[k,,]
-    mu = rep(0, length(protein_names))
+    mu = rep(0, length(obj$protein_names))
     beta_rep = sapply(beta[,cond], rep, n_cells_cond)
     if(cond == 1) {
       sigma = stan_pars$sigma[k,]
@@ -485,7 +485,7 @@ sample_y_hat = function(k = 1) {
                    nrow = nrow(count), 
                    ncol = ncol(count))
     count %<>% as.tibble
-    names(count) = protein_names
+    names(count) = obj$protein_names
     count %<>% add_column(term  = conditions_levels[cond])
     count
   }) %>% bind_rows()
@@ -493,10 +493,10 @@ sample_y_hat = function(k = 1) {
 Y_hat = sample_y_hat(k = 1)
 Y_hat %>% 
   group_by(term) %>% 
-  summarize_at(protein_names, median)
+  summarize_at(obj$protein_names, median)
 obj$df_samples_subset %>% 
   group_by(term) %>% 
-  summarize_at(protein_names, median)
+  summarize_at(obj$protein_names, median)
 ```
 
 Check if we can model pSTAT, pSTAT3, and pSTAT5 bright cells.
@@ -504,8 +504,8 @@ Check if we can model pSTAT, pSTAT3, and pSTAT5 bright cells.
 ```{r goodness_of_fit_a}
 gof = function(df, test_stat) {
   tfm = function(x) asinh(x/5)
-  df_tfm = df %>% mutate_at(protein_names, tfm)
-  df_median = df_tfm %>% summarize_at(protein_names, median)
+  df_tfm = df %>% mutate_at(obj$protein_names, tfm)
+  df_median = df_tfm %>% summarize_at(obj$protein_names, median)
   tibble(
     term = c(
       "1st trimester", 
