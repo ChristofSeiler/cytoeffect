@@ -451,7 +451,8 @@ Predictive distribution marginalized over cell random effects.
 stan_pars = rstan::extract(obj$fit_mcmc, 
                            pars = c("beta",
                                     "sigma","sigma_term","sigma_donor",
-                                    "Q","Q_term","Q_donor"))
+                                    "Q","Q_term","Q_donor",
+                                    "theta"))
 condition = "term"
 term = obj$df_samples_subset %>%
     pull(condition) %>%
@@ -484,6 +485,16 @@ sample_y_hat = function(k = 1) {
     count = matrix(rpois(length(count), count),
                    nrow = nrow(count), 
                    ncol = ncol(count))
+    # account for zero inflation
+    theta = stan_pars$theta[k,]
+    zeros = matrix(rbinom(n_cells_cond*length(obj$protein_names), 
+                          size = 1, # number of trials is 1 for Bernoulli
+                          prob = theta # mixture proportion
+                          ), 
+                   nrow = length(obj$protein_names), 
+                   ncol = n_cells_cond) %>% t
+    #tibble(sim = apply(zeros, 2, mean), theta, diff = sim-theta)
+    count[which(zeros == 1, arr.ind = TRUE)] = 0
     count %<>% as.tibble
     names(count) = obj$protein_names
     count %<>% add_column(term  = conditions_levels[cond])
