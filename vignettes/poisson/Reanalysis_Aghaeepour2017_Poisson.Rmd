@@ -448,58 +448,17 @@ Define a test statistics and compare observed value with posterior predictive di
 Predictive distribution marginalized over cell random effects.
 
 ```{r marginal_predicted_counts}
-stan_pars = rstan::extract(obj$fit_mcmc, 
-                           pars = c("beta",
-                                    "sigma","sigma_term","sigma_donor",
-                                    "Q","Q_term","Q_donor",
-                                    "theta"))
-condition = "term"
-term = obj$df_samples_subset %>%
-    pull(condition) %>%
-    as.factor() %>%
-    as.integer()
-conditions_levels = levels(pull(obj$df_samples_subset, 
-                                obj$condition))
-# kth posterior draw
-sample_y_hat = function(k = 1) {
-  set.seed(seed)
-  lapply(1:2, function(cond) {
-    n_cells_cond = table(term)[cond]
-    beta = stan_pars$beta[k,,]
-    mu = rep(0, length(obj$protein_names))
-    beta_rep = sapply(beta[,cond], rep, n_cells_cond)
-    if(cond == 1) {
-      sigma = stan_pars$sigma[k,]
-      Q = stan_pars$Q[k,,]
-    } else {
-      sigma = stan_pars$sigma_term[k,]
-      Q = stan_pars$Q_term[k,,]
-    }
-    Cov = Q %*% diag(sigma^2) %*% t(Q)
-    b = mvrnorm(n = n_cells_cond, mu, Cov)
-    sigma_donor = stan_pars$sigma_donor[k,]
-    Q_donor = stan_pars$Q_donor[k,,]
-    Cov_donor = Q_donor %*% diag(sigma_donor^2) %*% t(Q_donor)
-    b_donor = mvrnorm(n = n_cells_cond, mu, Cov_donor)
-    count = exp(beta_rep + b + b_donor)
-    count = matrix(rpois(length(count), count),
-                   nrow = nrow(count), 
-                   ncol = ncol(count))
-    # account for zero inflation
-    theta = stan_pars$theta[k,]
-    zeros = matrix(rbinom(n_cells_cond*length(obj$protein_names), 
-                          size = 1, # number of trials is 1 for Bernoulli
-                          prob = theta # mixture proportion
-                          ), 
-                   nrow = length(obj$protein_names), 
-                   ncol = n_cells_cond) %>% t
-    #tibble(sim = apply(zeros, 2, mean), theta, diff = sim-theta)
-    count[which(zeros == 1, arr.ind = TRUE)] = 0
-    count %<>% as.tibble
-    names(count) = obj$protein_names
-    count %<>% add_column(term  = conditions_levels[cond])
-    count
-  }) %>% bind_rows()
+sample_y_hat = function(k) {
+  tb = posterior_predictive_log_lambda(obj, k = 1, show_donors = TRUE)
+  lambda_matrix = tb %>% 
+    dplyr::select(obj$protein_names) %>% 
+    as.matrix %>% 
+    exp
+  Y_hat = matrix(rpois(length(lambda_matrix), lambda_matrix),
+                   nrow = nrow(lambda_matrix), 
+                   ncol = ncol(lambda_matrix))
+  tb[1:length(obj$protein_names)] = Y_hat
+  tb
 }
 Y_hat = sample_y_hat(k = 1)
 Y_hat %>% 
@@ -534,6 +493,7 @@ test_stat_a = function(df_tfm, df_median) {
        df_tfm$pSTAT5 > df_median$pSTAT5) * 100
 }
 gof_obsv_a = gof(obj$df_samples_subset, test_stat_a)
+stan_pars = rstan::extract(obj$fit_mcmc, pars = "beta")
 gof_pred_a = mclapply(1:dim(stan_pars$beta)[1], function(k) gof(sample_y_hat(k), test_stat_a),
                       mc.cores = ncores) %>% bind_rows()
 gof_obsv_a %<>% mutate(subset = "Cell Subset A")
