@@ -458,7 +458,7 @@ sample_y_hat = function(k) {
                    nrow = nrow(lambda_matrix), 
                    ncol = ncol(lambda_matrix))
   tb[1:length(obj$protein_names)] = Y_hat
-  tb
+  tb %>% filter(donor == "PTLG002")
 }
 Y_hat = sample_y_hat(k = 1)
 Y_hat %>% 
@@ -469,9 +469,16 @@ obj$df_samples_subset %>%
   summarize_at(obj$protein_names, median)
 ```
 
-Check if we can model pSTAT, pSTAT3, and pSTAT5 bright cells.
+Four checks:
 
-```{r goodness_of_fit_a}
+1. Check if we can model pSTAT, pSTAT3, and pSTAT5 bright cells
+2. Check if we can model pSTAT bright, and pSTAT3 and pSTAT5 dim cells
+3. Check if we can model zero pERK1_2 and pMAPKAPK bright cells
+4. Check if we can model nonzero pERK1_2 and pMAPKAPK bright cells
+
+```{r goodness_of_fit}
+set.seed(0xdada)
+# test function
 gof = function(df, test_stat) {
   tfm = function(x) asinh(x/5)
   df_tfm = df %>% mutate_at(obj$protein_names, tfm)
@@ -487,74 +494,57 @@ gof = function(df, test_stat) {
       )
   )
 }
+# 1. check
 test_stat_a = function(df_tfm, df_median) {
   mean(df_tfm$pSTAT1 > df_median$pSTAT1 & 
        df_tfm$pSTAT3 > df_median$pSTAT3 & 
        df_tfm$pSTAT5 > df_median$pSTAT5) * 100
 }
-gof_obsv_a = gof(obj$df_samples_subset, test_stat_a)
-stan_pars = rstan::extract(obj$fit_mcmc, pars = "beta")
-gof_pred_a = mclapply(1:dim(stan_pars$beta)[1], function(k) gof(sample_y_hat(k), test_stat_a),
-                      mc.cores = ncores) %>% bind_rows()
-gof_obsv_a %<>% mutate(subset = "Cell Subset A")
-gof_pred_a %<>% mutate(subset = "Cell Subset A")
-```
-
-Check if we can model pSTAT bright, and pSTAT3 and pSTAT5 dim cells.
-
-```{r goodness_of_fit_b}
+# 2. check
 test_stat_b = function(df_tfm, df_median) {
   mean(df_tfm$pSTAT1 > df_median$pSTAT1 & 
        df_tfm$pSTAT3 < df_median$pSTAT3 & 
        df_tfm$pSTAT5 < df_median$pSTAT5) * 100
 }
-gof_obsv_b = gof(obj$df_samples_subset, test_stat_b)
-gof_pred_b = mclapply(1:dim(stan_pars$beta)[1], function(k) gof(sample_y_hat(k), test_stat_b),
-                      mc.cores = ncores) %>% bind_rows()
-gof_obsv_b %<>% mutate(subset = "Cell Subset B")
-gof_pred_b %<>% mutate(subset = "Cell Subset B")
-```
-
-Check if we can model zero pERK1_2 and pMAPKAPK bright cells.
-
-```{r goodness_of_fit_c}
+# 3. check
 test_stat_c = function(df_tfm, df_median) {
   mean(df_tfm$pERK1_2  == 0 & 
        df_tfm$pMAPKAPK > df_median$pMAPKAPK) * 100
 }
-gof_obsv_c = gof(obj$df_samples_subset, test_stat_c)
-gof_pred_c = mclapply(1:dim(stan_pars$beta)[1], function(k) gof(sample_y_hat(k), test_stat_c),
-                      mc.cores = ncores) %>% bind_rows()
-gof_obsv_c %<>% mutate(subset = "Cell Subset C")
-gof_pred_c %<>% mutate(subset = "Cell Subset C")
-```
-
-Check if we can model nonzero pERK1_2 and pMAPKAPK bright cells.
-
-```{r goodness_of_fit_d}
+# 4. check
 test_stat_d = function(df_tfm, df_median) {
   mean(df_tfm$pERK1_2  > 0 & 
        df_tfm$pMAPKAPK > df_median$pMAPKAPK
        ) * 100
 }
-gof_obsv_d = gof(obj$df_samples_subset, test_stat_d)
-gof_pred_d = mclapply(1:dim(stan_pars$beta)[1], function(k) gof(sample_y_hat(k), test_stat_d),
-                      mc.cores = ncores) %>% bind_rows()
-gof_obsv_d %<>% mutate(subset = "Cell Subset D")
-gof_pred_d %<>% mutate(subset = "Cell Subset D")
+# combine observed statistic
+gof_obsv = bind_rows(
+  gof(obj$df_samples_subset, test_stat_a) %>% mutate(subset = "Cell Subset A"),
+  gof(obj$df_samples_subset, test_stat_b) %>% mutate(subset = "Cell Subset B"),
+  gof(obj$df_samples_subset, test_stat_c) %>% mutate(subset = "Cell Subset C"),
+  gof(obj$df_samples_subset, test_stat_d) %>% mutate(subset = "Cell Subset D")
+  )
+# combined predicted statistic
+gof_dist = function(test_stat) {
+  stan_pars = rstan::extract(obj$fit_mcmc, pars = "beta")
+  mclapply(1:dim(stan_pars$beta)[1], 
+           function(k) gof(sample_y_hat(k), test_stat),
+           mc.cores = ncores) %>% bind_rows()
+}
+gof_pred = bind_rows(
+  gof_dist(test_stat_a) %>% mutate(subset = "Cell Subset A"),
+  gof_dist(test_stat_b) %>% mutate(subset = "Cell Subset B"),
+  gof_dist(test_stat_c) %>% mutate(subset = "Cell Subset C"),
+  gof_dist(test_stat_d) %>% mutate(subset = "Cell Subset D")
+  )
 ```
 
 Combined plot for paper.
 
 ```{r goodness_of_fit_combined}
-# combine observed statistic
-gof_obsv_all = bind_rows(gof_obsv_a, gof_obsv_b, gof_obsv_c, gof_obsv_d)
-# combined predicted statistic
-gof_pred_all = bind_rows(gof_pred_a, gof_pred_b, gof_pred_c, gof_pred_d)
-# plot everything
-ggplot(gof_pred_all, aes(statistic, fill = term)) + 
+ggplot(gof_pred, aes(statistic, fill = term)) + 
   geom_histogram(bins = 40, position = "identity", alpha = 0.5) +
-  geom_vline(data = gof_obsv_all, linetype = "dashed", size = 1, 
+  geom_vline(data = gof_obsv, linetype = "dashed", size = 1, 
              aes(xintercept = statistic, color = term)) +
   scale_fill_few() + 
   scale_color_few() + 
