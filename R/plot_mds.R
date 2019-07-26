@@ -35,7 +35,8 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
                              pars = c("beta",
                                       "sigma","sigma_term",
                                       "Q","Q_term",
-                                      "b_donor"))
+                                      "b_donor",
+                                      "theta"))
   condition_index = seq(obj$conditions)
   donor = obj$df_samples_subset %>%
     pull(obj$group) %>%
@@ -60,16 +61,26 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
     if(show_donors) {
       # donor random effect
       b_donor = stan_pars$b_donor[k,tb_info$donor_index,]
-      mu = mvrnorm(n = tb_info$n, beta + b_donor, Cov)
+      lambda = mvrnorm(n = tb_info$n, beta + b_donor, Cov)
     } else {
-      mu = mvrnorm(n = tb_info$n, beta, Cov)
+      lambda = mvrnorm(n = tb_info$n, beta, Cov)
     }
-    mu %<>% as.tibble
-    names(mu) = obj$protein_names
-    mu %<>% add_column(term  = tb_info$term)
-    mu %<>% add_column(donor  = tb_info$donor)
-    mu %<>% add_column(k  = k)
-    mu
+    # account for zero inflation
+    theta = stan_pars$theta[k,]
+    zeros = matrix(rbinom(tb_info$n*length(obj$protein_names),
+                          size = 1, # number of trials is 1 for Bernoulli
+                          prob = theta # mixture proportion
+                          ),
+                   nrow = length(obj$protein_names),
+                   ncol = tb_info$n) %>% t
+    #tibble(sim = apply(zeros, 2, mean), theta, diff = sim-theta)
+    lambda[which(zeros == 1, arr.ind = TRUE)] = 0
+    lambda %<>% as.tibble
+    names(lambda) = obj$protein_names
+    lambda %<>% add_column(term  = tb_info$term)
+    lambda %<>% add_column(donor  = tb_info$donor)
+    lambda %<>% add_column(k  = k)
+    lambda
   }
   # count number of cells per term and donor
   subgroups = obj$df_samples_subset %>%
@@ -84,7 +95,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
                           as.factor %>%
                           as.integer)
   # sample one table
-  sample_mu_hat = function(k) {
+  sample_lambda_hat = function(k) {
     lapply(seq(nrow(subgroups)), function(i) {
       sample_condition_donor(k = k, tb_info = subgroups[i,])
     }) %>% bind_rows()
@@ -94,7 +105,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
   set.seed(seed)
   expr_median = mclapply(round(seq(1, nrow(stan_pars$beta), length.out = thinning)),
                          function(i) {
-                           sample_mu_hat(k = i) %>%
+                           sample_lambda_hat(k = i) %>%
                              group_by(.dots = sample_info_k) %>%
                              summarize_at(obj$protein_names,median)
                          },
@@ -153,16 +164,16 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
   ## add marker names labels
   ggmds = ggmds + geom_text_repel(data = expr_cor,
                                   aes(x = MDS1, y = MDS2,
-                                      label = obj$protein_names),
+                                      label = protein_selection),
                                   color = marker_color,
                                   alpha = 1.0) +
-    ggtitle("Posterior MDS of Latent Variable"~mu~"(Aspect Ratio Unscaled)")
+    ggtitle("Posterior MDS of Latent Variable"~lambda~"(Aspect Ratio Unscaled)")
 
   if(asp) {
     # change aspect ratio according to explained variance
     ggmds = ggmds +
       coord_fixed(ratio = explained_var[2] / explained_var[1]) +
-      ggtitle("Posterior MDS of Latent Variable"~mu)
+      ggtitle("Posterior MDS of Latent Variable"~lambda)
   }
   ggmds
 
