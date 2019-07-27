@@ -30,15 +30,15 @@ functions {
     Cor = quad_form_diag(Cov, sig);
     return Cor;
   }
-  int[] marker_index(int d, int n) {
-    int I[d,n];
-    for (j in 1:n) {
-      for (i in 1:d) {
-        I[i,j] = i;
-      }
-    }
-    return to_array_1d(I);
-  }
+  // int[] marker_index(int d, int n) {
+  //   int I[d,n];
+  //   for (j in 1:n) {
+  //     for (i in 1:d) {
+  //       I[i,j] = i;
+  //     }
+  //   }
+  //   return to_array_1d(I);
+  // }
   int num_zeros(int[] y) {
     int counter = 0;
     for (i in 1:size(y))
@@ -65,7 +65,7 @@ transformed data {
   int<lower=1,upper=k> donor_sorted[n] = donor[index_sorted];
   int<lower=0> Y_sorted[d,n] = Y[,index_sorted];
   int<lower=0> y_sorted[d*n] = to_array_1d(Y_sorted);
-  int<lower=1,upper=d> indices_marker[d*n] = marker_index(d,n);
+  // int<lower=1,upper=d> indices_marker[d*n] = marker_index(d,n);
   int<lower=0> n_zero = num_zeros(y_sorted);
   int<lower=0> n_nonzero = size(y_sorted) - n_zero;
   int<lower=0,upper=size(y_sorted)> indices_zero[n_zero];
@@ -94,7 +94,7 @@ parameters {
   vector[d*r_cell] x; // distribution on X for polar expansion
   vector[d*r_cell] x_term; // distribution on X for polar expansion
   vector[d*r_donor] x_donor; // distribution on X for polar expansion
-  real<lower=0, upper=1> theta[d]; // mixing proportions
+  real<lower=0, upper=1> theta[d,k]; // mixing proportions
 }
 transformed parameters {
   matrix[k,d] b_donor;
@@ -146,6 +146,7 @@ model {
     matrix[n_tar_cond,r_cell] Z_tar;
     matrix[n_tar_cond,d] b_tar;
     vector[n*d] lambda;
+    real theta_vec[n*d];
     // reference level
     Z_ref = to_matrix(z, n_ref_cond, r_cell);
     b_ref = Z_ref * Sigma_t;
@@ -156,14 +157,15 @@ model {
     b = append_row(b_ref, b_tar);
     // likelihood
     lambda = to_vector(beta'[term_sorted,] + b + b_donor[donor_sorted,]);
+    theta_vec = to_array_1d(theta[,donor_sorted]);
     for (i in 1:n_zero) {
       // mixtures cannot be vectorized
-      real theta_current = theta[indices_marker[indices_zero[i]]];
+      real theta_current = theta_vec[indices_zero[i]];
       target += log_sum_exp(bernoulli_lpmf(1 | theta_current),
                             bernoulli_lpmf(0 | theta_current) +
                             poisson_log_lpmf(0 | lambda[indices_zero[i]]));
     }
-    target += bernoulli_lpmf(0 | theta[indices_marker[indices_nonzero]]);
+    target += bernoulli_lpmf(0 | theta_vec[indices_nonzero]);
     target += poisson_log_lpmf(y_sorted[indices_nonzero] | lambda[indices_nonzero]);
   }
 }

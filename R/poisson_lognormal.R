@@ -132,6 +132,15 @@ poisson_lognormal = function(df_samples_subset,
   # ggcorrplot::ggcorrplot(cor(tfm(Y_donor)))
   # ggcorrplot::ggcorrplot(cov_donor$L %*% t(cov_donor$L))
 
+  # sample zeroinflation estimate
+  theta = obj$df_samples_subset %>%
+    group_by(donor) %>%
+    summarize_at(obj$protein_names, function(x) mean(x == 0)) %>%
+    dplyr::select(obj$protein_names) %>%
+    as.matrix %>%
+    t
+  theta[which(theta == 0, arr.ind = TRUE)] = 0.001
+
   # set random effects to zero
   z = rep(0, table(term)[1]*r_cell);
   z_term = rep(0, table(term)[2]*r_cell);
@@ -140,7 +149,8 @@ poisson_lognormal = function(df_samples_subset,
     beta = beta,
     sigma = sigma, sigma_term = sigma_term, sigma_donor = sigma_donor,
     x = x, x_term = x_term, x_donor = x_donor,
-    z = z, z_term = z_term, z_donor = z_donor
+    z = z, z_term = z_term, z_donor = z_donor,
+    theta = theta
   )
 
   # compile model

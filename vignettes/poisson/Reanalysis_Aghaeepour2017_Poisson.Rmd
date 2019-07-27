@@ -484,9 +484,12 @@ gof = function(tb) {
   tb %>% 
     group_by(term, donor) %>% 
     summarize(
-      pSTAT_bright = mean(pSTAT1 > pSTAT1_median & pSTAT3 > pSTAT3_median & pSTAT5 > pSTAT5_median),
-      pSTAT1_bright_35_dim = 
-        mean(pSTAT1 > pSTAT1_median & pSTAT3 < pSTAT3_median & pSTAT5 < pSTAT5_median),
+      pSTAT_bright = mean(pSTAT1 > pSTAT1_median & 
+                          pSTAT3 > pSTAT3_median & 
+                          pSTAT5 > pSTAT5_median),
+      pSTAT1_bright_35_dim = mean(pSTAT1 > pSTAT1_median & 
+                                  pSTAT3 < pSTAT3_median & 
+                                  pSTAT5 < pSTAT5_median),
       pERK1_2_zero = mean(pERK1_2  == 0),
       pMAPKAPK_nonzero = mean(pMAPKAPK > pMAPKAPK_median)
       )

@@ -52,7 +52,7 @@ posterior_predictive_log_lambda = function(obj, k = 1, show_donors = TRUE) {
       lambda = mvrnorm(n = tb_info$n, beta, Cov)
     }
     # account for zero inflation
-    theta = stan_pars$theta[k,]
+    theta = stan_pars$theta[k,,]
     zeros = matrix(rbinom(tb_info$n*length(obj$protein_names),
                           size = 1, # number of trials is 1 for Bernoulli
                           prob = theta # mixture proportion
