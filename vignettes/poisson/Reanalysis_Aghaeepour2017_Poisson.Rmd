@@ -482,7 +482,7 @@ pSTAT5_median = median(obj$df_samples_subset$pSTAT5)
 pMAPKAPK_median = median(obj$df_samples_subset$pMAPKAPK)
 gof = function(tb) {
   tb %>% 
-    group_by(term) %>% 
+    group_by(term, donor) %>% 
     summarize(
       pSTAT_bright = mean(pSTAT1 > pSTAT1_median & pSTAT3 > pSTAT3_median & pSTAT5 > pSTAT5_median),
       pSTAT1_bright_35_dim = 
@@ -500,17 +500,25 @@ gof_obsv = gof(obj$df_samples_subset)
 Observed test statistic (vertical dashed line) should be in the bulk of the distribution.
 
 ```{r goodness_of_fit_combined}
-gof_pred %<>% gather(subset, statistic, -term)
-gof_obsv %<>% gather(subset, statistic, -term)
-ggplot(gof_pred, aes(statistic, fill = term)) + 
-  geom_histogram(bins = 40, position = "identity", alpha = 0.5) +
-  geom_vline(data = gof_obsv, linetype = "dashed", size = 1, 
-             aes(xintercept = statistic, color = term)) +
-  scale_fill_few() + 
-  scale_color_few() + 
-  xlab("test statistic (percentage)") + 
-  facet_wrap(~subset, scales = "free") + 
-  theme(legend.position="bottom")
+plot_donor = function(donor_id) {
+  gof_pred_long = gof_pred %>% 
+    filter(donor == donor_id) %>% 
+    gather(subset, statistic, -term, -donor)
+  gof_obsv_long = gof_obsv %>% 
+    filter(donor == donor_id) %>% 
+    gather(subset, statistic, -term, -donor)
+  ggplot(gof_pred_long, aes(statistic, fill = term)) + 
+    geom_histogram(bins = 40, position = "identity", alpha = 0.5) +
+    geom_vline(data = gof_obsv_long, linetype = "dashed", size = 1, 
+               aes(xintercept = statistic, color = term)) +
+    scale_fill_few() + 
+    scale_color_few() + 
+    xlab("test statistic") + 
+    facet_wrap(~subset, scales = "free") + 
+    theme(legend.position="bottom") +
+    ggtitle(donor_id)
+}
+lapply(unique(obj$df_samples_subset$donor), plot_donor)
 ggsave(filename = "goodness_of_fit.pdf", 
        width = 8, height = 5)
 ```
