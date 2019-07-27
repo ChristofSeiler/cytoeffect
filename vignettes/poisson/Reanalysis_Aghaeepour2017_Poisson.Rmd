@@ -469,8 +469,8 @@ obj$df_samples_subset %>%
 
 Four checks:
 
-* Subset A: Check if we can model pSTAT, pSTAT3, and pSTAT5 bright cells
-* Subset B: Check if we can model pSTAT bright, and pSTAT3 and pSTAT5 dim cells
+* Subset A: Check if we can model pSTAT1, pSTAT3, and pSTAT5 bright cells
+* Subset B: Check if we can model pSTAT1 bright, and pSTAT3 and pSTAT5 dim cells
 * Subset C: Check if we can model zero pERK1_2 and pMAPKAPK bright cells
 * Subset D: Check if we can model nonzero pERK1_2 and pMAPKAPK bright cells
 
@@ -484,10 +484,11 @@ gof = function(tb) {
   tb %>% 
     group_by(term) %>% 
     summarize(
-      subset_A = mean(pSTAT1 > pSTAT1_median & pSTAT3 > pSTAT3_median & pSTAT5 > pSTAT5_median),
-      subset_B = mean(pSTAT1 > pSTAT1_median & pSTAT3 < pSTAT3_median & pSTAT5 < pSTAT5_median),
-      subset_C = mean(pERK1_2  == 0),
-      subset_D = mean(pMAPKAPK > pMAPKAPK_median)
+      pSTAT_bright = mean(pSTAT1 > pSTAT1_median & pSTAT3 > pSTAT3_median & pSTAT5 > pSTAT5_median),
+      pSTAT1_bright_35_dim = 
+        mean(pSTAT1 > pSTAT1_median & pSTAT3 < pSTAT3_median & pSTAT5 < pSTAT5_median),
+      zero_pERK1_2 = mean(pERK1_2  == 0),
+      nonzero_pMAPKAPK = mean(pMAPKAPK > pMAPKAPK_median)
       )
 }
 n_iter = nrow(rstan::extract(obj$fit_mcmc, pars = "beta")[[1]])
