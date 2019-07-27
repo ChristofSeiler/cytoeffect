@@ -443,9 +443,7 @@ ggsave(plot = pall,
 
 # Goodness of Fit
 
-Define a test statistics and compare observed value with posterior predictive distribution. 
-
-Predictive distribution marginalized over cell random effects.
+Define a test statistics and compare observed value with posterior predictive distribution.
 
 ```{r marginal_predicted_counts}
 sample_y_hat = function(k) {
@@ -458,7 +456,7 @@ sample_y_hat = function(k) {
                    nrow = nrow(lambda_matrix), 
                    ncol = ncol(lambda_matrix))
   tb[1:length(obj$protein_names)] = Y_hat
-  tb %>% filter(donor == "PTLG002")
+  tb
 }
 Y_hat = sample_y_hat(k = 1)
 Y_hat %>% 
@@ -471,77 +469,38 @@ obj$df_samples_subset %>%
 
 Four checks:
 
-1. Check if we can model pSTAT, pSTAT3, and pSTAT5 bright cells
-2. Check if we can model pSTAT bright, and pSTAT3 and pSTAT5 dim cells
-3. Check if we can model zero pERK1_2 and pMAPKAPK bright cells
-4. Check if we can model nonzero pERK1_2 and pMAPKAPK bright cells
+* Subset A: Check if we can model pSTAT, pSTAT3, and pSTAT5 bright cells
+* Subset B: Check if we can model pSTAT bright, and pSTAT3 and pSTAT5 dim cells
+* Subset C: Check if we can model zero pERK1_2 and pMAPKAPK bright cells
+* Subset D: Check if we can model nonzero pERK1_2 and pMAPKAPK bright cells
 
 ```{r goodness_of_fit}
 set.seed(0xdada)
-# test function
-gof = function(df, test_stat) {
-  tfm = function(x) asinh(x/5)
-  df_tfm = df %>% mutate_at(obj$protein_names, tfm)
-  df_median = df_tfm %>% summarize_at(obj$protein_names, median)
-  tibble(
-    term = c(
-      "1st trimester", 
-      "3rd trimester"
-      ),
-    statistic = c(
-      test_stat(df_tfm %>% filter(term == "1st trimester"), df_median), 
-      test_stat(df_tfm %>% filter(term == "3rd trimester"), df_median)
+pSTAT1_median = median(obj$df_samples_subset$pSTAT1)
+pSTAT3_median = median(obj$df_samples_subset$pSTAT3)
+pSTAT5_median = median(obj$df_samples_subset$pSTAT5)
+pMAPKAPK_median = median(obj$df_samples_subset$pMAPKAPK)
+gof = function(tb) {
+  tb %>% 
+    group_by(term) %>% 
+    summarize(
+      subset_A = mean(pSTAT1 > pSTAT1_median & pSTAT3 > pSTAT3_median & pSTAT5 > pSTAT5_median),
+      subset_B = mean(pSTAT1 > pSTAT1_median & pSTAT3 < pSTAT3_median & pSTAT5 < pSTAT5_median),
+      subset_C = mean(pERK1_2  == 0),
+      subset_D = mean(pMAPKAPK > pMAPKAPK_median)
       )
-  )
 }
-# 1. check
-test_stat_a = function(df_tfm, df_median) {
-  mean(df_tfm$pSTAT1 > df_median$pSTAT1 & 
-       df_tfm$pSTAT3 > df_median$pSTAT3 & 
-       df_tfm$pSTAT5 > df_median$pSTAT5) * 100
-}
-# 2. check
-test_stat_b = function(df_tfm, df_median) {
-  mean(df_tfm$pSTAT1 > df_median$pSTAT1 & 
-       df_tfm$pSTAT3 < df_median$pSTAT3 & 
-       df_tfm$pSTAT5 < df_median$pSTAT5) * 100
-}
-# 3. check
-test_stat_c = function(df_tfm, df_median) {
-  mean(df_tfm$pERK1_2  == 0 & 
-       df_tfm$pMAPKAPK > df_median$pMAPKAPK) * 100
-}
-# 4. check
-test_stat_d = function(df_tfm, df_median) {
-  mean(df_tfm$pERK1_2  > 0 & 
-       df_tfm$pMAPKAPK > df_median$pMAPKAPK
-       ) * 100
-}
-# combine observed statistic
-gof_obsv = bind_rows(
-  gof(obj$df_samples_subset, test_stat_a) %>% mutate(subset = "Cell Subset A"),
-  gof(obj$df_samples_subset, test_stat_b) %>% mutate(subset = "Cell Subset B"),
-  gof(obj$df_samples_subset, test_stat_c) %>% mutate(subset = "Cell Subset C"),
-  gof(obj$df_samples_subset, test_stat_d) %>% mutate(subset = "Cell Subset D")
-  )
-# combined predicted statistic
-gof_dist = function(test_stat) {
-  stan_pars = rstan::extract(obj$fit_mcmc, pars = "beta")
-  mclapply(1:dim(stan_pars$beta)[1], 
-           function(k) gof(sample_y_hat(k), test_stat),
-           mc.cores = ncores) %>% bind_rows()
-}
-gof_pred = bind_rows(
-  gof_dist(test_stat_a) %>% mutate(subset = "Cell Subset A"),
-  gof_dist(test_stat_b) %>% mutate(subset = "Cell Subset B"),
-  gof_dist(test_stat_c) %>% mutate(subset = "Cell Subset C"),
-  gof_dist(test_stat_d) %>% mutate(subset = "Cell Subset D")
-  )
+n_iter = nrow(rstan::extract(obj$fit_mcmc, pars = "beta")[[1]])
+gof_pred = mclapply(1:n_iter, function(k) gof(sample_y_hat(k)), 
+                    mc.cores = ncores, mc.set.seed = FALSE) %>% bind_rows()
+gof_obsv = gof(obj$df_samples_subset)
 ```
 
-Combined plot for paper.
+Observed test statistic (vertical dashed line) should be in the bulk of the distribution.
 
 ```{r goodness_of_fit_combined}
+gof_pred %<>% gather(subset, statistic, -term)
+gof_obsv %<>% gather(subset, statistic, -term)
 ggplot(gof_pred, aes(statistic, fill = term)) + 
   geom_histogram(bins = 40, position = "identity", alpha = 0.5) +
   geom_vline(data = gof_obsv, linetype = "dashed", size = 1, 
