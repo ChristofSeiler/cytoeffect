@@ -133,10 +133,10 @@ poisson_lognormal = function(df_samples_subset,
   # ggcorrplot::ggcorrplot(cov_donor$L %*% t(cov_donor$L))
 
   # sample zeroinflation estimate
-  theta = obj$df_samples_subset %>%
-    group_by(donor) %>%
-    summarize_at(obj$protein_names, function(x) mean(x == 0)) %>%
-    dplyr::select(obj$protein_names) %>%
+  theta = df_samples_subset %>%
+    group_by_(group) %>%
+    summarize_at(protein_names, function(x) mean(x == 0)) %>%
+    dplyr::select(protein_names) %>%
     as.matrix %>%
     t
   theta[which(theta == 0, arr.ind = TRUE)] = 0.001
