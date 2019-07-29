@@ -502,26 +502,23 @@ gof_obsv = gof(obj$df_samples_subset)
 
 Observed test statistic (vertical dashed line) should be in the bulk of the distribution.
 
-```{r goodness_of_fit_combined}
-plot_donor = function(donor_id) {
-  gof_pred_long = gof_pred %>% 
-    filter(donor == donor_id) %>% 
-    gather(subset, statistic, -term, -donor)
-  gof_obsv_long = gof_obsv %>% 
-    filter(donor == donor_id) %>% 
-    gather(subset, statistic, -term, -donor)
-  ggplot(gof_pred_long, aes(statistic, fill = term)) + 
-    geom_histogram(bins = 40, position = "identity", alpha = 0.5) +
-    geom_vline(data = gof_obsv_long, linetype = "dashed", size = 1, 
-               aes(xintercept = statistic, color = term)) +
-    scale_fill_few() + 
-    scale_color_few() + 
-    xlab("test statistic") + 
-    facet_wrap(~subset, scales = "free") + 
-    theme(legend.position="bottom") +
-    ggtitle(donor_id)
-}
-lapply(unique(obj$df_samples_subset$donor), plot_donor)
+```{r plot_goodness_of_fit}
+gof_pred_long = gof_pred %>% 
+  gather(subset, statistic, -term, -donor)
+gof_obsv_long = gof_obsv %>% 
+  gather(subset, statistic, -term, -donor) %>%
+  group_by(subset, term) %>% 
+  summarize(mean_statistic = mean(statistic))
+ggplot(gof_pred_long, aes(statistic, fill = term)) + 
+  geom_histogram(bins = 40, position = "identity", alpha = 0.5) +
+  geom_vline(data = gof_obsv_long, linetype = "dashed", size = 1, 
+               aes(xintercept = mean_statistic, color = term)) +
+  scale_fill_few() + 
+  scale_color_few() + 
+  xlab("test statistic") + 
+  facet_wrap(~subset, scales = "free") + 
+  theme(legend.position="bottom") +
+  ggtitle("All Donors")
 ggsave(filename = "goodness_of_fit.pdf", 
        width = 8, height = 5)
 ```
