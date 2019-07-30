@@ -491,7 +491,9 @@ gof = function(tb) {
                                   pSTAT3 < pSTAT3_median & 
                                   pSTAT5 < pSTAT5_median),
       pERK1_2_zero = mean(pERK1_2  == 0),
-      pMAPKAPK_nonzero = mean(pMAPKAPK > pMAPKAPK_median)
+      pMAPKAPK_nonzero = mean(pMAPKAPK > pMAPKAPK_median),
+      pSTAT1_zero = mean(pSTAT1 == 0),
+      pSTAT1_median = median(pSTAT1),
       )
 }
 n_iter = nrow(rstan::extract(obj$fit_mcmc, pars = "beta")[[1]])
