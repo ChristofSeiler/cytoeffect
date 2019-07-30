@@ -506,13 +506,12 @@ Observed test statistic (vertical dashed line) should be in the bulk of the dist
 gof_pred_long = gof_pred %>% 
   gather(subset, statistic, -term, -donor)
 gof_obsv_long = gof_obsv %>% 
-  gather(subset, statistic, -term, -donor) %>%
-  group_by(subset, term) %>% 
-  summarize(mean_statistic = mean(statistic))
+  gather(subset, statistic, -term, -donor)
 ggplot(gof_pred_long, aes(statistic, fill = term)) + 
   geom_histogram(bins = 40, position = "identity", alpha = 0.5) +
-  geom_vline(data = gof_obsv_long, linetype = "dashed", size = 1, 
-               aes(xintercept = mean_statistic, color = term)) +
+  geom_point(data = gof_obsv_long, 
+             position = position_jitter(width = 0, height = 50), alpha = 0.8,
+             aes(y = 0, x = statistic, color = term)) +
   scale_fill_few() + 
   scale_color_few() + 
   xlab("test statistic") + 
