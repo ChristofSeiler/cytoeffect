@@ -33,7 +33,8 @@ poisson_lognormal = function(df_samples_subset,
                              r_donor,
                              iter = 325,
                              warmup = 200,
-                             num_chains = 4) {
+                             num_chains = 4,
+                             adapt_delta = 0.8) {
 
   # some checks
   if(sum(names(df_samples_subset) == condition) == 0)
@@ -79,40 +80,18 @@ poisson_lognormal = function(df_samples_subset,
   is.neginf = function(x) x == -Inf
   beta[is.neginf(beta)] = -7 # beta[j] ~ normal(0, 7);
 
-  # regularize and decompose covariance matrix
-  # c is upper bound on condition number:
-  # out$d[1]/out$d[length(out$d)]
-  # math details: http://lagrange.math.siu.edu/Olive/slch6.pdf
-  # c = 100
-  # tfm = function(x) asinh(x/5)
-  # initcov = function(Y_raw) {
-  #   # transform raw counts
-  #   Y_tfm = tfm(Y_raw)
-  #   # sample standard deviation
-  #   Y_cov = cov(Y_tfm)
-  #   sigma = sqrt(diag(Y_cov))
-  #   # regularize correlation matrix
-  #   Y_cor = cor(Y_tfm)
-  #   out = svd(Y_cor)
-  #   rho = max(0, (out$d[1] - c*out$d[length(out$d)]) / (c - 1) )
-  #   Y_cor_reg = 1/(1+rho) * (Y_cor + diag(rho, nrow(Y_cor)))
-  #   # cholesky decomposition of correlation matrix
-  #   L = t(chol(Y_cor_reg))
-  #   list(sigma = sigma, L = L)
-  # }
-
   # covariance matrix across cells per level of condition
-  # cov1 = initcov(Y[term == 1,])
-  # cov2 = initcov(Y[term == 2,])
-
-  Y_term_svd = svd(cov(Y[term == 1,]))
-  sigma = sqrt(Y_term_svd$d[1:r_cell])
-  Q = Y_term_svd$u[,1:r_cell]
+  tfm = function(x) asinh(x/5)
+  Y_term1_svd = Y[term == 1,] %>% tfm %>% cov %>% svd
+  Y_term2_svd = Y[term == 2,] %>% tfm %>% cov %>% svd
+  #r_cell1 = sum(cumsum(Y_term1_svd$d/sum(Y_term1_svd$d)) < 0.95)
+  #r_cell2 = sum(cumsum(Y_term2_svd$d/sum(Y_term2_svd$d)) < 0.95)
+  #r_cell = max(r_cell1, r_cell2)
+  sigma = sqrt(Y_term1_svd$d[1:r_cell])
+  Q = Y_term1_svd$u[,1:r_cell]
   x = c(Q)
-
-  Y_term_svd = svd(cov(Y[term == 2,]))
-  sigma_term = sqrt(Y_term_svd$d[1:r_cell])
-  Q_term = Y_term_svd$u[,1:r_cell]
+  sigma_term = sqrt(Y_term2_svd$d[1:r_cell])
+  Q_term = Y_term2_svd$u[,1:r_cell]
   x_term = c(Q_term)
 
   # covariance matrix across donors
@@ -120,17 +99,11 @@ poisson_lognormal = function(df_samples_subset,
     group_by_at(group) %>%
     summarise_at(protein_names, median) %>%
     dplyr::select(protein_names)
-  Y_donor_svd = svd(cov(Y_donor))
+  Y_donor_svd = Y_donor %>% tfm %>% cov %>% svd
+  #r_donor = sum(cumsum(Y_donor_svd$d/sum(Y_donor_svd$d)) < 0.95)
   sigma_donor = sqrt(Y_donor_svd$d[1:r_donor])
   Q_donor = Y_donor_svd$u[,1:r_donor]
   x_donor = c(Q_donor)
-
-  # ggcorrplot::ggcorrplot(cov1$L %*% t(cov1$L))
-  # ggcorrplot::ggcorrplot(cor(tfm(Y[term == 1,])))
-  # ggcorrplot::ggcorrplot(cov2$L %*% t(cov2$L))
-  # ggcorrplot::ggcorrplot(cor(tfm(Y[term == 2,])))
-  # ggcorrplot::ggcorrplot(cor(tfm(Y_donor)))
-  # ggcorrplot::ggcorrplot(cov_donor$L %*% t(cov_donor$L))
 
   # sample zeroinflation estimate
   theta = df_samples_subset %>%
@@ -184,7 +157,7 @@ poisson_lognormal = function(df_samples_subset,
                       seed = 1,
                       init = rep(list(stan_init), num_chains),
                       save_warmup = FALSE,
-                      control = list(adapt_delta = 0.8))
+                      control = list(adapt_delta = adapt_delta))
 
   # # Laplace approximation
   # stan_file = system.file("exec", "poisson_eb.stan", package = "cytoeffect")
