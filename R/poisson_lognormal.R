@@ -82,7 +82,8 @@ poisson_lognormal = function(df_samples_subset,
 
   # covariance matrix across cells per level of condition
   tfm = function(x) asinh(x/5)
-  Y_term1_svd = Y[term == 1,] %>% tfm %>% cov %>% svd
+  Y_term1_svd = Y %>% tfm %>% cov %>% svd
+  #Y_term1_svd = Y[term == 1,] %>% tfm %>% cov %>% svd
   #Y_term2_svd = Y[term == 2,] %>% tfm %>% cov %>% svd
   #r_cell1 = sum(cumsum(Y_term1_svd$d/sum(Y_term1_svd$d)) < 0.95)
   #r_cell2 = sum(cumsum(Y_term2_svd$d/sum(Y_term2_svd$d)) < 0.95)
