@@ -115,7 +115,7 @@ poisson_lognormal = function(df_samples_subset,
   theta[which(theta == 0, arr.ind = TRUE)] = 0.001
 
   # set random effects to zero
-  z = rep(0, table(term)[1]*r_cell);
+  z = rep(0, n*r_cell);
   #z_term = rep(0, table(term)[2]*r_cell);
   z_donor = rep(0, k*r_donor)
   stan_init = list(
