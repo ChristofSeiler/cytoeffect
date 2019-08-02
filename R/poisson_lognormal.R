@@ -83,16 +83,16 @@ poisson_lognormal = function(df_samples_subset,
   # covariance matrix across cells per level of condition
   tfm = function(x) asinh(x/5)
   Y_term1_svd = Y[term == 1,] %>% tfm %>% cov %>% svd
-  Y_term2_svd = Y[term == 2,] %>% tfm %>% cov %>% svd
+  #Y_term2_svd = Y[term == 2,] %>% tfm %>% cov %>% svd
   #r_cell1 = sum(cumsum(Y_term1_svd$d/sum(Y_term1_svd$d)) < 0.95)
   #r_cell2 = sum(cumsum(Y_term2_svd$d/sum(Y_term2_svd$d)) < 0.95)
   #r_cell = max(r_cell1, r_cell2)
   sigma = sqrt(Y_term1_svd$d[1:r_cell])
   Q = Y_term1_svd$u[,1:r_cell]
   x = c(Q)
-  sigma_term = sqrt(Y_term2_svd$d[1:r_cell])
-  Q_term = Y_term2_svd$u[,1:r_cell]
-  x_term = c(Q_term)
+  #sigma_term = sqrt(Y_term2_svd$d[1:r_cell])
+  #Q_term = Y_term2_svd$u[,1:r_cell]
+  #x_term = c(Q_term)
 
   # covariance matrix across donors
   Y_donor = df_samples_subset %>%
@@ -116,13 +116,16 @@ poisson_lognormal = function(df_samples_subset,
 
   # set random effects to zero
   z = rep(0, table(term)[1]*r_cell);
-  z_term = rep(0, table(term)[2]*r_cell);
+  #z_term = rep(0, table(term)[2]*r_cell);
   z_donor = rep(0, k*r_donor)
   stan_init = list(
     beta = beta,
-    sigma = sigma, sigma_term = sigma_term, sigma_donor = sigma_donor,
-    x = x, x_term = x_term, x_donor = x_donor,
-    z = z, z_term = z_term, z_donor = z_donor,
+    sigma = sigma, #sigma_term = sigma_term,
+    sigma_donor = sigma_donor,
+    x = x, #x_term = x_term,
+    x_donor = x_donor,
+    z = z, #z_term = z_term,
+    z_donor = z_donor,
     theta = theta
   )
 
@@ -143,9 +146,12 @@ poisson_lognormal = function(df_samples_subset,
   #                           "x","x_term","x_donor")]
   fit_mcmc = sampling(model,
                       pars = c("beta",
-                               "sigma","sigma_term","sigma_donor",
-                               "Q","Q_term","Q_donor",
-                               "Cor","Cor_term","Cor_donor",
+                               "sigma",#"sigma_term",
+                               "sigma_donor",
+                               "Q",#"Q_term",
+                               "Q_donor",
+                               "Cor",#"Cor_term",
+                               "Cor_donor",
                                "b_donor",
                                "theta"
                                ),

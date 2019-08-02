@@ -86,13 +86,13 @@ transformed data {
 parameters {
   matrix[d,p] beta; // fixed coefficients
   vector<lower=0>[r_cell] sigma; // random effects std
-  vector<lower=0>[r_cell] sigma_term; // random effects std
+  //vector<lower=0>[r_cell] sigma_term; // random effects std
   vector<lower=0>[r_donor] sigma_donor; // random effects std
-  vector[n_ref_cond*r_cell] z; // random effects
-  vector[n_tar_cond*r_cell] z_term; // random effects
+  vector[n*r_cell] z; // random effects
+  //vector[n_tar_cond*r_cell] z_term; // random effects
   vector[k*r_donor] z_donor; // random effects
   vector[d*r_cell] x; // distribution on X for polar expansion
-  vector[d*r_cell] x_term; // distribution on X for polar expansion
+  //vector[d*r_cell] x_term; // distribution on X for polar expansion
   vector[d*r_donor] x_donor; // distribution on X for polar expansion
   real<lower=0, upper=1> theta[d,k]; // mixing proportions
 }
@@ -100,21 +100,21 @@ transformed parameters {
   matrix[k,d] b_donor;
   matrix[d,r_cell] Q;
   matrix[r_cell,d] Sigma_t;
-  matrix[d,r_cell] Q_term;
-  matrix[r_cell,d] Sigma_term_t;
+  //matrix[d,r_cell] Q_term;
+  //matrix[r_cell,d] Sigma_term_t;
   matrix[d,r_donor] Q_donor;
   matrix[r_donor,d] Sigma_donor_t;
   {
     matrix[d,r_cell] X_ref;
-    matrix[d,r_cell] X_tar;
+    //matrix[d,r_cell] X_tar;
     // reference level
     X_ref = to_matrix(x, d, r_cell);
     Q = polar(X_ref);
     Sigma_t = diag_post_multiply(Q, sigma)';
     // target level
-    X_tar = to_matrix(x_term, d, r_cell);
-    Q_term = polar(X_tar);
-    Sigma_term_t = diag_post_multiply(Q_term, sigma_term)';
+    //X_tar = to_matrix(x_term, d, r_cell);
+    //Q_term = polar(X_tar);
+    //Sigma_term_t = diag_post_multiply(Q_term, sigma_term)';
   }
   {
     matrix[d,r_donor] X;
@@ -131,32 +131,32 @@ model {
   for (j in 1:d)
     beta[j] ~ normal(0, 7);
   sigma ~ cauchy(0, 2.5);
-  sigma_term ~ cauchy(0, 2.5);
+  //sigma_term ~ cauchy(0, 2.5);
   sigma_donor ~ cauchy(0, 2.5);
   z ~ std_normal();
-  z_term ~ std_normal();
+  //z_term ~ std_normal();
   z_donor ~ std_normal();
   x ~ std_normal();
-  x_term ~ std_normal();
+  //x_term ~ std_normal();
   x_donor ~ std_normal();
   {
     matrix[n,d] b;
-    matrix[n_ref_cond,r_cell] Z_ref;
-    matrix[n_ref_cond,d] b_ref;
-    matrix[n_tar_cond,r_cell] Z_tar;
-    matrix[n_tar_cond,d] b_tar;
+    matrix[n,r_cell] Z_ref;
+    matrix[n,d] b_ref;
+    //matrix[n_tar_cond,r_cell] Z_tar;
+    //matrix[n_tar_cond,d] b_tar;
     vector[n*d] lambda;
     real theta_vec[n*d];
     // reference level
-    Z_ref = to_matrix(z, n_ref_cond, r_cell);
+    Z_ref = to_matrix(z, n, r_cell);
     b_ref = Z_ref * Sigma_t;
     // target level
-    Z_tar = to_matrix(z_term, n_tar_cond, r_cell);
-    b_tar = Z_tar * Sigma_term_t;
+    //Z_tar = to_matrix(z_term, n_tar_cond, r_cell);
+    //b_tar = Z_tar * Sigma_term_t;
     // combine levels
-    b = append_row(b_ref, b_tar);
+    //b = append_row(b_ref, b_tar);
     // likelihood
-    lambda = to_vector(beta'[term_sorted,] + b + b_donor[donor_sorted,]);
+    lambda = to_vector(beta'[term_sorted,] + b_ref + b_donor[donor_sorted,]);
     theta_vec = to_array_1d(theta[,donor_sorted]);
     for (i in 1:n_zero) {
       // mixtures cannot be vectorized
@@ -172,9 +172,9 @@ model {
 generated quantities {
   // correlation matrix
   matrix[d,d] Cor;
-  matrix[d,d] Cor_term;
+  //matrix[d,d] Cor_term;
   matrix[d,d] Cor_donor;
   Cor = cov2cor(Q, sigma);
-  Cor_term = cov2cor(Q_term, sigma_term);
+  //Cor_term = cov2cor(Q_term, sigma_term);
   Cor_donor = cov2cor(Q_donor, sigma_donor);
 }
