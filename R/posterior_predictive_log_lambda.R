@@ -11,7 +11,9 @@
 #'
 #' @param obj Object of class \code{cytoeffect_poisson} computed
 #'   using \code{\link{poisson_lognormal}}
-#' @return \code{\link[ggplot2]{ggplot2}} object
+#' @param k Draw from HMC chain
+#' @param show_donors Include donor random effect
+#' @return \code{\link[tibble]{tibble}} object
 #'
 posterior_predictive_log_lambda = function(obj, k = 1, show_donors = TRUE) {
 

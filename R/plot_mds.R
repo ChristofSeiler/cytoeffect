@@ -16,6 +16,7 @@
 #' @param ncores Number of cores
 #' @param thinning Number of posterior draws after thinning
 #' @param cor_scaling_factor Scaling factor for correlation arrows
+#' @param show_donors Include donor random effect
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
