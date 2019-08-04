@@ -187,8 +187,10 @@ Some more MCMC diagnostics. According to empirically findings, Rhat > 1.1 is usu
 
 ```{r mcmc_diagnostics}
 pars = c("beta",
-         "sigma","sigma_term","sigma_donor",
-         "Cor","Cor_term","Cor_donor",
+         "sigma",#"sigma_term",
+         "sigma_donor",
+         "Cor",#"Cor_term",
+         "Cor_donor",
          "b_donor")
 tb = summary(obj$fit_mcmc, 
              pars = pars)$summary %>% 
