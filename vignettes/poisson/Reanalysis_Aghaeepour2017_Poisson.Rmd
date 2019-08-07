@@ -186,21 +186,12 @@ range(cor - stan_pars$Cor_donor[k,,])
 Some more MCMC diagnostics. According to empirically findings, Rhat > 1.1 is usually indicative of problems in the fit.
 
 ```{r mcmc_diagnostics}
-pars = c("beta",
-         "sigma",#"sigma_term",
-         "sigma_donor",
-         "Cor",#"Cor_term",
-         "Cor_donor",
-         "b_donor")
-tb = summary(obj$fit_mcmc, 
-             pars = pars)$summary %>% 
-  as.tibble(rownames = "pars", .before = 1) %>% 
-  dplyr::select(pars, n_eff, Rhat)
-tb %<>% na.omit() # Stan fills upper triangle with zeros
-tb %>% arrange(n_eff)
-tb %>% arrange(desc(Rhat))
-tb %>% summarize(min = min(n_eff), max = max(n_eff))
-tb %>% summarize(min = min(Rhat), max = max(Rhat))
+tidyMCMC(
+  obj$fit_mcmc, 
+  pars = c("beta","sigma","sigma_donor",
+           "Cor","Cor_donor","b_donor"),
+  rhat = TRUE, ess = TRUE
+  ) %>% arrange(desc(rhat))
 ```
 
 # Results
@@ -208,12 +199,11 @@ tb %>% summarize(min = min(Rhat), max = max(Rhat))
 Plot posterior regression coefficients.
 
 ```{r plot_beta}
-p1 = plot(obj, type = "beta") + 
+plot(obj, type = "beta") + 
   ggtitle(expression("Fixed Effects"~beta)) +
   theme(legend.position = "bottom") +
   guides(col = guide_legend(ncol = 1)) + 
   scale_color_few()
-p1
 plot(obj, type = "beta") + 
   facet_wrap(~condition, scales = "free_x") +
   theme(legend.position = "bottom") +
@@ -248,69 +238,31 @@ exp(diff_log_count)
 Posterior multivariate pairs plot.
 
 ```{r posterior_pair_plot}
-pSTAT1_index = which(obj$protein_names == "pSTAT1")
-pSTAT3_index = which(obj$protein_names == "pSTAT3")
-pSTAT5_index = which(obj$protein_names == "pSTAT5")
-post_beta = rstan::extract(obj$fit_mcmc, pars = "beta")[[1]]
-tb_log_count = bind_rows(
-  tibble(
-    term = levels(pull(obj$df_samples_subset, obj$condition))[1],
-    pSTAT1 = post_beta[,pSTAT1_index,1],
-    pSTAT3 = post_beta[,pSTAT3_index,1],
-    pSTAT5 = post_beta[,pSTAT5_index,1]
-  ),
-  tibble(
-    term = levels(pull(obj$df_samples_subset, obj$condition))[2],
-    pSTAT1 = post_beta[,pSTAT1_index,2],
-    pSTAT3 = post_beta[,pSTAT3_index,2],
-    pSTAT5 = post_beta[,pSTAT5_index,2]
-  )
-)
-plot_diag = function(marker) {
-  ggplot(tb_log_count, aes_string(marker, fill = "term")) + 
-    geom_histogram(bins = 40, position = "identity", alpha = 0.5) +
-    scale_fill_few()
-}
-plot_off_diag = function(marker1, marker2) {
-  ggplot(tb_log_count, aes_string(marker1, marker2, color = "term")) +
-    geom_density2d() + 
-    scale_color_few()
-}
-ppair = plot_grid(
-  plot_diag("pSTAT1") + theme(legend.position = "none"),
-  NULL, 
-  NULL,
-  plot_off_diag("pSTAT1","pSTAT3") + theme(legend.position = "none"), 
-  plot_diag("pSTAT3") + theme(legend.position = "none"), 
-  NULL,
-  plot_off_diag("pSTAT1","pSTAT5") + theme(legend.position = "none"), 
-  plot_off_diag("pSTAT3","pSTAT5") + theme(legend.position = "none"), 
-  plot_diag("pSTAT5") + theme(legend.position = "none"),
-  ncol = 3
-)
-plot_grid(ppair,
-          get_legend(plot_diag("pSTAT1") + theme(legend.position = "bottom")),
-          ncol = 1,
-          rel_heights = c(1, .1))
+cytoeffect::plot_pairs(obj, "pSTAT1", "pSTAT3", "pSTAT5")
 ggsave(filename = "posterior_multivariate_plmm.pdf", width = 8, height = 6)
 ```
 
 Plot posterior standard deviation.
 
 ```{r posterior_sigma}
-p2 = plot(obj, type = "sigma") + 
+cytoeffect::plot(obj, type = "sigma") + 
   ggtitle("Marker Standard Deviation"~sigma) +
   theme(legend.position = "bottom") +
   guides(col = guide_legend(ncol = 1)) +
-  scale_color_manual(values=c("#5DA5DA", "#FAA43A", "#F17CB0"))
-p2
+  scale_color_manual(values=c("#60BD68", "#F17CB0"))
 ```
 
 Plot posterior correlations.
 
 ```{r posterior_cor}
-plist = plot(obj, type = "Cor")
+plist = cytoeffect::plot(obj, type = "Cor")
 plist
+```
+
+Plot posterior zero-inflation probability.
+
+```{r posterior_theta}
+cytoeffect::plot(obj, type = "theta")
 ```
 
 Multivariate posterior MDS plots.
@@ -323,124 +275,6 @@ ggsave(filename = "posterior_mds_latent_variable_mu_unscaled.pdf", width = 10, h
 cytoeffect::plot_mds(obj, asp = FALSE, show_donors = FALSE)
 ggsave(filename = "posterior_mds_latent_variable_mu_unscaled_no_donors.pdf", 
        width = 10, height = 5)
-```
-
-Pairwise correlation change between conditions.
-
-```{r correlation_uncertainty}
-marker_pair = c("pSTAT3","pSTAT5")
-Cor = rstan::extract(obj$fit_mcmc, pars = "Cor")[[1]]
-Cor_term = rstan::extract(obj$fit_mcmc, pars = "Cor_term")[[1]]
-Cor_diff = Cor_term - Cor
-tb_cor = Cor_diff[,
-                  which(obj$protein_names == marker_pair[1]),
-                  which(obj$protein_names == marker_pair[2])] %>% as.tibble
-tb_cor %<>% mutate(
-  side = if_else(tb_cor$value > 0, 
-                 true = paste0("positive (", 100*mean(tb_cor$value > 0), "%)"),
-                 false = paste0("negative (", 100*mean(tb_cor$value <= 0), "%)"))
-)
-# keep colors consistent
-if(mean(tb_cor$value > 0) == 1) {
-  fill_colors = "#E46726"
-} else {
-  fill_colors = c("#6D9EC1","#E46726")
-}
-ggplot(tb_cor, aes(value, fill = side)) + 
-  geom_histogram(bins = 50, alpha = 0.7) +
-  xlab(paste0("Cor_term(", paste(marker_pair, collapse = ", "),")" )) +
-  ggtitle("Posterior Distribution") + 
-  scale_fill_manual(values = fill_colors)
-```
-
-Check if overall correlation structure changes between conditions.
-
-```{r compare_covariance}
-value = sapply(1:nrow(Cor_diff), function(i) {
-  mask = which(upper.tri(Cor_diff[i,,]), arr.ind = T)
-  cord = Cor_diff[i,,]
-  mean(cord[lower.tri(cord)] > 0)
-})
-tb_cor = tibble(value = value)
-tb_cor %<>% mutate(
-  side = if_else(tb_cor$value > 0.5, 
-                 true = paste0("> 1/2 (", 100*mean(tb_cor$value > 0.5), "%)"),
-                 false = paste0("<= 1/2 (", 100*mean(tb_cor$value <= 0.5), "%)"))
-)
-p_global = ggplot(tb_cor, aes(value, fill = side)) + 
-  geom_histogram(bins = 25, alpha = 0.7) +
-  ggtitle(expression("Overall P(Corr"~Omega~"(3rd) > Corr"~Omega~"(1st))")) +
-  scale_fill_manual(values = fill_colors) +
-  theme(legend.position = "bottom") +
-  xlab("probability")
-p_global
-```
-
-Plot differential correlations.
-
-```{r plot_differential_cor}
-cor_increase = apply(X = Cor_diff, MARGIN = c(2,3), FUN = function(x) mean(x > 0))
-colnames(cor_increase) = rownames(cor_increase) = obj$protein_names
-p_local = ggcorrplot(cor_increase, hc.order = TRUE, type = "lower",
-           outline.col = "lightgray",
-           colors = c("#6D9EC1", "white", "#E46726")) +
-  ggtitle(expression("P(Corr"~Omega~"(3rd) > Corr"~Omega~"(1st))")) +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  scale_fill_gradient2(limit = c(0, 1), midpoint = 0.5,
-                       low = "#6D9EC1", mid =  "white", high = "#E46726",
-                       name = "probability")
-p_local
-```
-
-Plot graph with edges at least 95% probability of larger correlation.
-
-```{r plot_graph}
-plot_correlation_graph = function(lambda) {
-  graph = apply(Cor_diff, c(2,3), function(x) mean(x>0))
-  diag(graph) = 0
-  graph[upper.tri(graph)] = 0
-  ind = which(graph > 0, arr.ind = T)
-  tb_graph = tibble(
-    from = obj$protein_names[ind[,1]],
-    to = obj$protein_names[ind[,2]],
-    prob = graph[ind]
-  )
-  tb_graph %<>% dplyr::filter(prob > lambda)
-  tb_graph
-  bayesFDR = sum(1-tb_graph$prob)/nrow(tb_graph)*100
-  bayesFDR
-  set.seed(0xdada)
-  ig = graph_from_data_frame(tb_graph, directed = FALSE)
-  ggplot(ggnetwork(ig, layout = "circle"), aes(x, y, xend = xend, yend = yend)) + 
-    geom_edges(color = "black", size = 1) +
-    geom_nodes(color = "black", size = 20) + 
-    geom_nodetext(aes(label = vertex.names), 
-                  color = "white", size = 3, fontface = "bold") +
-    xlim(c(-0.1, 1.1)) +
-    ylim(c(-0.1, 1.1)) + 
-    ggtitle(paste0("Posterior Expected FDR: ", 
-                   round(bayesFDR, digits = 1),"%")) +
-    theme_blank() +
-    theme(plot.title = element_text(hjust = 0.5))
-}
-plot_correlation_graph(lambda = 0.8)
-```
-
-Combine plot for paper.
-
-```{r compbine_plot}
-pall = plot_grid(
-  p1, p2, 
-  plist[[1]] + ggtitle(expression("Marker Corr"~Omega~"(1st trimester)")),
-  plist[[2]] + ggtitle(expression("Marker Corr"~Omega~"(3rd trimester)")),
-  p_global, p_local, 
-  rel_heights = c(0.38,0.31,0.31),
-  nrow = 3, labels = "AUTO"
-)
-ggsave(plot = pall, 
-       filename = "posterior_summary_plmm.pdf", 
-       width = 8, height = 11)
 ```
 
 # Goodness of Fit

@@ -28,6 +28,7 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
   warmup = obj$fit_mcmc@stan_args[[1]]$warmup
   protein_names = obj$protein_names
   conditions = levels(pull(obj$df_samples_subset, obj$condition))
+  donors = unique(pull(obj$df_samples_subset, obj$group))
 
   if(type == "beta") {
 
@@ -80,11 +81,10 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
         add_column(type = rep(type_name, length(protein_names)))
       tb
     }
-    tb_donor = to_tb(par_sigma = "sigma", par_q = "Q", type_name = conditions[1])
-    tb_cond1 = to_tb(par_sigma = "sigma_term", par_q = "Q_term", type_name = conditions[2])
-    tb_cond2 = to_tb(par_sigma = "sigma_donor", par_q = "Q_donor", type_name = "donor")
-    tb_sigma = bind_rows(tb_donor, tb_cond1, tb_cond2)
-    tb_sigma$type %<>% factor(levels = c(conditions,"donor"))
+    tb_cond = to_tb(par_sigma = "sigma", par_q = "Q", type_name = obj$condition)
+    tb_donor = to_tb(par_sigma = "sigma_donor", par_q = "Q_donor", type_name = obj$group)
+    tb_sigma = bind_rows(tb_cond, tb_donor)
+    tb_sigma$type %<>% factor(levels = c(obj$condition,obj$group))
     dodge = position_dodge(width = 0.9)
     ggplot(tb_sigma, aes(x = protein_name, y = `50%`, color = type)) +
       geom_point(size = 2, position = dodge) +
@@ -97,8 +97,8 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
 
   } else if (type == "Cor") {
 
-    var_names = c("Cor","Cor_term","Cor_donor")
-    display_names = c(conditions,"donor")
+    var_names = c("Cor","Cor_donor")
+    display_names = c(obj$condition,obj$group)
     lapply(1:length(var_names), function(i) {
       cor = rstan::extract(obj$fit_mcmc, pars = var_names[i])[[1]]
       cor_median = apply(X = cor, MARGIN = c(2,3), FUN = median)
@@ -110,6 +110,22 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
         theme(panel.grid.major = element_blank(),
               panel.grid.minor = element_blank())
     })
+
+  } else if (type == "theta") {
+
+    theta = rstan::extract(obj$fit_mcmc, pars = "theta")[[1]]
+    theta_median = apply(X = theta, MARGIN = c(2,3), FUN = median)
+    colnames(theta_median) = donors
+    theta_median %<>% as_tibble()
+    theta_median %<>% mutate(protein_name = protein_names)
+    theta_median %<>% gather(donor, probability, -protein_name)
+    ggplot(theta_median, aes(protein_name, donor)) +
+      geom_tile(aes(fill = probability), color = "white") +
+      scale_fill_gradient(low = "white", high = "steelblue") +
+      coord_fixed() +
+      theme(panel.background = element_rect(fill = "lightgray"),
+            axis.text.x = element_text(angle = 90, hjust = 1),
+            axis.title = element_blank())
 
   } else {
 

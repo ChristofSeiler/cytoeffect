@@ -72,7 +72,7 @@ posterior_predictive_log_lambda = function(obj, k = 1, show_donors = TRUE) {
   }
   # count number of cells per term and donor
   subgroups = obj$df_samples_subset %>%
-    group_by_(term = obj$condition, donor = obj$group) %>%
+    group_by_at(c(term = obj$condition, donor = obj$group)) %>%
     tally %>%
     ungroup
   subgroups %<>% mutate(term_index = subgroups %>%

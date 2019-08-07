@@ -34,7 +34,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
   seed = 0xdada
 
   # sample all tables
-  sample_info_k = c("donor","term","k")
+  sample_info_k = c(obj$group,obj$condition,"k")
   set.seed(seed)
 
   n_chains = length(obj$fit_mcmc@stan_args)
@@ -80,7 +80,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
   # add median donors
   if(show_donors) {
     expr_median_donor = expr_median %>%
-      group_by(.dots = c("donor","term")) %>%
+      group_by(.dots = c(obj$group, obj$condition)) %>%
       summarize_at(c("MDS1","MDS2"), median)
     expr_median_donor %<>% add_column(
       color = sapply(expr_median_donor$term,
