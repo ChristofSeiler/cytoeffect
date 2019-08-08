@@ -66,6 +66,15 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
 
   } else if (type == "sigma") {
 
+    # summarize cell level effect
+    tb_cond = summary(obj$fit_mcmc, pars = c("sigma"),
+                      probs = c(0.025, 0.5, 0.975))
+    tb_cond = tb_cond$summary[,c("2.5%","50%","97.5%")]
+    tb_cond %<>% as.tibble(rownames = "name")
+    tb_cond %<>% add_column(protein_name = protein_names)
+    tb_cond %<>% add_column(type = "cell")
+
+    # summarize donor level effect
     to_tb = function(par_sigma, par_q, type_name) {
       sigma = rstan::extract(obj$fit_mcmc, pars = par_sigma)[[1]]
       Q = rstan::extract(obj$fit_mcmc, pars = par_q)[[1]]
@@ -81,10 +90,11 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
         add_column(type = rep(type_name, length(protein_names)))
       tb
     }
-    tb_cond = to_tb(par_sigma = "sigma", par_q = "Q", type_name = obj$condition)
     tb_donor = to_tb(par_sigma = "sigma_donor", par_q = "Q_donor", type_name = obj$group)
+
+    # combine and plot
     tb_sigma = bind_rows(tb_cond, tb_donor)
-    tb_sigma$type %<>% factor(levels = c(obj$condition,obj$group))
+    tb_sigma$type %<>% factor(levels = c("cell",obj$group))
     dodge = position_dodge(width = 0.9)
     ggplot(tb_sigma, aes(x = protein_name, y = `50%`, color = type)) +
       geom_point(size = 2, position = dodge) +

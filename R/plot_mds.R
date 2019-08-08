@@ -56,7 +56,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
   expr_median %<>% bind_cols(tibble(MDS1 = mds_res$points[,1],
                                     MDS2 = mds_res$points[,2]))
   # plot MDS
-  ggmds = ggplot(expr_median, aes(x = MDS1, y = MDS2, color = term)) +
+  ggmds = ggplot(expr_median, aes_string(x = "MDS1", y = "MDS2", color = obj$condition)) +
     xlab(paste0("MDS1 (",explained_var[1],"%)")) +
     ylab(paste0("MDS2 (",explained_var[2],"%)")) +
     scale_color_manual(values = c("#5DA5DA", "#FAA43A"),
@@ -83,12 +83,13 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
       group_by(.dots = c(obj$group, obj$condition)) %>%
       summarize_at(c("MDS1","MDS2"), median)
     expr_median_donor %<>% add_column(
-      color = sapply(expr_median_donor$term,
-                     function(x) if(x == expr_median_donor$term[1]) "#5DA5DA" else "#FAA43A"))
+      color = sapply(pull(expr_median_donor, obj$condition),
+                     function(x) if(x == pull(expr_median_donor, obj$condition)[1])
+                       "#5DA5DA" else "#FAA43A"))
     ggmds = ggmds +
       annotate("text",
                x = expr_median_donor$MDS1, y = expr_median_donor$MDS2,
-               label = expr_median_donor$donor, color = expr_median_donor$color)
+               label = pull(expr_median_donor, obj$group), color = expr_median_donor$color)
   }
 
   # add correlation arrows

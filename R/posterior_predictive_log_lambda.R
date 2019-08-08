@@ -22,33 +22,35 @@ posterior_predictive_log_lambda = function(obj, k = 1, show_donors = TRUE) {
 
   stan_pars = rstan::extract(obj$fit_mcmc,
                              pars = c("beta",
-                                      "sigma",#"sigma_term",
-                                      "Q",#"Q_term",
+                                      "sigma",
+                                      "Cor",
                                       "b_donor",
                                       "theta"))
+
+  condition = obj$df_samples_subset %>%
+    pull(obj$condition) %>%
+    as.factor %>%
+    levels
   condition_index = seq(obj$conditions)
-  donor = obj$df_samples_subset %>%
+
+  group = obj$df_samples_subset %>%
     pull(obj$group) %>%
     as.factor %>%
     levels
-  donor_index = seq(donor)
+  group_index = seq(group)
+
   # kth posterior draw
   sample_condition_donor = function(k, tb_info) {
     # fixed effects
-    beta = stan_pars$beta[k,,tb_info$term_index]
+    beta = stan_pars$beta[k,,tb_info$cond_index]
     # cell random effect
-    #if(tb_info$term_index == 1) {
-      sigma = stan_pars$sigma[k,]
-      Q = stan_pars$Q[k,,]
-    #} else {
-    #  sigma = stan_pars$sigma_term[k,]
-    #  Q = stan_pars$Q_term[k,,]
-    #}
-    Cov = Q %*% diag(sigma^2) %*% t(Q)
+    sigma = stan_pars$sigma[k,]
+    Cor = stan_pars$Cor[k,,]
+    Cov = diag(sigma) %*% Cor %*% diag(sigma)
     # combine
     if(show_donors) {
       # donor random effect
-      b_donor = stan_pars$b_donor[k,tb_info$donor_index,]
+      b_donor = stan_pars$b_donor[k,tb_info$group_index,]
       lambda = mvrnorm(n = tb_info$n, beta + b_donor, Cov)
     } else {
       lambda = mvrnorm(n = tb_info$n, beta, Cov)
@@ -63,23 +65,23 @@ posterior_predictive_log_lambda = function(obj, k = 1, show_donors = TRUE) {
                    ncol = tb_info$n) %>% t
     #tibble(sim = apply(zeros, 2, mean), theta, diff = sim-theta)
     lambda[which(zeros == 1, arr.ind = TRUE)] = 0
-    lambda %<>% as.tibble
-    names(lambda) = obj$protein_names
-    lambda %<>% add_column(term  = tb_info$term)
-    lambda %<>% add_column(donor  = tb_info$donor)
+    colnames(lambda) = obj$protein_names
+    lambda %<>% as_tibble
+    lambda %<>% add_column(!!(obj$condition) := pull(tb_info, obj$condition))
+    lambda %<>% add_column(!!(obj$group) := pull(tb_info, obj$group))
     lambda %<>% add_column(k  = k)
     lambda
   }
   # count number of cells per term and donor
   subgroups = obj$df_samples_subset %>%
-    group_by_at(c(term = obj$condition, donor = obj$group)) %>%
+    group_by_at(c(obj$condition, obj$group)) %>%
     tally %>%
     ungroup
-  subgroups %<>% mutate(term_index = subgroups %>%
-                          pull(term) %>%
+  subgroups %<>% mutate(cond_index = subgroups %>%
+                          pull(obj$condition) %>%
                           as.integer)
-  subgroups %<>% mutate(donor_index = subgroups %>%
-                          pull(donor) %>%
+  subgroups %<>% mutate(group_index = subgroups %>%
+                          pull(obj$group) %>%
                           as.factor %>%
                           as.integer)
   # sample one table

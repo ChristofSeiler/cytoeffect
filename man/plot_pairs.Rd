@@ -24,8 +24,5 @@ Posterior multivariate pairs plot for Poisson Log-Normal Mixed Model
 }
 \examples{
 # fit = cytoeffect::poisson_lognormal(...)
-# cytoeffect::plot_pairs(fit,
-                         marker1 = "pSTAT1",
-                         marker2 = "pSTAT3",
-                         marker3 = "pSTAT5")
+# cytoeffect::plot_pairs(fit, marker1 = ..., marker2 = ..., marker3 = ...)
 }
