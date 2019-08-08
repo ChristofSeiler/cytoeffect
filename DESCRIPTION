@@ -25,7 +25,8 @@ Imports:
     ggcorrplot,
     batchtools,
     MASS,
-    ggrepel
+    ggrepel,
+    cowplot
 LinkingTo: 
     StanHeaders (>= 2.17.2),
     rstan (>= 2.17.3),
