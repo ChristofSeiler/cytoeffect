@@ -15,9 +15,13 @@
 #' @param protein_names A vector of column names of protein to use in the analysis
 #' @param condition The column name of the condition variable
 #' @param group The column name of the group variable
+#' @param r_donor Rank of the donor random effect covariance matrix
 #' @param iter Number of iteration per chain for the HMC sampler
 #' @param warmup Number of warm up steps per chain for the HMC sampler
 #' @param num_chains Number of HMC chains to run in parallel
+#' @param adapt_delta Parameter to control step size of numerical solver
+#' @param seed Set seed for HMC sampler
+#'                    (higher value means smaller step size, max is 1)
 #' @return A list of class \code{cytoeffect_poisson} containing
 #'   \item{fit_mcmc}{\code{\link[rstan]{rstan}} object}
 #'   \item{protein_names}{input protein names}
@@ -29,12 +33,12 @@ poisson_lognormal = function(df_samples_subset,
                              protein_names,
                              condition,
                              group,
-                             r_cell,
                              r_donor,
                              iter = 325,
                              warmup = 200,
                              num_chains = 4,
-                             adapt_delta = 0.8) {
+                             adapt_delta = 0.8,
+                             seed = 1) {
 
   # some checks
   if(sum(names(df_samples_subset) == condition) == 0)
@@ -48,7 +52,6 @@ poisson_lognormal = function(df_samples_subset,
 
   # prepare input data
   Y = df_samples_subset %>% dplyr::select(protein_names) %>% as.matrix()
-  #X = model.matrix(formula(paste("~",condition)), data = df_samples_subset)
   term = df_samples_subset %>%
     pull(condition) %>%
     as.factor() %>%
@@ -56,9 +59,6 @@ poisson_lognormal = function(df_samples_subset,
   p = length(table(term))
   n = nrow(Y)
   d = ncol(Y)
-  #p = ncol(X)
-  #k = length(unique(df_samples_subset$group_condition))
-  #donor = as.integer(as.factor(df_samples_subset$group_condition))
   donor = df_samples_subset %>%
     pull(group) %>%
     as.factor() %>%
@@ -66,7 +66,7 @@ poisson_lognormal = function(df_samples_subset,
   k = length(table(donor))
   stan_data = list(Y = t(Y), n = n, d = d, p = p,
                    k = k, donor = donor, term = term,
-                   r_cell = r_cell, r_donor = r_donor)
+                   r_donor = r_donor)
 
   # prepare starting point for sampler
 
@@ -82,18 +82,15 @@ poisson_lognormal = function(df_samples_subset,
 
   # covariance matrix across cells per level of condition
   tfm = function(x) asinh(x/5)
-  Y_term1_svd = Y %>% tfm %>% cov %>% svd
-  #Y_term1_svd = Y[term == 1,] %>% tfm %>% cov %>% svd
-  #Y_term2_svd = Y[term == 2,] %>% tfm %>% cov %>% svd
-  #r_cell1 = sum(cumsum(Y_term1_svd$d/sum(Y_term1_svd$d)) < 0.95)
-  #r_cell2 = sum(cumsum(Y_term2_svd$d/sum(Y_term2_svd$d)) < 0.95)
-  #r_cell = max(r_cell1, r_cell2)
-  sigma = sqrt(Y_term1_svd$d[1:r_cell])
-  Q = Y_term1_svd$u[,1:r_cell]
-  x = c(Q)
-  #sigma_term = sqrt(Y_term2_svd$d[1:r_cell])
-  #Q_term = Y_term2_svd$u[,1:r_cell]
-  #x_term = c(Q_term)
+  # transform raw counts
+  Y_tfm = tfm(Y)
+  # sample standard deviation
+  Y_cov = cov(Y_tfm)
+  sigma = sqrt(diag(Y_cov))
+  # regularize correlation matrix
+  Y_cor = cor(Y_tfm)
+  # cholesky decomposition of correlation matrix
+  L = t(chol(Y_cor))
 
   # covariance matrix across donors
   Y_donor = df_samples_subset %>%
@@ -116,17 +113,19 @@ poisson_lognormal = function(df_samples_subset,
   theta[which(theta == 0, arr.ind = TRUE)] = 0.001
 
   # set random effects to zero
-  z = rep(0, n*r_cell);
-  #z_term = rep(0, table(term)[2]*r_cell);
+  z = rep(0, n*d);
   z_donor = rep(0, k*r_donor)
   stan_init = list(
     beta = beta,
-    sigma = sigma, #sigma_term = sigma_term,
+    # cell level
+    sigma = sigma,
+    L = L,
+    z = z,
+    # donor level
     sigma_donor = sigma_donor,
-    x = x, #x_term = x_term,
     x_donor = x_donor,
-    z = z, #z_term = z_term,
     z_donor = z_donor,
+    # zero inflation
     theta = theta
   )
 
@@ -147,11 +146,10 @@ poisson_lognormal = function(df_samples_subset,
   #                           "x","x_term","x_donor")]
   fit_mcmc = sampling(model,
                       pars = c("beta",
-                               "sigma",#"sigma_term",
+                               "sigma",
                                "sigma_donor",
-                               "Q",#"Q_term",
                                "Q_donor",
-                               "Cor",#"Cor_term",
+                               "Cor",
                                "Cor_donor",
                                "b_donor",
                                "theta"
@@ -161,7 +159,7 @@ poisson_lognormal = function(df_samples_subset,
                       warmup = warmup,
                       chains = num_chains,
                       cores = num_chains,
-                      seed = 1,
+                      seed = seed,
                       init = rep(list(stan_init), num_chains),
                       save_warmup = FALSE,
                       control = list(adapt_delta = adapt_delta))
