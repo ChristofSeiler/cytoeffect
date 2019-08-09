@@ -245,7 +245,7 @@ ggsave(filename = "posterior_multivariate_plmm.pdf", width = 8, height = 6)
 Plot posterior standard deviation.
 
 ```{r posterior_sigma}
-cytoeffect::plot(obj, type = "sigma") + 
+plot(obj, type = "sigma") + 
   ggtitle("Marker Standard Deviation"~sigma) +
   theme(legend.position = "bottom") +
   guides(col = guide_legend(ncol = 1)) +
@@ -255,14 +255,14 @@ cytoeffect::plot(obj, type = "sigma") +
 Plot posterior correlations.
 
 ```{r posterior_cor}
-plist = cytoeffect::plot(obj, type = "Cor")
+plist = plot(obj, type = "Cor")
 plist
 ```
 
 Plot posterior zero-inflation probability.
 
 ```{r posterior_theta}
-cytoeffect::plot(obj, type = "theta")
+plot(obj, type = "theta")
 ```
 
 Multivariate posterior MDS plots.
