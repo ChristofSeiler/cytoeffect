@@ -199,11 +199,11 @@ tidyMCMC(
 Plot posterior regression coefficients.
 
 ```{r plot_beta}
-plot(obj, type = "beta") + 
-  ggtitle(expression("Fixed Effects"~beta)) +
-  theme(legend.position = "bottom") +
+p_beta = plot(obj, type = "beta") + 
+  theme(legend.position = "bottom", plot.title = element_blank()) +
   guides(col = guide_legend(ncol = 1)) + 
   scale_color_few()
+p_beta
 plot(obj, type = "beta") + 
   facet_wrap(~condition, scales = "free_x") +
   theme(legend.position = "bottom") +
@@ -238,8 +238,9 @@ exp(diff_log_count)
 Posterior multivariate pairs plot.
 
 ```{r posterior_pair_plot}
-cytoeffect::plot_pairs(obj, "pSTAT1", "pSTAT3", "pSTAT5")
-ggsave(filename = "posterior_multivariate_plmm.pdf", width = 8, height = 6)
+p_beta_pairs = cytoeffect::plot_pairs(obj, "pSTAT1", "pSTAT3", "pSTAT5")
+ggsave(plot_grid(p_beta, NULL, p_beta_pairs, nrow = 1, rel_widths = c(0.35, 0.05, 0.6)), 
+       filename = "posterior_beta.pdf", width = 10, height = 5)
 ```
 
 Plot posterior standard deviation.
@@ -262,18 +263,19 @@ plist
 Plot posterior zero-inflation probability.
 
 ```{r posterior_theta}
-plot(obj, type = "theta")
+plot(obj, type = "theta") + coord_flip()
+ggsave(filename = "posterior_theta.pdf", width = 7, height = 4)
 ```
 
 Multivariate posterior MDS plots.
 
 ```{r multivariate_posterior}
 cytoeffect::plot_mds(obj)
-ggsave(filename = "posterior_mds_latent_variable_mu_scaled.pdf", width = 10, height = 5)
+ggsave(filename = "posterior_lambda_scaled.pdf", width = 10, height = 5)
 cytoeffect::plot_mds(obj, asp = FALSE)
-ggsave(filename = "posterior_mds_latent_variable_mu_unscaled.pdf", width = 10, height = 5)
+ggsave(filename = "posterior_lambda_unscaled.pdf", width = 10, height = 5)
 cytoeffect::plot_mds(obj, asp = FALSE, show_donors = FALSE)
-ggsave(filename = "posterior_mds_latent_variable_mu_unscaled_no_donors.pdf", 
+ggsave(filename = "posterior_lambda_unscaled_no_donors.pdf", 
        width = 10, height = 5)
 ```
 
@@ -357,7 +359,7 @@ ggplot(gof_pred_long, aes(statistic, fill = term)) +
   theme(legend.position="bottom") +
   ggtitle("All Donors")
 ggsave(filename = "goodness_of_fit.pdf", 
-       width = 8, height = 5)
+       width = 10, height = 5)
 ```
 
 # Session Info {.unnumbered}
