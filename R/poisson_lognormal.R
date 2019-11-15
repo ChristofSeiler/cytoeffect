@@ -152,7 +152,8 @@ poisson_lognormal = function(df_samples_subset,
                                "Cor",
                                "Cor_donor",
                                "b_donor",
-                               "theta"
+                               "theta",
+                               "log_lik"
                                ),
                       data = stan_data,
                       iter = iter,

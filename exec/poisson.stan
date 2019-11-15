@@ -81,6 +81,7 @@ transformed parameters {
   matrix[k,d] b_donor;
   matrix[d,r_donor] Q_donor;
   matrix[r_donor,d] Sigma_donor_t;
+  vector[n*d] log_lik;
   {
     matrix[d,r_donor] X;
     matrix[k,r_donor] Z;
@@ -90,17 +91,6 @@ transformed parameters {
     Z = to_matrix(z_donor, k, r_donor);
     b_donor = Z * Sigma_donor_t;
   }
-}
-model {
-  // priors
-  for (j in 1:d)
-    beta[j] ~ normal(0, 7);
-  sigma ~ cauchy(0, 2.5);
-  sigma_donor ~ cauchy(0, 2.5);
-  L ~ lkj_corr_cholesky(eta);
-  z ~ std_normal();
-  z_donor ~ std_normal();
-  x_donor ~ std_normal();
   {
     matrix[d,d] Sigma_t;
     matrix[n,d] b;
@@ -116,13 +106,29 @@ model {
     for (i in 1:n_zero) {
       // mixtures cannot be vectorized
       real theta_current = theta_vec[indices_zero[i]];
-      target += log_sum_exp(bernoulli_lpmf(1 | theta_current),
-                            bernoulli_lpmf(0 | theta_current) +
-                            poisson_log_lpmf(0 | lambda[indices_zero[i]]));
+      log_lik[indices_zero[i]] = log_sum_exp(bernoulli_lpmf(1 | theta_current),
+                                  bernoulli_lpmf(0 | theta_current) +
+                                  poisson_log_lpmf(0 | lambda[indices_zero[i]]));
     }
-    target += bernoulli_lpmf(0 | theta_vec[indices_nonzero]);
-    target += poisson_log_lpmf(y[indices_nonzero] | lambda[indices_nonzero]);
+    for (i in 1:n_nonzero) {
+      log_lik[indices_nonzero[i]] =
+        bernoulli_lpmf(0 | theta_vec[indices_nonzero[i]]);
+      log_lik[indices_nonzero[i]] =
+        poisson_log_lpmf(y[indices_nonzero[i]] | lambda[indices_nonzero[i]]);
+    }
   }
+}
+model {
+  // priors
+  for (j in 1:d)
+    beta[j] ~ normal(0, 7);
+  sigma ~ cauchy(0, 2.5);
+  sigma_donor ~ cauchy(0, 2.5);
+  L ~ lkj_corr_cholesky(eta);
+  z ~ std_normal();
+  z_donor ~ std_normal();
+  x_donor ~ std_normal();
+  target += log_lik;
 }
 generated quantities {
   // correlation matrices
