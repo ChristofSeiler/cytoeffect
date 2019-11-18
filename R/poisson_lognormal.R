@@ -51,7 +51,10 @@ poisson_lognormal = function(df_samples_subset,
     stop("condition variables should have two levels")
 
   # prepare input data
-  Y = df_samples_subset %>% dplyr::select(protein_names) %>% as.matrix()
+  Y = df_samples_subset %>%
+    ungroup() %>%
+    dplyr::select(protein_names) %>%
+    as.matrix()
   term = df_samples_subset %>%
     pull(condition) %>%
     as.factor() %>%
