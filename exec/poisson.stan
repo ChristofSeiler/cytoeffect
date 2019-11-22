@@ -45,10 +45,10 @@ data {
   int<lower=1> k; // number of donors
   int<lower=1,upper=k> donor[n]; // donor indicator
   int<lower=1,upper=p> term[n]; // condition indicator
+  int<lower=1> r; // rank of latent matrix
   int<lower=1> r_donor; // rank of latent matrix
 }
 transformed data {
-  real eta = 1.0; // parameter of lkj prior
   int<lower=0> y[d*n] = to_array_1d(Y);
   int<lower=0> n_zero = num_zeros(y);
   int<lower=0> n_nonzero = size(y) - n_zero;
@@ -68,19 +68,31 @@ transformed data {
   }
 }
 parameters {
-  vector[n*d] z; // random effects
   matrix[d,p] beta; // fixed coefficients
-  vector<lower=0>[d] sigma; // random effects std
+  vector<lower=0>[r] sigma; // random effects std
   vector<lower=0>[r_donor] sigma_donor; // random effects std
-  cholesky_factor_corr[d] L; // cholesky factor protein effects
+  vector[n*r] z; // random effects
+  vector[d*r] x; // distribution on X for polar expansion
   vector[k*r_donor] z_donor; // random effects
   vector[d*r_donor] x_donor; // distribution on X for polar expansion
   real<lower=0, upper=1> theta[d,k]; // mixing proportions
 }
 transformed parameters {
+  matrix[n,d] b;
+  matrix[d,r] Q;
+  matrix[r,d] Sigma_t;
   matrix[k,d] b_donor;
   matrix[d,r_donor] Q_donor;
   matrix[r_donor,d] Sigma_donor_t;
+  {
+    matrix[d,r] X;
+    matrix[n,r] Z;
+    X = to_matrix(x, d, r);
+    Q = polar(X);
+    Sigma_t = diag_post_multiply(Q, sigma)';
+    Z = to_matrix(z, n, r);
+    b = Z * Sigma_t;
+  }
   {
     matrix[d,r_donor] X;
     matrix[k,r_donor] Z;
@@ -97,19 +109,13 @@ model {
     beta[j] ~ normal(0, 7);
   sigma ~ cauchy(0, 2.5);
   sigma_donor ~ cauchy(0, 2.5);
-  L ~ lkj_corr_cholesky(eta);
   z ~ std_normal();
+  x ~ std_normal();
   z_donor ~ std_normal();
   x_donor ~ std_normal();
   {
-    matrix[d,d] Sigma_t;
-    matrix[n,d] b;
-    matrix[n,d] Z;
     vector[n*d] lambda;
     real theta_vec[n*d];
-    Sigma_t = diag_pre_multiply(sigma, L)';
-    Z = to_matrix(z, n, d);
-    b = Z * Sigma_t;
     // likelihood
     lambda = to_vector(beta'[term,] + b + b_donor[donor,]);
     theta_vec = to_array_1d(theta[,donor]);
@@ -128,6 +134,6 @@ generated quantities {
   // correlation matrices
   matrix[d,d] Cor;
   matrix[d,d] Cor_donor;
-  Cor = L * L';
+  Cor = cov2cor(Q, sigma);
   Cor_donor = cov2cor(Q_donor, sigma_donor);
 }

@@ -33,6 +33,7 @@ poisson_lognormal = function(df_samples_subset,
                              protein_names,
                              condition,
                              group,
+                             r,
                              r_donor,
                              iter = 325,
                              warmup = 200,
@@ -69,6 +70,7 @@ poisson_lognormal = function(df_samples_subset,
   k = length(table(donor))
   stan_data = list(Y = t(Y), n = n, d = d, p = p,
                    k = k, donor = donor, term = term,
+                   r = r,
                    r_donor = r_donor)
 
   # prepare starting point for sampler
@@ -87,13 +89,10 @@ poisson_lognormal = function(df_samples_subset,
   tfm = function(x) asinh(x/5)
   # transform raw counts
   Y_tfm = tfm(Y)
-  # sample standard deviation
-  Y_cov = cov(Y_tfm)
-  sigma = sqrt(diag(Y_cov))
-  # regularize correlation matrix
-  Y_cor = cor(Y_tfm)
-  # cholesky decomposition of correlation matrix
-  L = t(chol(Y_cor))
+  Y_svd = Y_tfm %>% tfm %>% cov %>% svd
+  sigma = sqrt(Y_svd$d[1:r])
+  Q = Y_svd$u[,1:r]
+  x = c(Q)
 
   # covariance matrix across donors
   Y_donor = df_samples_subset %>%
@@ -116,13 +115,13 @@ poisson_lognormal = function(df_samples_subset,
   theta[which(theta == 0, arr.ind = TRUE)] = 0.001
 
   # set random effects to zero
-  z = rep(0, n*d);
+  z = rep(0, n*r);
   z_donor = rep(0, k*r_donor)
   stan_init = list(
     beta = beta,
     # cell level
     sigma = sigma,
-    L = L,
+    x = x,
     z = z,
     # donor level
     sigma_donor = sigma_donor,
@@ -150,6 +149,7 @@ poisson_lognormal = function(df_samples_subset,
   fit_mcmc = sampling(model,
                       pars = c("beta",
                                "sigma",
+                               "Q",
                                "sigma_donor",
                                "Q_donor",
                                "Cor",
