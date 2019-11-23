@@ -23,7 +23,7 @@ posterior_predictive_log_lambda = function(obj, k = 1, show_donors = TRUE) {
   stan_pars = rstan::extract(obj$fit_mcmc,
                              pars = c("beta",
                                       "sigma",
-                                      "Cor",
+                                      "Q",
                                       "b_donor",
                                       "theta"))
 
@@ -45,8 +45,8 @@ posterior_predictive_log_lambda = function(obj, k = 1, show_donors = TRUE) {
     beta = stan_pars$beta[k,,tb_info$cond_index]
     # cell random effect
     sigma = stan_pars$sigma[k,]
-    Cor = stan_pars$Cor[k,,]
-    Cov = diag(sigma) %*% Cor %*% diag(sigma)
+    Q = stan_pars$Q[k,,]
+    Cov = Q %*% diag(sigma)^2 %*% t(Q)
     # combine
     if(show_donors) {
       # donor random effect
