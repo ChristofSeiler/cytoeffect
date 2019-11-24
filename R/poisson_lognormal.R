@@ -34,6 +34,7 @@ poisson_lognormal = function(df_samples_subset,
                              condition,
                              group,
                              r_donor,
+                             eta,
                              iter = 325,
                              warmup = 200,
                              num_chains = 4,
@@ -69,7 +70,8 @@ poisson_lognormal = function(df_samples_subset,
   k = length(table(donor))
   stan_data = list(Y = t(Y), n = n, d = d, p = p,
                    k = k, donor = donor, term = term,
-                   r_donor = r_donor)
+                   r_donor = r_donor,
+                   eta = eta)
 
   # prepare starting point for sampler
 

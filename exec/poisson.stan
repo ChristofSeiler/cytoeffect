@@ -46,9 +46,9 @@ data {
   int<lower=1,upper=k> donor[n]; // donor indicator
   int<lower=1,upper=p> term[n]; // condition indicator
   int<lower=1> r_donor; // rank of latent matrix
+  real eta; // parameter of lkj prior
 }
 transformed data {
-  real eta = 1.0; // parameter of lkj prior
   int<lower=0> y[d*n] = to_array_1d(Y);
   int<lower=0> n_zero = num_zeros(y);
   int<lower=0> n_nonzero = size(y) - n_zero;
