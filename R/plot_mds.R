@@ -56,12 +56,16 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
   expr_median %<>% bind_cols(tibble(MDS1 = mds_res$points[,1],
                                     MDS2 = mds_res$points[,2]))
   # plot MDS
-  ggmds = ggplot(expr_median, aes_string(x = "MDS1", y = "MDS2", color = obj$condition)) +
+  ggmds = ggplot(expr_median, aes_string(x = "MDS1", y = "MDS2",
+                                         color = obj$condition)) +
     xlab(paste0("MDS1 (",explained_var[1],"%)")) +
     ylab(paste0("MDS2 (",explained_var[2],"%)")) +
     scale_color_manual(values = c("#5DA5DA", "#FAA43A"),
                        name = obj$condition) +
-    geom_density_2d()
+    scale_fill_manual(values = c("#5DA5DA", "#FAA43A"),
+                      name = obj$condition) +
+    stat_density_2d(aes_string(fill = obj$condition),
+                    geom = "polygon", alpha = 0.05)
 
   # make circle of correlation plot
   protein_sd = apply(as.data.frame(expr_median)[,obj$protein_names],2,sd)
@@ -87,9 +91,22 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
                      function(x) if(x == pull(expr_median_donor, obj$condition)[1])
                        "#5DA5DA" else "#FAA43A"))
     ggmds = ggmds +
-      annotate("text",
-               x = expr_median_donor$MDS1, y = expr_median_donor$MDS2,
-               label = pull(expr_median_donor, obj$group), color = expr_median_donor$color)
+      geom_point(
+        data = expr_median_donor,
+        aes_string(shape = obj$group,
+                   x = expr_median_donor$MDS1,
+                   y = expr_median_donor$MDS2),
+        size = 3,
+        ) +
+      scale_shape_manual(
+        values =
+          64 + # from shape table (so that it starts at A)
+          pull(expr_median_donor, obj$group) %>%
+            unique %>%
+            length %>%
+            seq(1, .)
+        ) +
+      theme(legend.position = "bottom")
   }
 
   # add correlation arrows
