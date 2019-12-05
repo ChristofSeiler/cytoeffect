@@ -35,7 +35,6 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
 
   # sample all tables
   sample_info_k = c(obj$group,obj$condition,"k")
-  set.seed(seed)
 
   n_chains = length(obj$fit_mcmc@stan_args)
   stan_args = obj$fit_mcmc@stan_args[[1]]
@@ -43,6 +42,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
   expr_median = mclapply(
     round(seq(1, n_total_draws, length.out = thinning)),
     function(i) {
+      set.seed(seed)
       posterior_predictive_log_lambda(obj, k = i, show_donors = show_donors) %>%
         group_by(.dots = sample_info_k) %>%
         summarize_at(obj$protein_names,median)
@@ -122,7 +122,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
                                   aes(x = MDS1, y = MDS2,
                                       label = protein_selection),
                                   color = marker_color,
-                                  alpha = 1.0) +
+                                  alpha = 1.0, seed = seed) +
     ggtitle("Posterior MDS of Latent Variable"~lambda~"(Aspect Ratio Unscaled)")
 
   if(asp) {
