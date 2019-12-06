@@ -51,6 +51,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
     ) %>% bind_rows
   # classical MDS on all posterior draws
   dist_matrix = dist(expr_median[,-seq(sample_info_k)])
+  set.seed(seed)
   mds_res = cmdscale(dist_matrix,eig = TRUE, k = 2) # k is the number of dim
   explained_var = (100*mds_res$eig[1:2]/sum(mds_res$eig)) %>% round(digits = 1)
   expr_median %<>% bind_cols(tibble(MDS1 = mds_res$points[,1],
@@ -73,7 +74,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
   protein_selection = obj$protein_names[protein_sd != 0]
   # correlations between variables and MDS axes
   expr_cor = cor(as.data.frame(expr_median)[,protein_selection],
-                 expr_median[,c("MDS1","MDS2")]) %>% as.tibble
+                 expr_median[,c("MDS1","MDS2")]) %>% as_tibble
   # scaling factor (otherwise too crowded)
   expr_cor = expr_cor * cor_scaling_factor
   expr_cor %<>% add_column(protein_selection)
