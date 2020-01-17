@@ -108,7 +108,7 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
   } else if (type == "Cor") {
 
     var_names = c("Cor","Cor_donor")
-    display_names = c(obj$condition,obj$group)
+    display_names = c("cell",obj$group)
     lapply(1:length(var_names), function(i) {
       cor = rstan::extract(obj$fit_mcmc, pars = var_names[i])[[1]]
       cor_median = apply(X = cor, MARGIN = c(2,3), FUN = median)
