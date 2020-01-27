@@ -5,7 +5,7 @@
 \title{HMC Sampling for Poisson Log-Normal Mixed Model}
 \usage{
 poisson_lognormal(df_samples_subset, protein_names, condition, group,
-  r_donor, iter = 325, warmup = 200, num_chains = 4,
+  r_donor, eta = 1, iter = 325, warmup = 200, num_chains = 4,
   adapt_delta = 0.8, seed = 1)
 }
 \arguments{

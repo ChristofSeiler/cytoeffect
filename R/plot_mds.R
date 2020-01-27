@@ -17,13 +17,14 @@
 #' @param thinning Number of posterior draws after thinning
 #' @param cor_scaling_factor Scaling factor for correlation arrows
 #' @param show_donors Include donor random effect
+#' @param repel Repel marker names
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
 #' # fit = cytoeffect::poisson_lognormal(...)
 #' # cytoeffect::plot_mds(fit, asp = FALSE)
 plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning = 100,
-                    cor_scaling_factor = 1, show_donors = TRUE) {
+                    cor_scaling_factor = 1, show_donors = TRUE, repel = TRUE) {
 
   if (class(obj) != "cytoeffect_poisson")
     stop("Not a cytoeffect_poisson object.")
@@ -119,11 +120,20 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
                            arrow = arrow(type = "open", length = unit(0.03, "npc")))
 
   ## add marker names labels
-  ggmds = ggmds + geom_text_repel(data = expr_cor,
-                                  aes(x = MDS1, y = MDS2,
-                                      label = protein_selection),
+  if(repel) {
+    ggmds = ggmds + geom_text_repel(data = expr_cor,
+                                    aes(x = MDS1, y = MDS2,
+                                        label = protein_selection),
+                                    color = marker_color,
+                                    alpha = 1.0, seed = seed)
+  } else {
+    ggmds = ggmds + geom_text(data = expr_cor,
+                              aes(x = MDS1, y = MDS2,
+                                  label = protein_selection),
                                   color = marker_color,
-                                  alpha = 1.0, seed = seed) +
+                                  alpha = 1.0)
+  }
+  ggmds = ggmds +
     ggtitle("Posterior MDS of Latent Variable"~lambda~"(Aspect Ratio Unscaled)")
 
   if(asp) {
