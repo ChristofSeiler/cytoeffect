@@ -15,16 +15,20 @@
 #' @param asp Set \code{asp = FALSE} to avoid scaling aspect ratio by eigenvalues
 #' @param ncores Number of cores
 #' @param thinning Number of posterior draws after thinning
-#' @param cor_scaling_factor Scaling factor for correlation arrows
 #' @param show_donors Include donor random effect
+#' @param show_markers Include markers
+#' @param cor_scaling_factor Scaling factor for correlation arrows
 #' @param repel Repel marker names
+#' @param scale_x Scale x axis
+#' @param scale_y Scale y axis
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
 #' # fit = cytoeffect::poisson_lognormal(...)
 #' # cytoeffect::plot_mds(fit, asp = FALSE)
 plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning = 100,
-                    cor_scaling_factor = 1, show_donors = TRUE, repel = TRUE) {
+                    show_donors = TRUE, show_markers = TRUE, cor_scaling_factor = 1,
+                    repel = TRUE, scale_x = 1, scale_y = 1) {
 
   if (class(obj) != "cytoeffect_poisson")
     stop("Not a cytoeffect_poisson object.")
@@ -112,29 +116,35 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
   }
 
   # add correlation arrows
-  ggmds = ggmds + annotate("segment",
-                           x = expr_cor$x0, xend = expr_cor$MDS1,
-                           y = expr_cor$y0, yend = expr_cor$MDS2,
-                           colour = arrow_color,
-                           alpha = 1.0,
-                           arrow = arrow(type = "open", length = unit(0.03, "npc")))
+  if(show_markers) {
+    ggmds = ggmds + annotate("segment",
+                             x = expr_cor$x0, xend = expr_cor$MDS1,
+                             y = expr_cor$y0, yend = expr_cor$MDS2,
+                             colour = arrow_color,
+                             alpha = 1.0,
+                             arrow = arrow(type = "open", length = unit(0.03, "npc")))
 
-  ## add marker names labels
-  if(repel) {
-    ggmds = ggmds + geom_text_repel(data = expr_cor,
-                                    aes(x = MDS1, y = MDS2,
-                                        label = protein_selection),
-                                    color = marker_color,
-                                    alpha = 1.0, seed = seed)
-  } else {
-    ggmds = ggmds + geom_text(data = expr_cor,
-                              aes(x = MDS1, y = MDS2,
-                                  label = protein_selection),
-                                  color = marker_color,
-                                  alpha = 1.0)
+    ## add marker names labels
+    if(repel) {
+      ggmds = ggmds + geom_text_repel(data = expr_cor,
+                                      aes(x = MDS1, y = MDS2,
+                                          label = protein_selection),
+                                      color = marker_color,
+                                      alpha = 1.0, seed = seed)
+    } else {
+      ggmds = ggmds + geom_text(data = expr_cor,
+                                aes(x = MDS1, y = MDS2,
+                                    label = protein_selection),
+                                color = marker_color,
+                                alpha = 1.0)
+    }
   }
   ggmds = ggmds +
     ggtitle("Posterior MDS of Latent Variable"~lambda~"(Aspect Ratio Unscaled)")
+
+  ggmds = ggmds +
+    scale_x_continuous(limits = range(expr_median$MDS1)*scale_x) +
+    scale_y_continuous(limits = range(expr_median$MDS2)*scale_y)
 
   if(asp) {
     # change aspect ratio according to explained variance
