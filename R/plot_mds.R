@@ -35,6 +35,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
 
   arrow_color = "darkgray"
   marker_color = "black"
+  segment_color = "black"
   marker_size = 5
   seed = 0xdada
 
@@ -63,15 +64,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
                                     MDS2 = mds_res$points[,2]))
   # plot MDS
   ggmds = ggplot(expr_median, aes_string(x = "MDS1", y = "MDS2",
-                                         color = obj$condition)) +
-    xlab(paste0("MDS1 (",explained_var[1],"%)")) +
-    ylab(paste0("MDS2 (",explained_var[2],"%)")) +
-    scale_color_manual(values = c("#5DA5DA", "#FAA43A"),
-                       name = obj$condition) +
-    scale_fill_manual(values = c("#5DA5DA", "#FAA43A"),
-                      name = obj$condition) +
-    stat_density_2d(aes_string(fill = obj$condition),
-                    geom = "polygon", alpha = 0.05)
+                                         color = obj$condition))
 
   # make circle of correlation plot
   protein_sd = apply(as.data.frame(expr_median)[,obj$protein_names],2,sd)
@@ -86,6 +79,42 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
   # add arrows coordinates
   expr_cor %<>% add_column(x0 = rep(0,nrow(expr_cor)))
   expr_cor %<>% add_column(y0 = rep(0,nrow(expr_cor)))
+
+  # add correlation arrows
+  if(show_markers) {
+    ggmds = ggmds + annotate("segment",
+                             x = expr_cor$x0, xend = expr_cor$MDS1,
+                             y = expr_cor$y0, yend = expr_cor$MDS2,
+                             colour = arrow_color,
+                             alpha = 1.0,
+                             arrow = arrow(type = "open", length = unit(0.03, "npc")))
+
+    ## add marker names labels
+    if(repel) {
+      ggmds = ggmds + geom_text_repel(data = expr_cor,
+                                      aes(x = MDS1, y = MDS2,
+                                          label = protein_selection),
+                                      color = marker_color,
+                                      alpha = 1.0, seed = seed)
+    } else {
+      ggmds = ggmds + geom_text(data = expr_cor,
+                                aes(x = MDS1, y = MDS2,
+                                    label = protein_selection),
+                                color = marker_color,
+                                alpha = 1.0)
+    }
+  }
+
+  # add uncertainty countours
+  ggmds = ggmds +
+    xlab(paste0("MDS1 (",explained_var[1],"%)")) +
+    ylab(paste0("MDS2 (",explained_var[2],"%)")) +
+    scale_color_manual(values = c("#5DA5DA", "#FAA43A"),
+                       name = obj$condition) +
+    scale_fill_manual(values = c("#5DA5DA", "#FAA43A"),
+                      name = obj$condition) +
+    stat_density_2d(aes_string(fill = obj$condition),
+                    geom = "polygon", alpha = 0.05)
 
   # add median donors
   if(show_donors) {
@@ -115,30 +144,23 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
       theme(legend.position = "bottom")
   }
 
-  # add correlation arrows
-  if(show_markers) {
-    ggmds = ggmds + annotate("segment",
-                             x = expr_cor$x0, xend = expr_cor$MDS1,
-                             y = expr_cor$y0, yend = expr_cor$MDS2,
-                             colour = arrow_color,
-                             alpha = 1.0,
-                             arrow = arrow(type = "open", length = unit(0.03, "npc")))
+  # add line segments connecting donor centers
+  con_levels = levels(pull(expr_median_donor, obj$condition))
+  segments =
+    left_join(
+      expr_median_donor[expr_median_donor[,obj$condition] == con_levels[1],],
+      expr_median_donor[expr_median_donor[,obj$condition] == con_levels[2],],
+      by = obj$group
+    )
+  segments %<>% dplyr::select(
+    donor, MDS1.x, MDS2.x, MDS1.y, MDS2.y
+  )
+  ggmds = ggmds + geom_segment(
+    aes(x = MDS1.x, xend = segments$MDS1.y, y = MDS2.x, yend = MDS2.y),
+    colour = segment_color, alpha = 1.0,
+    data = segments)
 
-    ## add marker names labels
-    if(repel) {
-      ggmds = ggmds + geom_text_repel(data = expr_cor,
-                                      aes(x = MDS1, y = MDS2,
-                                          label = protein_selection),
-                                      color = marker_color,
-                                      alpha = 1.0, seed = seed)
-    } else {
-      ggmds = ggmds + geom_text(data = expr_cor,
-                                aes(x = MDS1, y = MDS2,
-                                    label = protein_selection),
-                                color = marker_color,
-                                alpha = 1.0)
-    }
-  }
+  # add title
   ggmds = ggmds +
     ggtitle("Posterior MDS of Latent Variable"~lambda~"(Aspect Ratio Unscaled)")
 
