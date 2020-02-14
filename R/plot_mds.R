@@ -17,18 +17,14 @@
 #' @param thinning Number of posterior draws after thinning
 #' @param show_donors Include donor random effect
 #' @param show_markers Include markers
-#' @param cor_scaling_factor Scaling factor for correlation arrows
 #' @param repel Repel marker names
-#' @param scale_x Scale x axis
-#' @param scale_y Scale y axis
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
 #' # fit = cytoeffect::poisson_lognormal(...)
 #' # cytoeffect::plot_mds(fit, asp = FALSE)
 plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning = 100,
-                    show_donors = TRUE, show_markers = TRUE, cor_scaling_factor = 1,
-                    repel = TRUE, scale_x = 1, scale_y = 1) {
+                    show_donors = TRUE, show_markers = TRUE, repel = TRUE) {
 
   if (class(obj) != "cytoeffect_poisson")
     stop("Not a cytoeffect_poisson object.")
@@ -41,7 +37,6 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
 
   # sample all tables
   sample_info_k = c(obj$group,obj$condition,"k")
-
   n_chains = length(obj$fit_mcmc@stan_args)
   stan_args = obj$fit_mcmc@stan_args[[1]]
   n_total_draws = n_chains * (stan_args$iter - stan_args$warmup)
@@ -54,31 +49,65 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
         summarize_at(obj$protein_names,median)
       },
     mc.cores = ncores
-    ) %>% bind_rows
-  # classical MDS on all posterior draws
-  dist_matrix = dist(expr_median[,-seq(sample_info_k)])
-  set.seed(seed)
-  mds_res = cmdscale(dist_matrix,eig = TRUE, k = 2) # k is the number of dim
-  explained_var = (100*mds_res$eig[1:2]/sum(mds_res$eig)) %>% round(digits = 1)
-  expr_median %<>% bind_cols(tibble(MDS1 = mds_res$points[,1],
-                                    MDS2 = mds_res$points[,2]))
-  # plot MDS
-  ggmds = ggplot(expr_median, aes_string(x = "MDS1", y = "MDS2",
-                                         color = obj$condition))
+    )
 
-  # make circle of correlation plot
-  protein_sd = apply(as.data.frame(expr_median)[,obj$protein_names],2,sd)
+  # prepare three way arrary for distatis
+  dist_matrix = lapply(expr_median, function(x) {
+    as.matrix(dist(x[,-seq(sample_info_k)]))
+  })
+  dist_matrix_arr = array(
+    0, dim = c(dim(dist_matrix[[1]]), length(dist_matrix))
+    )
+  for(i in 1:dim(dist_matrix_arr)[3]) {
+    dist_matrix_arr[,,i] = dist_matrix[[i]]
+  }
+
+  # run distatis
+  fit_distatis = DistatisR::distatis(dist_matrix_arr, nfact2keep = 2)
+  distatis_coords = fit_distatis$res4Splus[["PartialF"]]
+  consensus_coords = fit_distatis$res4Splus[["F"]]
+
+  # reshape distatis results
+  distatis_coords_list = lapply(
+    1:dim(distatis_coords)[3],
+    function(i) bind_cols(expr_median[[1]],
+                          as_tibble(distatis_coords[,,1]))
+  )
+  tb_distatis_coords = distatis_coords_list %>%
+    bind_rows() %>%
+    ungroup()
+  tb_distatis_coords %<>% dplyr::rename(MDS1 = `Factor 1`,
+                                        MDS2 = `Factor 2`)
+  tb_consensus_coords = bind_cols(
+    expr_median[[1]][sample_info_k],
+    as_tibble(consensus_coords)) %>%
+    ungroup()
+  tb_consensus_coords %<>% dplyr::rename(MDS1 = `Factor 1`,
+                                         MDS2 = `Factor 2`)
+
+  # prepare plot distatis canvas
+  ggmds = ggplot(tb_distatis_coords, aes_string(x = "MDS1", y = "MDS2",
+                                                color = obj$condition))
+
+  # prepare circle of correlation data
+  protein_sd = apply(as.data.frame(tb_distatis_coords)[,obj$protein_names],2,sd)
   # only keep makers that have some variability
   protein_selection = obj$protein_names[protein_sd != 0]
   # correlations between variables and MDS axes
-  expr_cor = cor(as.data.frame(expr_median)[,protein_selection],
-                 expr_median[,c("MDS1","MDS2")]) %>% as_tibble
+  expr_cor = cor(as.data.frame(tb_distatis_coords)[,protein_selection],
+                 tb_distatis_coords[,c("MDS1","MDS2")]) %>% as_tibble
   # scaling factor (otherwise too crowded)
-  expr_cor = expr_cor * cor_scaling_factor
   expr_cor %<>% add_column(protein_selection)
   # add arrows coordinates
   expr_cor %<>% add_column(x0 = rep(0,nrow(expr_cor)))
   expr_cor %<>% add_column(y0 = rep(0,nrow(expr_cor)))
+  scale_arrow = max(sqrt(tb_distatis_coords$MDS1^2 +
+                           tb_distatis_coords$MDS2^2))
+  cor_max = max(sqrt(expr_cor$MDS1^2+expr_cor$MDS2^2))
+  expr_cor %<>% mutate(
+    MDS1 = scale_arrow * MDS1/cor_max,
+    MDS2 = scale_arrow * MDS2/cor_max
+    )
 
   # add correlation arrows
   if(show_markers) {
@@ -107,8 +136,8 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
 
   # add uncertainty countours
   ggmds = ggmds +
-    xlab(paste0("MDS1 (",explained_var[1],"%)")) +
-    ylab(paste0("MDS2 (",explained_var[2],"%)")) +
+    xlab("DiSTATIS1") +
+    ylab("DiSTATIS2") +
     scale_color_manual(values = c("#5DA5DA", "#FAA43A"),
                        name = obj$condition) +
     scale_fill_manual(values = c("#5DA5DA", "#FAA43A"),
@@ -116,27 +145,24 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
     stat_density_2d(aes_string(fill = obj$condition),
                     geom = "polygon", alpha = 0.05)
 
-  # add median donors
+  # add donors centers
   if(show_donors) {
-    expr_median_donor = expr_median %>%
-      group_by(.dots = c(obj$group, obj$condition)) %>%
-      summarize_at(c("MDS1","MDS2"), median)
-    expr_median_donor %<>% add_column(
+    tb_consensus_coords %<>% add_column(
       color = sapply(pull(expr_median_donor, obj$condition),
-                     function(x) if(x == pull(expr_median_donor, obj$condition)[1])
+                     function(x) if(x == pull(tb_consensus_coords, obj$condition)[1])
                        "#5DA5DA" else "#FAA43A"))
     ggmds = ggmds +
       geom_point(
-        data = expr_median_donor,
+        data = tb_consensus_coords,
         aes_string(shape = obj$group,
-                   x = expr_median_donor$MDS1,
-                   y = expr_median_donor$MDS2),
+                   x = tb_consensus_coords$MDS1,
+                   y = tb_consensus_coords$MDS2),
         size = 3,
         ) +
       scale_shape_manual(
         values =
           64 + # from shape table (so that it starts at A)
-          pull(expr_median_donor, obj$group) %>%
+          pull(tb_consensus_coords, obj$group) %>%
             unique %>%
             length %>%
             seq(1, .)
@@ -145,11 +171,11 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
   }
 
   # add line segments connecting donor centers
-  con_levels = levels(pull(expr_median_donor, obj$condition))
+  con_levels = levels(pull(tb_consensus_coords, obj$condition))
   segments =
     left_join(
-      expr_median_donor[expr_median_donor[,obj$condition] == con_levels[1],],
-      expr_median_donor[expr_median_donor[,obj$condition] == con_levels[2],],
+      tb_consensus_coords[tb_consensus_coords[,obj$condition] == con_levels[1],],
+      tb_consensus_coords[tb_consensus_coords[,obj$condition] == con_levels[2],],
       by = obj$group
     )
   segments %<>% dplyr::select(
@@ -161,19 +187,6 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
     data = segments)
 
   # add title
-  ggmds = ggmds +
-    ggtitle("Posterior MDS of Latent Variable"~lambda~"(Aspect Ratio Unscaled)")
-
-  ggmds = ggmds +
-    scale_x_continuous(limits = range(expr_median$MDS1)*scale_x) +
-    scale_y_continuous(limits = range(expr_median$MDS2)*scale_y)
-
-  if(asp) {
-    # change aspect ratio according to explained variance
-    ggmds = ggmds +
-      coord_fixed(ratio = explained_var[2] / explained_var[1]) +
-      ggtitle("Posterior MDS of Latent Variable"~lambda)
-  }
-  ggmds
+  ggmds + ggtitle("Posterior MDS of Latent Variable"~lambda)
 
 }
