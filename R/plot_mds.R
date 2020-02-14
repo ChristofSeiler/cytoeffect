@@ -187,6 +187,6 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
     data = segments)
 
   # add title
-  ggmds + ggtitle("Posterior MDS of Latent Variable"~lambda)
+  ggmds + ggtitle("Posterior DiSTATIS of Latent Variable"~lambda)
 
 }
