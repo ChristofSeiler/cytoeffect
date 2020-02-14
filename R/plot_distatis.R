@@ -12,9 +12,7 @@
 #'
 #' @param obj Object of class \code{cytoeffect_poisson} computed
 #'   using \code{\link{poisson_lognormal}}
-#' @param asp Set \code{asp = FALSE} to avoid scaling aspect ratio by eigenvalues
 #' @param ncores Number of cores
-#' @param thinning Number of posterior draws after thinning
 #' @param show_donors Include donor random effect
 #' @param show_markers Include markers
 #' @param repel Repel marker names
@@ -22,15 +20,15 @@
 #'
 #' @examples
 #' # fit = cytoeffect::poisson_lognormal(...)
-#' # cytoeffect::plot_mds(fit, asp = FALSE)
-plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning = 100,
-                    show_donors = TRUE, show_markers = TRUE, repel = TRUE) {
+#' # cytoeffect::plot_distatis(fit)
+plot_distatis = function(obj, ncores = parallel::detectCores(),
+                         show_donors = TRUE, show_markers = TRUE, repel = TRUE) {
 
   if (class(obj) != "cytoeffect_poisson")
     stop("Not a cytoeffect_poisson object.")
 
   arrow_color = "darkgray"
-  marker_color = "black"
+  marker_color = "darkgray"
   segment_color = "black"
   marker_size = 5
   seed = 0xdada
@@ -41,7 +39,7 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
   stan_args = obj$fit_mcmc@stan_args[[1]]
   n_total_draws = n_chains * (stan_args$iter - stan_args$warmup)
   expr_median = mclapply(
-    round(seq(1, n_total_draws, length.out = thinning)),
+    1:n_total_draws,
     function(i) {
       set.seed(seed)
       posterior_predictive_log_lambda(obj, k = i, show_donors = show_donors) %>%
@@ -101,8 +99,8 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
   # add arrows coordinates
   expr_cor %<>% add_column(x0 = rep(0,nrow(expr_cor)))
   expr_cor %<>% add_column(y0 = rep(0,nrow(expr_cor)))
-  scale_arrow = max(sqrt(tb_distatis_coords$MDS1^2 +
-                           tb_distatis_coords$MDS2^2))
+  scale_arrow = max(sqrt(tb_consensus_coords$MDS1^2 +
+                           tb_consensus_coords$MDS2^2))
   cor_max = max(sqrt(expr_cor$MDS1^2+expr_cor$MDS2^2))
   expr_cor %<>% mutate(
     MDS1 = scale_arrow * MDS1/cor_max,
@@ -136,8 +134,8 @@ plot_mds = function(obj, asp = TRUE, ncores = parallel::detectCores(), thinning 
 
   # add uncertainty countours
   ggmds = ggmds +
-    xlab("DiSTATIS1") +
-    ylab("DiSTATIS2") +
+    xlab("Factor 1") +
+    ylab("Factor 2") +
     scale_color_manual(values = c("#5DA5DA", "#FAA43A"),
                        name = obj$condition) +
     scale_fill_manual(values = c("#5DA5DA", "#FAA43A"),
