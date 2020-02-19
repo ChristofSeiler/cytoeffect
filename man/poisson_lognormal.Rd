@@ -4,9 +4,19 @@
 \alias{poisson_lognormal}
 \title{HMC Sampling for Poisson Log-Normal Mixed Model}
 \usage{
-poisson_lognormal(df_samples_subset, protein_names, condition, group,
-  r_donor, eta = 1, iter = 325, warmup = 200, num_chains = 4,
-  adapt_delta = 0.8, seed = 1)
+poisson_lognormal(
+  df_samples_subset,
+  protein_names,
+  condition,
+  group,
+  r_donor,
+  eta = 1,
+  iter = 325,
+  warmup = 200,
+  num_chains = 4,
+  adapt_delta = 0.8,
+  seed = 1
+)
 }
 \arguments{
 \item{df_samples_subset}{Data frame or tibble with proteins counts,

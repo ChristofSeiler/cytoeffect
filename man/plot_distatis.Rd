@@ -4,8 +4,13 @@
 \alias{plot_distatis}
 \title{Plot Multivariate Posterior Summaries for Poisson Log-Normal Mixed Model}
 \usage{
-plot_distatis(obj, ncores = parallel::detectCores(),
-  show_donors = TRUE, show_markers = TRUE, repel = TRUE)
+plot_distatis(
+  obj,
+  ncores = parallel::detectCores(),
+  show_donors = TRUE,
+  show_markers = TRUE,
+  repel = TRUE
+)
 }
 \arguments{
 \item{obj}{Object of class \code{cytoeffect_poisson} computed
