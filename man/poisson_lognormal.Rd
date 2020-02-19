@@ -4,8 +4,19 @@
 \alias{poisson_lognormal}
 \title{HMC Sampling for Poisson Log-Normal Mixed Model}
 \usage{
-poisson_lognormal(df_samples_subset, protein_names, condition, group,
-  iter = 325, warmup = 200, num_chains = 4)
+poisson_lognormal(
+  df_samples_subset,
+  protein_names,
+  condition,
+  group,
+  r_donor,
+  eta = 1,
+  iter = 325,
+  warmup = 200,
+  num_chains = 4,
+  adapt_delta = 0.8,
+  seed = 1
+)
 }
 \arguments{
 \item{df_samples_subset}{Data frame or tibble with proteins counts,
@@ -17,11 +28,18 @@ cell condition, and group information}
 
 \item{group}{The column name of the group variable}
 
+\item{r_donor}{Rank of the donor random effect covariance matrix}
+
 \item{iter}{Number of iteration per chain for the HMC sampler}
 
 \item{warmup}{Number of warm up steps per chain for the HMC sampler}
 
 \item{num_chains}{Number of HMC chains to run in parallel}
+
+\item{adapt_delta}{Parameter to control step size of numerical solver}
+
+\item{seed}{Set seed for HMC sampler
+(higher value means smaller step size, max is 1)}
 }
 \value{
 A list of class \code{cytoeffect_poisson} containing

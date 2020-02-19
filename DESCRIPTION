@@ -25,7 +25,8 @@ Imports:
     ggcorrplot,
     batchtools,
     MASS,
-    ggrepel
+    ggrepel,
+    cowplot
 LinkingTo: 
     StanHeaders (>= 2.17.2),
     rstan (>= 2.17.3),
@@ -38,6 +39,6 @@ Depends:
     methods
 SystemRequirements: GNU make
 NeedsCompilation: yes
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
 Suggests: 
     testthat

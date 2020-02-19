@@ -28,6 +28,7 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
   warmup = obj$fit_mcmc@stan_args[[1]]$warmup
   protein_names = obj$protein_names
   conditions = levels(pull(obj$df_samples_subset, obj$condition))
+  donors = unique(pull(obj$df_samples_subset, obj$group))
 
   if(type == "beta") {
 
@@ -65,15 +66,35 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
 
   } else if (type == "sigma") {
 
-    tb_sigma = summary(obj$fit_mcmc, pars = c("sigma","sigma_term","sigma_donor"),
-                       probs = c(0.025, 0.5, 0.975))
-    tb_sigma = tb_sigma$summary[,c("2.5%","50%","97.5%")]
-    tb_sigma %<>% as.tibble(rownames = "name")
-    tb_sigma %<>% add_column(protein_name = rep(protein_names, 3))
-    tb_sigma %<>% add_column(type = c(rep(conditions[1], length(protein_names)),
-                                      rep(conditions[2], length(protein_names)),
-                                      rep("donor", length(protein_names))))
-    tb_sigma$type %<>% factor(levels = c(conditions,"donor"))
+    # summarize cell level effect
+    tb_cond = summary(obj$fit_mcmc, pars = c("sigma"),
+                      probs = c(0.025, 0.5, 0.975))
+    tb_cond = tb_cond$summary[,c("2.5%","50%","97.5%")]
+    tb_cond %<>% as.tibble(rownames = "name")
+    tb_cond %<>% add_column(protein_name = protein_names)
+    tb_cond %<>% add_column(type = "cell")
+
+    # summarize donor level effect
+    to_tb = function(par_sigma, par_q, type_name) {
+      sigma = rstan::extract(obj$fit_mcmc, pars = par_sigma)[[1]]
+      Q = rstan::extract(obj$fit_mcmc, pars = par_q)[[1]]
+      qvtq = lapply(1:nrow(Q), function(i) {
+        cov = Q[i,,] %*% diag(sigma[i,]^2) %*% t(Q[i,,])
+        sqrt(diag(cov))
+      }) %>% bind_cols()
+      tb = apply(
+        qvtq, 1, function(x)
+          quantile(x, probs = c(0.025, 0.5, 0.975))
+        ) %>% t %>% as_tibble %>%
+        add_column(protein_name = protein_names) %>%
+        add_column(type = rep(type_name, length(protein_names)))
+      tb
+    }
+    tb_donor = to_tb(par_sigma = "sigma_donor", par_q = "Q_donor", type_name = obj$group)
+
+    # combine and plot
+    tb_sigma = bind_rows(tb_cond, tb_donor)
+    tb_sigma$type %<>% factor(levels = c("cell",obj$group))
     dodge = position_dodge(width = 0.9)
     ggplot(tb_sigma, aes(x = protein_name, y = `50%`, color = type)) +
       geom_point(size = 2, position = dodge) +
@@ -86,8 +107,8 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
 
   } else if (type == "Cor") {
 
-    var_names = c("Cor","Cor_term","Cor_donor")
-    display_names = c(conditions,"donor")
+    var_names = c("Cor","Cor_donor")
+    display_names = c("cell",obj$group)
     lapply(1:length(var_names), function(i) {
       cor = rstan::extract(obj$fit_mcmc, pars = var_names[i])[[1]]
       cor_median = apply(X = cor, MARGIN = c(2,3), FUN = median)
@@ -99,6 +120,22 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
         theme(panel.grid.major = element_blank(),
               panel.grid.minor = element_blank())
     })
+
+  } else if (type == "theta") {
+
+    theta = rstan::extract(obj$fit_mcmc, pars = "theta")[[1]]
+    theta_median = apply(X = theta, MARGIN = c(2,3), FUN = median)
+    colnames(theta_median) = donors
+    theta_median %<>% as_tibble()
+    theta_median %<>% mutate(protein_name = protein_names)
+    theta_median %<>% gather(donor, probability, -protein_name)
+    ggplot(theta_median, aes(protein_name, donor)) +
+      geom_tile(aes(fill = probability), color = "white") +
+      scale_fill_gradient(low = "white", high = "steelblue") +
+      coord_fixed() +
+      theme(panel.background = element_rect(fill = "lightgray"),
+            axis.text.x = element_text(angle = 90, hjust = 1),
+            axis.title = element_blank())
 
   } else {
 

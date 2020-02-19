@@ -4,8 +4,16 @@
 \alias{glmm}
 \title{HMC Sampling for Logistic Linear Mixed Model}
 \usage{
-glmm(df_samples_subset, protein_names, condition, group, iter = 325,
-  warmup = 200, num_chains = 4, eta = 1)
+glmm(
+  df_samples_subset,
+  protein_names,
+  condition,
+  group,
+  iter = 325,
+  warmup = 200,
+  num_chains = 4,
+  eta = 1
+)
 }
 \arguments{
 \item{df_samples_subset}{Data frame or tibble with proteins counts,

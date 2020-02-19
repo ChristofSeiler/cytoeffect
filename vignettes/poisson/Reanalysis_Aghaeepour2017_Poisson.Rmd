@@ -73,7 +73,7 @@ Download preprocessed data from Zenodo.
 ```{r download_zenodo}
 rdata_filenames = c(cytof_data, prefit)
 for(filename in rdata_filenames)
-    download.file(url = paste0(zenodo_url, filename), 
+    download.file(url = paste0(zenodo_url, filename),
                   destfile = filename,
                   mode = "wb")
 ```
@@ -87,12 +87,12 @@ sample_info = rowData(se_aghaeepour2017immune)
 sample_info_names = names(sample_info)
 df_samples = cbind(as.data.frame(exprs), as.data.frame(sample_info))
 df_samples %<>% as.tibble
-protein_names = colData(se_aghaeepour2017immune) %>% 
-  as.data.frame %>% 
+protein_names = colData(se_aghaeepour2017immune) %>%
+  as.data.frame %>%
   dplyr::filter(type == "function") %>%
   .$protein_name
-gate_protein_names = colData(se_aghaeepour2017immune) %>% 
-  as.data.frame %>% 
+gate_protein_names = colData(se_aghaeepour2017immune) %>%
+  as.data.frame %>%
   dplyr::filter(type == "phenotype") %>%
   .$protein_name
 ```
@@ -138,9 +138,9 @@ if(nrow(df_samples_subset) > ncells) {
 Tally cell count.
 
 ```{r cell_count_subsample}
-df_samples_subset %>% group_by(term,celltype,donor) %>% tally %>% 
+df_samples_subset %>% group_by(term,celltype,donor) %>% tally %>%
   arrange(n)
-df_samples_subset %>% group_by(term,celltype,donor) %>% tally %>% 
+df_samples_subset %>% group_by(term,celltype,donor) %>% tally %>%
   arrange(desc(n))
 ```
 
@@ -157,8 +157,9 @@ df_samples_subset$term %<>% factor(levels = c("1st trimester",
 if(file.exists(prefit)) {
   load(file = prefit)
 } else {
-  obj = cytoeffect::poisson_lognormal(df_samples_subset, protein_names, 
+  obj = cytoeffect::poisson_lognormal(df_samples_subset, protein_names,
                                       condition = "term", group = "donor",
+                                      r_donor = 3,
                                       iter = 325, warmup = 200,
                                       num_chains = ncores)
   save(obj,file = prefit)
@@ -172,24 +173,25 @@ Postprocessing of posterior samples. Traceplot of posterior samples.
 ```{r post_sampling, fig.wide=TRUE}
 pars_str = "beta"
 rstan::traceplot(obj$fit_mcmc, inc_warmup = FALSE, pars = pars_str)
+# test case
+stan_pars = rstan::extract(obj$fit_mcmc,
+                           pars = c("sigma_donor", "Q_donor", "Cor_donor"))
+k = 100
+sigma = stan_pars$sigma_donor[k,]
+Q = stan_pars$Q_donor[k,,]
+cor = cov2cor(Q %*% diag(sigma^2) %*% t(Q))
+range(cor - stan_pars$Cor_donor[k,,])
 ```
 
 Some more MCMC diagnostics. According to empirically findings, Rhat > 1.1 is usually indicative of problems in the fit.
 
 ```{r mcmc_diagnostics}
-pars = c("beta",
-         "sigma","sigma_term","sigma_donor",
-         "Cor","Cor_term","Cor_donor",
-         "b_donor")
-tb = summary(obj$fit_mcmc, 
-             pars = pars)$summary %>% 
-  as.tibble(rownames = "pars", .before = 1) %>% 
-  dplyr::select(pars, n_eff, Rhat)
-tb %<>% na.omit() # Stan fills upper triangle with zeros
-tb %>% arrange(n_eff)
-tb %>% arrange(desc(Rhat))
-tb %>% summarize(min = min(n_eff), max = max(n_eff))
-tb %>% summarize(min = min(Rhat), max = max(Rhat))
+tidyMCMC(
+  obj$fit_mcmc,
+  pars = c("beta","sigma","sigma_donor",
+           "Cor","Cor_donor","b_donor"),
+  rhat = TRUE, ess = TRUE
+  ) %>% arrange(desc(rhat))
 ```
 
 # Results
@@ -197,16 +199,15 @@ tb %>% summarize(min = min(Rhat), max = max(Rhat))
 Plot posterior regression coefficients.
 
 ```{r plot_beta}
-p1 = plot(obj, type = "beta") + 
-  ggtitle(expression("Fixed Effects"~beta)) +
-  theme(legend.position = "bottom") +
-  guides(col = guide_legend(ncol = 1)) + 
+p_beta = plot(obj, type = "beta") +
+  theme(legend.position = "bottom", plot.title = element_blank()) +
+  guides(col = guide_legend(ncol = 1)) +
   scale_color_few()
-p1
-plot(obj, type = "beta") + 
+p_beta
+plot(obj, type = "beta") +
   facet_wrap(~condition, scales = "free_x") +
   theme(legend.position = "bottom") +
-  guides(col = guide_legend(ncol = 1)) + 
+  guides(col = guide_legend(ncol = 1)) +
   scale_color_few()
 ```
 
@@ -214,21 +215,21 @@ Extract expected count difference for pSTAT1.
 
 ```{r fixed_effects_pSTAT1}
 post_beta = rstan::extract(obj$fit_mcmc, pars = "beta")[[1]]
-first_index = which(levels(pull(obj$df_samples_subset, obj$condition)) 
+first_index = which(levels(pull(obj$df_samples_subset, obj$condition))
                     == "1st trimester")
-third_index = which(levels(pull(obj$df_samples_subset, obj$condition)) 
+third_index = which(levels(pull(obj$df_samples_subset, obj$condition))
                     == "3rd trimester")
 pstat1_index = which(obj$protein_names == "pSTAT1")
-first_log_count = quantile(post_beta[,pstat1_index,first_index], 
+first_log_count = quantile(post_beta[,pstat1_index,first_index],
                            probs = c(0.025, 0.5, 0.975))
 first_log_count
 exp(first_log_count)
-third_log_count = quantile(post_beta[,pstat1_index,third_index], 
+third_log_count = quantile(post_beta[,pstat1_index,third_index],
                            probs = c(0.025, 0.5, 0.975))
 third_log_count
 exp(third_log_count)
 diff_log_count = quantile(
-  post_beta[,pstat1_index,third_index] - post_beta[,pstat1_index,first_index], 
+  post_beta[,pstat1_index,third_index] - post_beta[,pstat1_index,first_index],
   probs = c(0.025, 0.5, 0.975))
 diff_log_count
 exp(diff_log_count)
@@ -237,62 +238,19 @@ exp(diff_log_count)
 Posterior multivariate pairs plot.
 
 ```{r posterior_pair_plot}
-pSTAT1_index = which(obj$protein_names == "pSTAT1")
-pSTAT3_index = which(obj$protein_names == "pSTAT3")
-pSTAT5_index = which(obj$protein_names == "pSTAT5")
-post_beta = rstan::extract(obj$fit_mcmc, pars = "beta")[[1]]
-tb_log_count = bind_rows(
-  tibble(
-    term = levels(pull(obj$df_samples_subset, obj$condition))[1],
-    pSTAT1 = post_beta[,pSTAT1_index,1],
-    pSTAT3 = post_beta[,pSTAT3_index,1],
-    pSTAT5 = post_beta[,pSTAT5_index,1]
-  ),
-  tibble(
-    term = levels(pull(obj$df_samples_subset, obj$condition))[2],
-    pSTAT1 = post_beta[,pSTAT1_index,2],
-    pSTAT3 = post_beta[,pSTAT3_index,2],
-    pSTAT5 = post_beta[,pSTAT5_index,2]
-  )
-)
-plot_diag = function(marker) {
-  ggplot(tb_log_count, aes_string(marker, fill = "term")) + 
-    geom_histogram(bins = 40, position = "identity", alpha = 0.5) +
-    scale_fill_few()
-}
-plot_off_diag = function(marker1, marker2) {
-  ggplot(tb_log_count, aes_string(marker1, marker2, color = "term")) +
-    geom_density2d() + 
-    scale_color_few()
-}
-ppair = plot_grid(
-  plot_diag("pSTAT1") + theme(legend.position = "none"),
-  NULL, 
-  NULL,
-  plot_off_diag("pSTAT1","pSTAT3") + theme(legend.position = "none"), 
-  plot_diag("pSTAT3") + theme(legend.position = "none"), 
-  NULL,
-  plot_off_diag("pSTAT1","pSTAT5") + theme(legend.position = "none"), 
-  plot_off_diag("pSTAT3","pSTAT5") + theme(legend.position = "none"), 
-  plot_diag("pSTAT5") + theme(legend.position = "none"),
-  ncol = 3
-)
-plot_grid(ppair,
-          get_legend(plot_diag("pSTAT1") + theme(legend.position = "bottom")),
-          ncol = 1,
-          rel_heights = c(1, .1))
-ggsave(filename = "posterior_multivariate_plmm.pdf", width = 8, height = 6)
+p_beta_pairs = cytoeffect::plot_pairs(obj, "pSTAT1", "pSTAT3", "pSTAT5")
+ggsave(plot_grid(p_beta, NULL, p_beta_pairs, nrow = 1, rel_widths = c(0.35, 0.05, 0.6)),
+       filename = "posterior_beta.pdf", width = 10, height = 5)
 ```
 
 Plot posterior standard deviation.
 
 ```{r posterior_sigma}
-p2 = plot(obj, type = "sigma") + 
+plot(obj, type = "sigma") +
   ggtitle("Marker Standard Deviation"~sigma) +
   theme(legend.position = "bottom") +
   guides(col = guide_legend(ncol = 1)) +
-  scale_color_manual(values=c("#5DA5DA", "#FAA43A", "#F17CB0"))
-p2
+  scale_color_manual(values=c("#60BD68", "#F17CB0"))
 ```
 
 Plot posterior correlations.
@@ -302,287 +260,106 @@ plist = plot(obj, type = "Cor")
 plist
 ```
 
+Plot posterior zero-inflation probability.
+
+```{r posterior_theta}
+plot(obj, type = "theta") + coord_flip()
+ggsave(filename = "posterior_theta.pdf", width = 7, height = 4)
+```
+
 Multivariate posterior MDS plots.
 
 ```{r multivariate_posterior}
 cytoeffect::plot_mds(obj)
-ggsave(filename = "posterior_mds_latent_variable_mu_scaled.pdf", width = 10, height = 5)
+ggsave(filename = "posterior_lambda_scaled.pdf", width = 10, height = 5)
 cytoeffect::plot_mds(obj, asp = FALSE)
-ggsave(filename = "posterior_mds_latent_variable_mu_unscaled.pdf", width = 10, height = 5)
+ggsave(filename = "posterior_lambda_unscaled.pdf", width = 10, height = 5)
 cytoeffect::plot_mds(obj, asp = FALSE, show_donors = FALSE)
-ggsave(filename = "posterior_mds_latent_variable_mu_unscaled_no_donors.pdf", 
+ggsave(filename = "posterior_lambda_unscaled_no_donors.pdf",
        width = 10, height = 5)
-```
-
-Pairwise correlation change between conditions.
-
-```{r correlation_uncertainty}
-marker_pair = c("pSTAT3","pSTAT5")
-Cor = rstan::extract(obj$fit_mcmc, pars = "Cor")[[1]]
-Cor_term = rstan::extract(obj$fit_mcmc, pars = "Cor_term")[[1]]
-Cor_diff = Cor_term - Cor
-tb_cor = Cor_diff[,
-                  which(obj$protein_names == marker_pair[1]),
-                  which(obj$protein_names == marker_pair[2])] %>% as.tibble
-tb_cor %<>% mutate(
-  side = if_else(tb_cor$value > 0, 
-                 true = paste0("positive (", 100*mean(tb_cor$value > 0), "%)"),
-                 false = paste0("negative (", 100*mean(tb_cor$value <= 0), "%)"))
-)
-# keep colors consistent
-if(mean(tb_cor$value > 0) == 1) {
-  fill_colors = "#E46726"
-} else {
-  fill_colors = c("#6D9EC1","#E46726")
-}
-ggplot(tb_cor, aes(value, fill = side)) + 
-  geom_histogram(bins = 50, alpha = 0.7) +
-  xlab(paste0("Cor_term(", paste(marker_pair, collapse = ", "),")" )) +
-  ggtitle("Posterior Distribution") + 
-  scale_fill_manual(values = fill_colors)
-```
-
-Check if overall correlation structure changes between conditions.
-
-```{r compare_covariance}
-value = sapply(1:nrow(Cor_diff), function(i) {
-  mask = which(upper.tri(Cor_diff[i,,]), arr.ind = T)
-  cord = Cor_diff[i,,]
-  mean(cord[lower.tri(cord)] > 0)
-})
-tb_cor = tibble(value = value)
-tb_cor %<>% mutate(
-  side = if_else(tb_cor$value > 0.5, 
-                 true = paste0("> 1/2 (", 100*mean(tb_cor$value > 0.5), "%)"),
-                 false = paste0("<= 1/2 (", 100*mean(tb_cor$value <= 0.5), "%)"))
-)
-p_global = ggplot(tb_cor, aes(value, fill = side)) + 
-  geom_histogram(bins = 25, alpha = 0.7) +
-  ggtitle(expression("Overall P(Corr"~Omega~"(3rd) > Corr"~Omega~"(1st))")) +
-  scale_fill_manual(values = fill_colors) +
-  theme(legend.position = "bottom") +
-  xlab("probability")
-p_global
-```
-
-Plot differential correlations.
-
-```{r plot_differential_cor}
-cor_increase = apply(X = Cor_diff, MARGIN = c(2,3), FUN = function(x) mean(x > 0))
-colnames(cor_increase) = rownames(cor_increase) = obj$protein_names
-p_local = ggcorrplot(cor_increase, hc.order = TRUE, type = "lower",
-           outline.col = "lightgray",
-           colors = c("#6D9EC1", "white", "#E46726")) +
-  ggtitle(expression("P(Corr"~Omega~"(3rd) > Corr"~Omega~"(1st))")) +
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank()) +
-  scale_fill_gradient2(limit = c(0, 1), midpoint = 0.5,
-                       low = "#6D9EC1", mid =  "white", high = "#E46726",
-                       name = "probability")
-p_local
-```
-
-Plot graph with edges at least 95% probability of larger correlation.
-
-```{r plot_graph}
-plot_correlation_graph = function(lambda) {
-  graph = apply(Cor_diff, c(2,3), function(x) mean(x>0))
-  diag(graph) = 0
-  graph[upper.tri(graph)] = 0
-  ind = which(graph > 0, arr.ind = T)
-  tb_graph = tibble(
-    from = obj$protein_names[ind[,1]],
-    to = obj$protein_names[ind[,2]],
-    prob = graph[ind]
-  )
-  tb_graph %<>% dplyr::filter(prob > lambda)
-  tb_graph
-  bayesFDR = sum(1-tb_graph$prob)/nrow(tb_graph)*100
-  bayesFDR
-  set.seed(0xdada)
-  ig = graph_from_data_frame(tb_graph, directed = FALSE)
-  ggplot(ggnetwork(ig, layout = "circle"), aes(x, y, xend = xend, yend = yend)) + 
-    geom_edges(color = "black", size = 1) +
-    geom_nodes(color = "black", size = 20) + 
-    geom_nodetext(aes(label = vertex.names), 
-                  color = "white", size = 3, fontface = "bold") +
-    xlim(c(-0.1, 1.1)) +
-    ylim(c(-0.1, 1.1)) + 
-    ggtitle(paste0("Posterior Expected FDR: ", 
-                   round(bayesFDR, digits = 1),"%")) +
-    theme_blank() +
-    theme(plot.title = element_text(hjust = 0.5))
-}
-plot_correlation_graph(lambda = 0.8)
-```
-
-Combine plot for paper.
-
-```{r compbine_plot}
-pall = plot_grid(
-  p1, p2, 
-  plist[[1]] + ggtitle(expression("Marker Corr"~Omega~"(1st trimester)")),
-  plist[[2]] + ggtitle(expression("Marker Corr"~Omega~"(3rd trimester)")),
-  p_global, p_local, 
-  rel_heights = c(0.38,0.31,0.31),
-  nrow = 3, labels = "AUTO"
-)
-ggsave(plot = pall, 
-       filename = "posterior_summary_plmm.pdf", 
-       width = 8, height = 11)
 ```
 
 # Goodness of Fit
 
-Define a test statistics and compare observed value with posterior predictive distribution. 
-
-Predictive distribution marginalized over cell random effects.
+Define a test statistics and compare observed value with posterior predictive distribution.
 
 ```{r marginal_predicted_counts}
-stan_pars = rstan::extract(obj$fit_mcmc, 
-                           pars = c("beta",
-                                    "sigma","sigma_term","sigma_donor",
-                                    "Cor","Cor_term","Cor_donor"))
-condition = "term"
-term = obj$df_samples_subset %>%
-    pull(condition) %>%
-    as.factor() %>%
-    as.integer()
-conditions_levels = levels(pull(obj$df_samples_subset, 
-                                obj$condition))
-# kth posterior draw
-sample_y_hat = function(k = 1) {
-  set.seed(seed)
-  lapply(1:2, function(cond) {
-    n_cells_cond = table(term)[cond]
-    beta = stan_pars$beta[k,,]
-    mu = rep(0, length(protein_names))
-    beta_rep = sapply(beta[,cond], rep, n_cells_cond)
-    if(cond == 1) {
-      sigma = stan_pars$sigma[k,]
-      Cor = stan_pars$Cor[k,,]
-    } else {
-      sigma = stan_pars$sigma_term[k,]
-      Cor = stan_pars$Cor_term[k,,]
-    }
-    Cov = diag(sigma) %*% Cor %*% diag(sigma)
-    b = mvrnorm(n = n_cells_cond, mu, Cov)
-    sigma_donor = stan_pars$sigma_donor[k,]
-    Cor_donor = stan_pars$Cor_donor[k,,]
-    Cov_donor = diag(sigma_donor) %*% Cor_donor %*% diag(sigma_donor)
-    b_donor = mvrnorm(n = n_cells_cond, mu, Cov_donor)
-    count = exp(beta_rep + b + b_donor)
-    count = matrix(rpois(length(count), count),
-                   nrow = nrow(count), 
-                   ncol = ncol(count))
-    count %<>% as.tibble
-    names(count) = protein_names
-    count %<>% add_column(term  = conditions_levels[cond])
-    count
-  }) %>% bind_rows()
+sample_y_hat = function(k) {
+  tb = posterior_predictive_log_lambda(obj, k = 1, show_donors = TRUE)
+  lambda_matrix = tb %>%
+    dplyr::select(obj$protein_names) %>%
+    as.matrix %>%
+    exp
+  Y_hat = matrix(rpois(length(lambda_matrix), lambda_matrix),
+                   nrow = nrow(lambda_matrix),
+                   ncol = ncol(lambda_matrix))
+  tb[1:length(obj$protein_names)] = Y_hat
+  tb
 }
 Y_hat = sample_y_hat(k = 1)
-Y_hat %>% 
-  group_by(term) %>% 
-  summarize_at(protein_names, median)
-df_samples_subset %>% 
-  group_by(term) %>% 
-  summarize_at(protein_names, median)
+Y_hat %>%
+  group_by(term) %>%
+  summarize_at(obj$protein_names, median)
+obj$df_samples_subset %>%
+  group_by(term) %>%
+  summarize_at(obj$protein_names, median)
 ```
 
-Check if we can model pSTAT, pSTAT3, and pSTAT5 bright cells.
+Four checks:
 
-```{r goodness_of_fit_a}
-gof = function(df, test_stat) {
-  tfm = function(x) asinh(x/5)
-  df_tfm = df %>% mutate_at(protein_names, tfm)
-  df_median = df_tfm %>% summarize_at(protein_names, median)
-  tibble(
-    term = c(
-      "1st trimester", 
-      "3rd trimester"
-      ),
-    statistic = c(
-      test_stat(df_tfm %>% filter(term == "1st trimester"), df_median), 
-      test_stat(df_tfm %>% filter(term == "3rd trimester"), df_median)
+* Subset A: Check if we can model pSTAT1, pSTAT3, and pSTAT5 bright cells
+* Subset B: Check if we can model pSTAT1 bright, and pSTAT3 and pSTAT5 dim cells
+* Subset C: Check if we can model zero pERK1_2 and pMAPKAPK bright cells
+* Subset D: Check if we can model nonzero pERK1_2 and pMAPKAPK bright cells
+
+```{r goodness_of_fit}
+set.seed(0xdada)
+pSTAT1_median = median(obj$df_samples_subset$pSTAT1)
+pSTAT3_median = median(obj$df_samples_subset$pSTAT3)
+pSTAT5_median = median(obj$df_samples_subset$pSTAT5)
+pMAPKAPK_median = median(obj$df_samples_subset$pMAPKAPK)
+gof = function(tb) {
+  tb %>%
+    group_by(term, donor) %>%
+    summarize(
+      pSTAT_bright = mean(pSTAT1 > pSTAT1_median &
+                          pSTAT3 > pSTAT3_median &
+                          pSTAT5 > pSTAT5_median),
+      pSTAT1_bright_35_dim = mean(pSTAT1 > pSTAT1_median &
+                                  pSTAT3 < pSTAT3_median &
+                                  pSTAT5 < pSTAT5_median),
+      pERK1_2_zero = mean(pERK1_2  == 0),
+      pMAPKAPK_nonzero = mean(pMAPKAPK > pMAPKAPK_median),
+      pSTAT1_zero = mean(pSTAT1 == 0),
+      pSTAT1_median = median(pSTAT1),
       )
-  )
 }
-test_stat_a = function(df_tfm, df_median) {
-  mean(df_tfm$pSTAT1 > df_median$pSTAT1 & 
-       df_tfm$pSTAT3 > df_median$pSTAT3 & 
-       df_tfm$pSTAT5 > df_median$pSTAT5) * 100
-}
-gof_obsv_a = gof(df_samples_subset, test_stat_a)
-gof_pred_a = mclapply(1:dim(stan_pars$beta)[1], function(k) gof(sample_y_hat(k), test_stat_a),
-                      mc.cores = ncores) %>% bind_rows()
-gof_obsv_a %<>% mutate(subset = "Cell Subset A")
-gof_pred_a %<>% mutate(subset = "Cell Subset A")
+n_iter = nrow(rstan::extract(obj$fit_mcmc, pars = "beta")[[1]])
+gof_pred = mclapply(1:n_iter, function(k) gof(sample_y_hat(k)),
+                    mc.cores = ncores, mc.set.seed = FALSE) %>% bind_rows()
+gof_obsv = gof(obj$df_samples_subset)
 ```
 
-Check if we can model pSTAT bright, and pSTAT3 and pSTAT5 dim cells.
+Observed test statistic (vertical dashed line) should be in the bulk of the distribution.
 
-```{r goodness_of_fit_b}
-test_stat_b = function(df_tfm, df_median) {
-  mean(df_tfm$pSTAT1 > df_median$pSTAT1 & 
-       df_tfm$pSTAT3 < df_median$pSTAT3 & 
-       df_tfm$pSTAT5 < df_median$pSTAT5) * 100
-}
-gof_obsv_b = gof(df_samples_subset, test_stat_b)
-gof_pred_b = mclapply(1:dim(stan_pars$beta)[1], function(k) gof(sample_y_hat(k), test_stat_b),
-                      mc.cores = ncores) %>% bind_rows()
-gof_obsv_b %<>% mutate(subset = "Cell Subset B")
-gof_pred_b %<>% mutate(subset = "Cell Subset B")
-```
-
-Check if we can model zero pERK1_2 and pMAPKAPK bright cells.
-
-```{r goodness_of_fit_c}
-test_stat_c = function(df_tfm, df_median) {
-  mean(df_tfm$pERK1_2  == 0 & 
-       df_tfm$pMAPKAPK > df_median$pMAPKAPK) * 100
-}
-gof_obsv_c = gof(df_samples_subset, test_stat_c)
-gof_pred_c = mclapply(1:dim(stan_pars$beta)[1], function(k) gof(sample_y_hat(k), test_stat_c),
-                      mc.cores = ncores) %>% bind_rows()
-gof_obsv_c %<>% mutate(subset = "Cell Subset C")
-gof_pred_c %<>% mutate(subset = "Cell Subset C")
-```
-
-Check if we can model nonzero pERK1_2 and pMAPKAPK bright cells.
-
-```{r goodness_of_fit_d}
-test_stat_d = function(df_tfm, df_median) {
-  mean(df_tfm$pERK1_2  > 0 & 
-       df_tfm$pMAPKAPK > df_median$pMAPKAPK
-       ) * 100
-}
-gof_obsv_d = gof(df_samples_subset, test_stat_d)
-gof_pred_d = mclapply(1:dim(stan_pars$beta)[1], function(k) gof(sample_y_hat(k), test_stat_d),
-                      mc.cores = ncores) %>% bind_rows()
-gof_obsv_d %<>% mutate(subset = "Cell Subset D")
-gof_pred_d %<>% mutate(subset = "Cell Subset D")
-```
-
-Combined plot for paper.
-
-```{r goodness_of_fit_combined}
-# combine observed statistic
-gof_obsv_all = bind_rows(gof_obsv_a, gof_obsv_b, gof_obsv_c, gof_obsv_d)
-# combined predicted statistic
-gof_pred_all = bind_rows(gof_pred_a, gof_pred_b, gof_pred_c, gof_pred_d)
-# plot everything
-ggplot(gof_pred_all, aes(statistic, fill = term)) + 
+```{r plot_goodness_of_fit}
+gof_pred_long = gof_pred %>%
+  gather(subset, statistic, -term, -donor)
+gof_obsv_long = gof_obsv %>%
+  gather(subset, statistic, -term, -donor)
+ggplot(gof_pred_long, aes(statistic, fill = term)) +
   geom_histogram(bins = 40, position = "identity", alpha = 0.5) +
-  geom_vline(data = gof_obsv_all, linetype = "dashed", size = 1, 
-             aes(xintercept = statistic, color = term)) +
-  scale_fill_few() + 
-  scale_color_few() + 
-  xlab("test statistic (percentage)") + 
-  facet_wrap(~subset, scales = "free") + 
-  theme(legend.position="bottom")
-ggsave(filename = "goodness_of_fit.pdf", 
-       width = 8, height = 5)
+  geom_point(data = gof_obsv_long,
+             position = position_jitter(width = 0, height = 50), alpha = 0.8,
+             aes(y = 0, x = statistic, color = term)) +
+  scale_fill_few() +
+  scale_color_few() +
+  xlab("test statistic") +
+  facet_wrap(~subset, scales = "free") +
+  theme(legend.position="bottom") +
+  ggtitle("All Donors")
+ggsave(filename = "goodness_of_fit.pdf",
+       width = 10, height = 5)
 ```
 
 # Session Info {.unnumbered}

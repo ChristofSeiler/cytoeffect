@@ -15,9 +15,13 @@
 #' @param protein_names A vector of column names of protein to use in the analysis
 #' @param condition The column name of the condition variable
 #' @param group The column name of the group variable
+#' @param r_donor Rank of the donor random effect covariance matrix
 #' @param iter Number of iteration per chain for the HMC sampler
 #' @param warmup Number of warm up steps per chain for the HMC sampler
 #' @param num_chains Number of HMC chains to run in parallel
+#' @param adapt_delta Parameter to control step size of numerical solver
+#' @param seed Set seed for HMC sampler
+#'                    (higher value means smaller step size, max is 1)
 #' @return A list of class \code{cytoeffect_poisson} containing
 #'   \item{fit_mcmc}{\code{\link[rstan]{rstan}} object}
 #'   \item{protein_names}{input protein names}
@@ -29,9 +33,13 @@ poisson_lognormal = function(df_samples_subset,
                              protein_names,
                              condition,
                              group,
+                             r_donor,
+                             eta = 1,
                              iter = 325,
                              warmup = 200,
-                             num_chains = 4) {
+                             num_chains = 4,
+                             adapt_delta = 0.8,
+                             seed = 1) {
 
   # some checks
   if(sum(names(df_samples_subset) == condition) == 0)
@@ -44,10 +52,10 @@ poisson_lognormal = function(df_samples_subset,
     stop("condition variables should have two levels")
 
   # prepare input data
-  #df_samples_subset$group_condition = paste0(pull(df_samples_subset, group), "_",
-  #                                      pull(df_samples_subset, condition))
-  Y = df_samples_subset %>% dplyr::select(protein_names) %>% as.matrix()
-  #X = model.matrix(formula(paste("~",condition)), data = df_samples_subset)
+  Y = df_samples_subset %>%
+    ungroup() %>%
+    dplyr::select(protein_names) %>%
+    as.matrix()
   term = df_samples_subset %>%
     pull(condition) %>%
     as.factor() %>%
@@ -55,16 +63,15 @@ poisson_lognormal = function(df_samples_subset,
   p = length(table(term))
   n = nrow(Y)
   d = ncol(Y)
-  #p = ncol(X)
-  #k = length(unique(df_samples_subset$group_condition))
-  #donor = as.integer(as.factor(df_samples_subset$group_condition))
   donor = df_samples_subset %>%
     pull(group) %>%
     as.factor() %>%
     as.integer()
   k = length(table(donor))
-  stan_data = list(Y = Y, n = n, d = d, p = p,
-                   k = k, donor = donor, term = term)
+  stan_data = list(Y = t(Y), n = n, d = d, p = p,
+                   k = k, donor = donor, term = term,
+                   r_donor = r_donor,
+                   eta = eta)
 
   # prepare starting point for sampler
 
@@ -78,97 +85,118 @@ poisson_lognormal = function(df_samples_subset,
   is.neginf = function(x) x == -Inf
   beta[is.neginf(beta)] = -7 # beta[j] ~ normal(0, 7);
 
-  # regularize and decompose covariance matrix
-  # c is upper bound on condition number:
-  # out$d[1]/out$d[length(out$d)]
-  # math details: http://lagrange.math.siu.edu/Olive/slch6.pdf
-  c = 100
-  tfm = function(x) asinh(x/5)
-  initcov = function(Y_raw) {
-    # transform raw counts
-    Y_tfm = tfm(Y_raw)
-    # sample standard deviation
-    Y_cov = cov(Y_tfm)
-    sigma = sqrt(diag(Y_cov))
-    # regularize correlation matrix
-    Y_cor = cor(Y_tfm)
-    out = svd(Y_cor)
-    rho = max(0, (out$d[1] - c*out$d[length(out$d)]) / (c - 1) )
-    Y_cor_reg = 1/(1+rho) * (Y_cor + diag(rho, nrow(Y_cor)))
-    # cholesky decomposition of correlation matrix
-    L = t(chol(Y_cor_reg))
-    list(sigma = sigma, L = L)
-  }
-
   # covariance matrix across cells per level of condition
-  cov1 = initcov(Y[term == 1,])
-  cov2 = initcov(Y[term == 2,])
+  tfm = function(x) asinh(x/5)
+  # transform raw counts
+  Y_tfm = tfm(Y)
+  # sample standard deviation
+  Y_cov = cov(Y_tfm)
+  sigma = sqrt(diag(Y_cov))
+  # regularize correlation matrix
+  Y_cor = cor(Y_tfm)
+  # cholesky decomposition of correlation matrix
+  L = t(chol(Y_cor))
 
   # covariance matrix across donors
   Y_donor = df_samples_subset %>%
     group_by_at(group) %>%
     summarise_at(protein_names, median) %>%
     dplyr::select(protein_names)
-  cov_donor = initcov(Y_donor)
+  Y_donor_svd = Y_donor %>% tfm %>% cov %>% svd
+  #r_donor = sum(cumsum(Y_donor_svd$d/sum(Y_donor_svd$d)) < 0.95)
+  sigma_donor = sqrt(Y_donor_svd$d[1:r_donor])
+  Q_donor = Y_donor_svd$u[,1:r_donor]
+  x_donor = c(Q_donor)
 
-  # ggcorrplot::ggcorrplot(cov1$L %*% t(cov1$L))
-  # ggcorrplot::ggcorrplot(cor(tfm(Y[term == 1,])))
-  # ggcorrplot::ggcorrplot(cov2$L %*% t(cov2$L))
-  # ggcorrplot::ggcorrplot(cor(tfm(Y[term == 2,])))
-  # ggcorrplot::ggcorrplot(cor(tfm(Y_donor)))
-  # ggcorrplot::ggcorrplot(cov_donor$L %*% t(cov_donor$L))
+  # sample zeroinflation estimate
+  theta = df_samples_subset %>%
+    group_by_(group) %>%
+    summarize_at(protein_names, function(x) mean(x == 0)) %>%
+    dplyr::select(protein_names) %>%
+    as.matrix %>%
+    t
+  theta[which(theta == 0, arr.ind = TRUE)] = 0.001
 
   # set random effects to zero
-  z = matrix(0, nrow = n, ncol = d)
-  z_term = matrix(0, nrow = n, ncol = d)
-  z_donor = matrix(0, nrow = k, ncol = d)
+  z = rep(0, n*d);
+  z_donor = rep(0, k*r_donor)
   stan_init = list(
     beta = beta,
-    sigma = cov1$sigma, sigma_term = cov2$sigma, sigma_donor = cov_donor$sigma,
-    L = cov1$L, L_term = cov2$L, L_donor = cov_donor$L,
-    z = z, z_term = z_term, z_donor = z_donor
+    # cell level
+    sigma = sigma,
+    L = L,
+    z = z,
+    # donor level
+    sigma_donor = sigma_donor,
+    x_donor = x_donor,
+    z_donor = z_donor,
+    # zero inflation
+    theta = theta
   )
 
-  # cluster function
-  run_sampling = function(seed) {
+  # compile model
+  stan_file = system.file("exec", "poisson.stan", package = "cytoeffect")
+  #stan_file = "../../exec/poisson.stan"
+  model = stan_model(file = stan_file, model_name = "poisson")
 
-    # compile model
-    stan_file = system.file("exec", "poisson.stan", package = "cytoeffect")
-    model = stan_model(file = stan_file, model_name = "poisson")
+  # # run sampler
+  # fit_mle = optimizing(model,
+  #                      data = stan_data,
+  #                      init = stan_init,
+  #                      as_vector = FALSE,
+  #                      verbose = TRUE)
+  # stan_init = fit_mle$par[c("beta",
+  #                           "sigma","sigma_term","sigma_donor",
+  #                           "z","z_term","z_donor",
+  #                           "x","x_term","x_donor")]
+  fit_mcmc = sampling(model,
+                      pars = c("beta",
+                               "sigma",
+                               "sigma_donor",
+                               "Q_donor",
+                               "Cor",
+                               "Cor_donor",
+                               "b_donor",
+                               "theta"
+                               ),
+                      data = stan_data,
+                      iter = iter,
+                      warmup = warmup,
+                      chains = num_chains,
+                      cores = num_chains,
+                      seed = seed,
+                      init = rep(list(stan_init), num_chains),
+                      save_warmup = FALSE,
+                      control = list(adapt_delta = adapt_delta))
 
-    # run sampler
-    fit_mcmc = sampling(model,
-                        pars = c("beta",
-                                 "sigma","sigma_term","sigma_donor",
-                                 # "L","L_term","L_donor",
-                                 "Cor","Cor_term","Cor_donor",
-                                 "b_donor"
-                                 # "Y_hat"
-                                 ),
-                        data = stan_data,
-                        iter = iter,
-                        warmup = warmup,
-                        chains = num_chains,
-                        cores = num_chains,
-                        seed = seed,
-                        init = rep(list(stan_init), num_chains),
-                        save_warmup = FALSE)
-    fit_mcmc
-  }
-
-  # preapte and submit cluster job
-  current_time = Sys.time() %>%
-    str_replace_all(":","") %>%
-    str_replace_all("-| ","_")
-  reg = makeRegistry(file.dir = paste0("registry_",current_time),
-                     packages = "rstan")
-  batchMap(run_sampling, seed = 1)
-  submitJobs()
-  waitForJobs()
-  fit_mcmc = reduceResultsList()[[1]]
+  # # Laplace approximation
+  # stan_file = system.file("exec", "poisson_eb.stan", package = "cytoeffect")
+  # #stan_file = "../../exec/poisson_eb.stan"
+  # model_eb = stan_model(file = stan_file, model_name = "poisson_eb")
+  # stan_data = list(Y = Y, n = n, d = d, p = p,
+  #                  k = k, donor = donor, term = term,
+  #                  r = rank,
+  #                  b = fit_mle$par$b)
+  # fit_mle = optimizing(model_eb,
+  #                      data = stan_data,
+  #                      init = stan_init,
+  #                      as_vector = FALSE,
+  #                      hessian = TRUE,
+  #                      verbose = TRUE)
+  # neg_hessian = -fit_mle$hessian
+  # cond1 = paste0("beta.",1:10,".1")
+  # cond2 = paste0("beta.",1:10,".2")
+  # beta_names = c(cond1, cond2)
+  # beta_sd = sqrt(1/diag(neg_hessian[beta_names, beta_names]))
+  # tibble(
+  #   protein_names,
+  #   beta_sd[cond1],
+  #   beta_sd[cond2]
+  # )
 
   # create cytoeffect class
   obj = list(fit_mcmc = fit_mcmc,
+             #fit_mle = fit_mle,
              df_samples_subset = df_samples_subset,
              protein_names = protein_names,
              condition = condition,
