@@ -26,7 +26,8 @@ Imports:
     batchtools,
     MASS,
     ggrepel,
-    cowplot
+    cowplot,
+    DistatisR
 LinkingTo: 
     StanHeaders (>= 2.17.2),
     rstan (>= 2.17.3),
