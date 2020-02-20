@@ -32,6 +32,7 @@ before_install:
 
 install:
   - R -e "install.packages('rstan', repos = 'https://cloud.r-project.org/', dependencies = TRUE)"
+  - R -e "install.packages('devtools', repos = 'https://cloud.r-project.org/', dependencies = TRUE)"
   - R -e 'devtools::install_deps(dep = T)'
 
 script:
