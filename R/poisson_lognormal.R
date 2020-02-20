@@ -7,7 +7,6 @@
 #' @import rstan
 #' @import reshape2
 #' @import dplyr
-#' @import batchtools
 #' @export
 #'
 #' @param df_samples_subset Data frame or tibble with proteins counts,

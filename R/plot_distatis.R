@@ -146,7 +146,7 @@ plot_distatis = function(obj, ncores = parallel::detectCores(),
   # add donors centers
   if(show_donors) {
     tb_consensus_coords %<>% add_column(
-      color = sapply(pull(expr_median_donor, obj$condition),
+      color = sapply(pull(tb_consensus_coords, obj$condition),
                      function(x) if(x == pull(tb_consensus_coords, obj$condition)[1])
                        "#5DA5DA" else "#FAA43A"))
     ggmds = ggmds +
@@ -177,7 +177,7 @@ plot_distatis = function(obj, ncores = parallel::detectCores(),
       by = obj$group
     )
   segments %<>% dplyr::select(
-    donor, MDS1.x, MDS2.x, MDS1.y, MDS2.y
+    obj$group, MDS1.x, MDS2.x, MDS1.y, MDS2.y
   )
   ggmds = ggmds + geom_segment(
     aes(x = MDS1.x, xend = segments$MDS1.y, y = MDS2.x, yend = MDS2.y),

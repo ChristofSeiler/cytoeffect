@@ -111,8 +111,8 @@ test_that("fit poisson model", {
   expect_is(plot(obj, type = "theta"), "ggplot")
   expect_error(plot(obj, type = "something_crazy"))
 
-  expect_is(plot_mds(obj, asp = TRUE, ncores = 1), "ggplot")
-  expect_is(plot_mds(obj, asp = FALSE, ncores = 1), "ggplot")
-  expect_error(plot_mds(obj$fit_mcmc))
+  expect_is(plot_distatis(obj, ncores = 1), "ggplot")
+  expect_is(plot_distatis(obj, ncores = 1), "ggplot")
+  expect_error(plot_distatis(obj$fit_mcmc))
 
 })

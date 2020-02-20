@@ -23,7 +23,6 @@ Imports:
     stringr,
     rstan (>= 2.17.3),
     ggcorrplot,
-    batchtools,
     MASS,
     ggrepel,
     cowplot,
