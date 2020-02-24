@@ -107,6 +107,17 @@ plot_distatis = function(obj, ncores = parallel::detectCores(),
     MDS2 = scale_arrow * MDS2/cor_max
     )
 
+  # add uncertainty countours
+  ggmds = ggmds +
+    xlab("Factor 1") +
+    ylab("Factor 2") +
+    scale_color_manual(values = c("#5DA5DA", "#FAA43A"),
+                       name = obj$condition) +
+    scale_fill_manual(values = c("#5DA5DA", "#FAA43A"),
+                      name = obj$condition) +
+    stat_density_2d(aes_string(fill = obj$condition),
+                    geom = "polygon", alpha = 0.05)
+
   # add correlation arrows
   if(show_markers) {
     ggmds = ggmds + annotate("segment",
@@ -132,42 +143,6 @@ plot_distatis = function(obj, ncores = parallel::detectCores(),
     }
   }
 
-  # add uncertainty countours
-  ggmds = ggmds +
-    xlab("Factor 1") +
-    ylab("Factor 2") +
-    scale_color_manual(values = c("#5DA5DA", "#FAA43A"),
-                       name = obj$condition) +
-    scale_fill_manual(values = c("#5DA5DA", "#FAA43A"),
-                      name = obj$condition) +
-    stat_density_2d(aes_string(fill = obj$condition),
-                    geom = "polygon", alpha = 0.05)
-
-  # add donors centers
-  if(show_donors) {
-    tb_consensus_coords %<>% add_column(
-      color = sapply(pull(tb_consensus_coords, obj$condition),
-                     function(x) if(x == pull(tb_consensus_coords, obj$condition)[1])
-                       "#5DA5DA" else "#FAA43A"))
-    ggmds = ggmds +
-      geom_point(
-        data = tb_consensus_coords,
-        aes_string(shape = obj$group,
-                   x = tb_consensus_coords$MDS1,
-                   y = tb_consensus_coords$MDS2),
-        size = 3,
-        ) +
-      scale_shape_manual(
-        values =
-          64 + # from shape table (so that it starts at A)
-          pull(tb_consensus_coords, obj$group) %>%
-            unique %>%
-            length %>%
-            seq(1, .)
-        ) +
-      theme(legend.position = "bottom")
-  }
-
   # add line segments connecting donor centers
   con_levels = levels(pull(tb_consensus_coords, obj$condition))
   segments =
@@ -183,6 +158,28 @@ plot_distatis = function(obj, ncores = parallel::detectCores(),
     aes(x = MDS1.x, xend = segments$MDS1.y, y = MDS2.x, yend = MDS2.y),
     colour = segment_color, alpha = 1.0,
     data = segments)
+
+  # add donors centers
+  if(show_donors) {
+    ggmds = ggmds +
+      geom_point(
+        data = tb_consensus_coords,
+        aes_string(shape = obj$group,
+                   x = tb_consensus_coords$MDS1,
+                   y = tb_consensus_coords$MDS2),
+        size = 4,
+        color = "black"
+        ) +
+      scale_shape_manual(
+        values =
+          64 + # from shape table (so that it starts at A)
+          pull(tb_consensus_coords, obj$group) %>%
+          unique %>%
+          length %>%
+          seq(1, .)
+      ) +
+      theme(legend.position = "bottom")
+  }
 
   # add title
   ggmds + ggtitle("Posterior DiSTATIS of Latent Variable"~lambda)
