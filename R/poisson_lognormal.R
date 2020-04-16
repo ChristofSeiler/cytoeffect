@@ -115,6 +115,7 @@ poisson_lognormal = function(df_samples_subset,
     as.matrix %>%
     t
   theta[which(theta == 0, arr.ind = TRUE)] = 0.001
+  theta[which(theta == 1, arr.ind = TRUE)] = 0.999
 
   # set random effects to zero
   z = rep(0, n*d);
