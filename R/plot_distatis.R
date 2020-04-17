@@ -155,7 +155,7 @@ plot_distatis = function(obj, ncores = parallel::detectCores(),
     obj$group, MDS1.x, MDS2.x, MDS1.y, MDS2.y
   )
   ggmds = ggmds + geom_segment(
-    aes(x = MDS1.x, xend = segments$MDS1.y, y = MDS2.x, yend = MDS2.y),
+    aes(x = MDS1.x, xend = MDS1.y, y = MDS2.x, yend = MDS2.y),
     colour = segment_color, alpha = 1.0,
     data = segments)
 

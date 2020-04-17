@@ -55,6 +55,8 @@ posterior_predictive_log_lambda = function(obj, k = 1, show_donors = TRUE) {
     } else {
       lambda = mvrnorm(n = tb_info$n, beta, Cov)
     }
+    # make sure it has the right dimension
+    lambda %<>% matrix(nrow = tb_info$n, ncol = length(obj$protein_names))
     # account for zero inflation
     theta = stan_pars$theta[k,,]
     zeros = matrix(rbinom(tb_info$n*length(obj$protein_names),
