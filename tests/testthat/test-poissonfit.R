@@ -112,7 +112,6 @@ test_that("fit poisson model", {
   expect_error(plot(obj, type = "something_crazy"))
 
   expect_is(plot_distatis(obj, ncores = 1), "ggplot")
-  expect_is(plot_distatis(obj, ncores = 1), "ggplot")
   expect_error(plot_distatis(obj$fit_mcmc))
 
 })
