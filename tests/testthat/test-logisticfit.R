@@ -112,10 +112,10 @@ test_that("stop when eta is negative", {
 test_that("fit logistic model", {
 
   set.seed(0xdada)
-  latent_M = rpois(100, 3)
+  latent_M = rnorm(100, 0, 1)
   df_samples_subset = tibble(
-    M1 = rpois(100, latent_M + 5),
-    M2 = rpois(100, latent_M + 4),
+    M1 = rpois(100, exp(latent_M+log(10))),
+    M2 = rpois(100, exp(latent_M+log(11))),
     treatment = factor(c(rep("unstim",50), rep("stim",50))),
     patient = factor(c(rep("A",25), rep("B",25), rep("C",25), rep("D",25)))
   )
@@ -126,9 +126,12 @@ test_that("fit logistic model", {
 
   df_samples_subset %<>% mutate_at(protein_names, function(x) asinh(x/5))
 
-  obj = cytoeffect::glmm(df_samples_subset, protein_names,
-                         condition = condition, group = group,
-                         num_chains = ncores)
+  suppressWarnings(
+    obj <- cytoeffect::glmm(df_samples_subset, protein_names,
+                           warmup = 10, iter = 20,
+                           condition = condition, group = group,
+                           num_chains = ncores)
+  )
 
   expect_is(obj$fit_mcmc, "stanfit")
 

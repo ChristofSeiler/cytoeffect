@@ -1,10 +1,7 @@
 #' Posterior multivariate pairs plot for Poisson Log-Normal Mixed Model
 #'
-#' @import rstan
 #' @import ggplot2
-#' @import magrittr
 #' @import dplyr
-#' @import tidyr
 #' @import cowplot
 #' @export
 #'

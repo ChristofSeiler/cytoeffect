@@ -14,32 +14,37 @@ BugReports: https://github.com/ChristofSeiler/cytoeffect/issues
 Encoding: UTF-8
 LazyData: true
 Imports:
-    ggplot2,
-    reshape2,
-    magrittr,
-    dplyr,
-    tibble,
-    tidyr,
-    stringr,
-    rstan (>= 2.17.3),
-    ggcorrplot,
-    MASS,
-    ggrepel,
+    methods,
+    Rcpp (>= 0.12.0),
+    rstan (>= 2.18.1),
+    rstantools (>= 2.0.0),
     cowplot,
-    DistatisR
+    DistatisR,
+    dplyr,
+    ggcorrplot,
+    ggplot2,
+    ggrepel,
+    magrittr,
+    MASS,
+    reshape2,
+    stringr,
+    tibble,
+    tidyr
 LinkingTo: 
-    StanHeaders (>= 2.17.2),
-    rstan (>= 2.17.3),
-    BH (>= 1.66.0-1),
-    Rcpp (>= 0.12.16),
-    RcppEigen (>= 0.3.3.4.0)
+    BH (>= 1.66.0),
+    Rcpp (>= 0.12.0),
+    RcppEigen (>= 0.3.3.3.0),
+    rstan (>= 2.18.1),
+    StanHeaders (>= 2.18.0)
 Depends:
-    R (>= 3.4.0),
-    Rcpp (>= 0.12.16),
-    methods
+    R (>= 3.4.0)
 SystemRequirements: GNU make
 NeedsCompilation: yes
 RoxygenNote: 7.0.2
 Suggests: 
     testthat,
-    covr
+    covr,
+    knitr,
+    rmarkdown
+Biarch: true
+VignetteBuilder: knitr

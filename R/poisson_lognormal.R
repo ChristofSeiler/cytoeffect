@@ -4,7 +4,6 @@
 #' Poisson log-normal mixed model. Each cell and protein marker has its own rate
 #' parameter following a linear model.
 #'
-#' @import rstan
 #' @import reshape2
 #' @import dplyr
 #' @export
@@ -15,6 +14,7 @@
 #' @param condition The column name of the condition variable
 #' @param group The column name of the group variable
 #' @param r_donor Rank of the donor random effect covariance matrix
+#' @param eta Hyperparameter for LKJ prior
 #' @param iter Number of iteration per chain for the HMC sampler
 #' @param warmup Number of warm up steps per chain for the HMC sampler
 #' @param num_chains Number of HMC chains to run in parallel
@@ -135,9 +135,9 @@ poisson_lognormal = function(df_samples_subset,
   )
 
   # compile model
-  stan_file = system.file("exec", "poisson.stan", package = "cytoeffect")
+  #stan_file = system.file("exec", "poisson.stan", package = "cytoeffect")
   #stan_file = "../../exec/poisson.stan"
-  model = stan_model(file = stan_file, model_name = "poisson")
+  #model = stan_model(file = stan_file, model_name = "poisson")
 
   # # run sampler
   # fit_mle = optimizing(model,
@@ -149,7 +149,7 @@ poisson_lognormal = function(df_samples_subset,
   #                           "sigma","sigma_term","sigma_donor",
   #                           "z","z_term","z_donor",
   #                           "x","x_term","x_donor")]
-  fit_mcmc = sampling(model,
+  fit_mcmc = sampling(stanmodels$poisson,
                       pars = c("beta",
                                "sigma",
                                "sigma_donor",

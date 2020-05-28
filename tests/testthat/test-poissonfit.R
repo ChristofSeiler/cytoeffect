@@ -87,8 +87,8 @@ test_that("fit poisson model", {
   set.seed(0xdada)
   latent_M = rnorm(100, 0, 1)
   df_samples_subset = tibble(
-    M1 = rpois(100, latent_M + 5),
-    M2 = rpois(100, latent_M + 4),
+    M1 = rpois(100, exp(latent_M+log(10))),
+    M2 = rpois(100, exp(latent_M+log(11))),
     treatment = factor(c(rep("unstim",50), rep("stim",50))),
     patient = factor(c(rep("A",25), rep("B",25), rep("C",25), rep("D",25)))
   )
@@ -97,10 +97,13 @@ test_that("fit poisson model", {
   group = "patient"
   ncores = 1
 
-  obj = cytoeffect::poisson_lognormal(df_samples_subset, protein_names,
-                                      condition = condition, group = group,
-                                      r_donor = 2,
-                                      num_chains = ncores)
+  suppressWarnings(
+    obj <- cytoeffect::poisson_lognormal(df_samples_subset, protein_names,
+                                         warmup = 10, iter = 20,
+                                         condition = condition, group = group,
+                                         r_donor = 2,
+                                         num_chains = ncores)
+  )
 
   expect_is(obj$fit_mcmc, "stanfit")
 

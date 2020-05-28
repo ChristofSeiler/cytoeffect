@@ -30,6 +30,8 @@ cell condition, and group information}
 
 \item{r_donor}{Rank of the donor random effect covariance matrix}
 
+\item{eta}{Hyperparameter for LKJ prior}
+
 \item{iter}{Number of iteration per chain for the HMC sampler}
 
 \item{warmup}{Number of warm up steps per chain for the HMC sampler}

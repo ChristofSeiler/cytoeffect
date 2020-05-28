@@ -1,12 +1,11 @@
 #' Plot Multivariate Posterior Summaries for Poisson Log-Normal Mixed Model
 #'
-#' @import rstan
 #' @import ggplot2
-#' @import magrittr
+#' @importFrom magrittr %>% %<>%
 #' @import dplyr
-#' @import tidyr
 #' @import parallel
-#' @import MASS
+#' @importFrom MASS mvrnorm
+#' @importFrom rstan extract
 #' @export
 #'
 #' @param obj Object of class \code{cytoeffect_poisson} computed
@@ -51,9 +50,9 @@ posterior_predictive_log_lambda = function(obj, k = 1, show_donors = TRUE) {
     if(show_donors) {
       # donor random effect
       b_donor = stan_pars$b_donor[k,tb_info$group_index,]
-      lambda = mvrnorm(n = tb_info$n, beta + b_donor, Cov)
+      lambda = MASS::mvrnorm(n = tb_info$n, beta + b_donor, Cov)
     } else {
-      lambda = mvrnorm(n = tb_info$n, beta, Cov)
+      lambda = MASS::mvrnorm(n = tb_info$n, beta, Cov)
     }
     # make sure it has the right dimension
     lambda %<>% matrix(nrow = tb_info$n, ncol = length(obj$protein_names))

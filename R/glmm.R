@@ -4,7 +4,6 @@
 #' linear mixed model. We predict the experimental condition from protein
 #' marker expressions.
 #'
-#' @import rstan
 #' @import ggplot2
 #' @import reshape2
 #' @import dplyr
@@ -63,11 +62,11 @@ glmm = function(df_samples_subset,
   )
 
   # compile model
-  stan_file = system.file("exec", "glmm.stan", package = "cytoeffect")
-  model = stan_model(file = stan_file, model_name = "glmm")
+  #stan_file = system.file("exec", "glmm.stan", package = "cytoeffect")
+  #model = stan_model(file = stan_file, model_name = "glmm")
 
   # run sampler
-  fit_mcmc = sampling(model,
+  fit_mcmc = sampling(stanmodels$glmm,
                       data = stan_data,
                       iter = iter,
                       warmup = warmup,

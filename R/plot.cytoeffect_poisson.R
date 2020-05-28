@@ -1,17 +1,17 @@
 #' Plot Posterior Summaries for Poisson Log-Normal Mixed Model
 #'
-#' @import rstan
-#' @import ggplot2
-#' @import ggcorrplot
-#' @import magrittr
-#' @import dplyr
-#' @import tidyr
-#' @import stringr
-#' @import tibble
-#' @export
-#'
 #' @aliases plot.cytoeffect_poisson
 #' @method plot cytoeffect_poisson
+#'
+#' @import ggplot2
+#' @import ggcorrplot
+#' @importFrom magrittr %>% %<>%
+#' @import dplyr
+#' @import stringr
+#' @import tibble
+#' @importFrom rstan extract summary
+#' @export
+#'
 #' @param obj Object of class \code{cytoeffect_poisson} computed
 #'   using \code{\link{poisson_lognormal}}
 #' @param type A string with the parameter to plot:
@@ -33,9 +33,9 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
   if(type == "beta") {
 
     # extract index estimates
-    tb_beta = summary(obj$fit_mcmc, pars = "beta", probs = c(0.025, 0.5, 0.975))
+    tb_beta = rstan::summary(obj$fit_mcmc, pars = "beta", probs = c(0.025, 0.5, 0.975))
     tb_beta = tb_beta$summary[,c("2.5%","50%","97.5%")]
-    tb_beta %<>% as.tibble(rownames = "name")
+    tb_beta %<>% as_tibble(rownames = "name")
     tb_beta %<>% add_column(protein_name = rep(protein_names, each = length(conditions)))
     tb_beta %<>% add_column(condition = rep(conditions, length(protein_names)))
 
@@ -45,7 +45,7 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
     beta_diff = apply(beta_contrast, 2,
                       function(x)
                         quantile(x, probs = c(0.025, 0.5, 0.975))
-    ) %>% t %>% as.tibble
+    ) %>% t %>% as_tibble
     beta_diff %<>% add_column(name = "contrast")
     beta_diff %<>% add_column(protein_name = protein_names)
     beta_diff %<>% add_column(condition = paste(rev(conditions),collapse = " - "))
@@ -67,10 +67,10 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
   } else if (type == "sigma") {
 
     # summarize cell level effect
-    tb_cond = summary(obj$fit_mcmc, pars = c("sigma"),
-                      probs = c(0.025, 0.5, 0.975))
+    tb_cond = rstan::summary(obj$fit_mcmc, pars = c("sigma"),
+                             probs = c(0.025, 0.5, 0.975))
     tb_cond = tb_cond$summary[,c("2.5%","50%","97.5%")]
-    tb_cond %<>% as.tibble(rownames = "name")
+    tb_cond %<>% as_tibble(rownames = "name")
     tb_cond %<>% add_column(protein_name = protein_names)
     tb_cond %<>% add_column(type = "cell")
 
@@ -128,7 +128,7 @@ plot.cytoeffect_poisson = function(obj, type = "beta",
     colnames(theta_median) = donors
     theta_median %<>% as_tibble()
     theta_median %<>% mutate(protein_name = protein_names)
-    theta_median %<>% gather(donor, probability, -protein_name)
+    theta_median %<>% tidyr::gather(donor, probability, -protein_name)
     ggplot(theta_median, aes(protein_name, donor)) +
       geom_tile(aes(fill = probability), color = "white") +
       scale_fill_gradient(low = "white", high = "steelblue") +

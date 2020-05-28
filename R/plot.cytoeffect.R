@@ -1,16 +1,17 @@
 #' Plot Posterior Summaries of Logistic Linear Mixed Model
 #'
-#' @import rstan
-#' @import ggplot2
-#' @import ggcorrplot
-#' @import magrittr
-#' @import dplyr
-#' @import tidyr
-#' @import tibble
-#' @export
-#'
 #' @aliases plot.cytoeffect
 #' @method plot cytoeffect
+#'
+#' @import ggplot2
+#' @import ggcorrplot
+#' @importFrom magrittr %>% %<>%
+#' @import dplyr
+#' @import tibble
+#' @importFrom rstan extract
+#' @importFrom rstan summary
+#' @export
+#'
 #' @param obj Object of class \code{cytoeffect} computed using \code{\link{glmm}}
 #' @param type A string with the variable name to plot:
 #'   \code{type = "beta"}, \code{type = "sigma_donor"}, \code{type = "Cor_donor"},
@@ -29,9 +30,9 @@ plot.cytoeffect = function(obj, type = "beta") {
 
   if(type == "beta") {
 
-    tb_beta = summary(fit_mcmc, pars = "beta", probs = c(0.025, 0.5, 0.975))
+    tb_beta = rstan::summary(fit_mcmc, pars = "beta", probs = c(0.025, 0.5, 0.975))
     tb_beta = tb_beta$summary[,c("2.5%","50%","97.5%")]
-    tb_beta %<>% as.tibble(rownames = "name")
+    tb_beta %<>% as_tibble(rownames = "name")
     tb_beta %<>% filter(name != "beta[1]") # remove intercept
     tb_beta %<>% add_column(protein_name = as.character(protein_names))
     ggplot(tb_beta, aes(x = `50%`, y = protein_name)) +
@@ -44,9 +45,9 @@ plot.cytoeffect = function(obj, type = "beta") {
 
   } else if (type == "sigma_donor") {
 
-    tb_sigma = summary(fit_mcmc, pars = type, probs = c(0.025, 0.5, 0.975))
+    tb_sigma = rstan::summary(fit_mcmc, pars = type, probs = c(0.025, 0.5, 0.975))
     tb_sigma = tb_sigma$summary[,c("2.5%","50%","97.5%")]
-    tb_sigma %<>% as.tibble(rownames = "name")
+    tb_sigma %<>% as_tibble(rownames = "name")
     tb_sigma %<>% filter(name != "sigma_donor[1]") # remove intercept
     tb_sigma %<>% add_column(protein_name = as.character(protein_names))
     ggplot(tb_sigma, aes(x = `50%`, y = protein_name)) +

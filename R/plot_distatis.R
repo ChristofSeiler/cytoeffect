@@ -1,12 +1,9 @@
 #' Plot Multivariate Posterior Summaries for Poisson Log-Normal Mixed Model
 #'
-#' @import rstan
 #' @import ggplot2
-#' @import magrittr
+#' @importFrom magrittr %>% %<>%
 #' @import dplyr
-#' @import tidyr
 #' @import parallel
-#' @import MASS
 #' @import ggrepel
 #' @export
 #'

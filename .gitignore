@@ -10,3 +10,8 @@ vignettes/logistic/*/*.html
 vignettes/poisson/*.pdf
 vignettes/poisson/*.html
 vignettes/poisson/*/*.html
+src/*.h
+src/*.cpp
+src/*.cc
+src/*.o
+src/*.so
