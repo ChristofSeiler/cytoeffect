@@ -7,8 +7,9 @@ latex: true
 r_build_args: '--no-build-vignettes'
 r_check_args: '--ignore-vignettes'
 
-r_github_packages:
-  - jimhester/covr
+# for code coverage
+r_packages:
+  - covr
 
 env:
   global:

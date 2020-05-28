@@ -12,21 +12,22 @@
 #' @importFrom rstan summary
 #' @export
 #'
-#' @param obj Object of class \code{cytoeffect} computed using \code{\link{glmm}}
+#' @param x Object of class \code{cytoeffect} computed using \code{\link{glmm}}
 #' @param type A string with the variable name to plot:
 #'   \code{type = "beta"}, \code{type = "sigma_donor"}, \code{type = "Cor_donor"},
 #'   or \code{type = "Cor_donor_all"}
+#' @param ... Other parameters
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
 #' # fit = cytoeffect::glmm(...)
 #' # plot(fit)
-plot.cytoeffect = function(obj, type = "beta") {
+plot.cytoeffect = function(x, type = "beta", ...) {
 
-  fit_mcmc = obj$fit_mcmc
-  protein_names = obj$protein_names
+  fit_mcmc = x$fit_mcmc
+  protein_names = x$protein_names
   warmup = fit_mcmc@stan_args[[1]]$warmup
-  conditions = obj$conditions
+  conditions = x$conditions
 
   if(type == "beta") {
 
@@ -67,7 +68,7 @@ plot.cytoeffect = function(obj, type = "beta") {
     p_mat = 1-pmax(cor_pos, cor_neg)
     colnames(cor_median) = rownames(cor_median) = protein_names
     ggcorrplot(cor_median, hc.order = TRUE, type = "lower",
-               outline.col = "lightgray",
+               outline.color = "lightgray",
                colors = c("#6D9EC1", "white", "#E46726")) +
       ggtitle(paste0("Marker Correlations (",type,")")) +
       theme(panel.grid.major = element_blank(),
