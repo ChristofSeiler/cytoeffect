@@ -41,4 +41,5 @@ SystemRequirements: GNU make
 NeedsCompilation: yes
 RoxygenNote: 7.0.2
 Suggests: 
-    testthat
+    testthat,
+    covr
