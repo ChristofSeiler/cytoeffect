@@ -3,11 +3,10 @@
 <!-- badges: start -->
 
 [![build status](https://travis-ci.com/ChristofSeiler/cytoeffect.svg?branch=master)](https://travis-ci.com/ChristofSeiler/cytoeffect)
-[![codecov](https://codecov.io/gh/ChristofSeiler/cytoeffect/branch/master/graph/badge.svg)](https://codecov.io/gh/ChristofSeiler/cytoeffect)
-[![binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ChristofSeiler/cytoeffect_binder/master?urlpath=rstudio)
-
 [![R build status](https://github.com/ChristofSeiler/cytoeffect/workflows/R-CMD-check/badge.svg)](https://github.com/ChristofSeiler/cytoeffect/actions)
 [![Codecov test coverage](https://codecov.io/gh/ChristofSeiler/cytoeffect/branch/master/graph/badge.svg)](https://codecov.io/gh/ChristofSeiler/cytoeffect?branch=master)
+[![binder](http://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/ChristofSeiler/cytoeffect_binder/master?urlpath=rstudio)
+
 <!-- badges: end -->
 
 ## Goal
