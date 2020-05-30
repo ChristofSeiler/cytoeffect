@@ -118,3 +118,31 @@ test_that("fit poisson model", {
   expect_error(plot_distatis(obj$fit_mcmc))
 
 })
+
+test_that("pairs plot", {
+
+  set.seed(0xdada)
+  latent_M = rnorm(100, 0, 1)
+  df_samples_subset = tibble(
+    M1 = rpois(100, exp(latent_M+log(10))),
+    M2 = rpois(100, exp(latent_M+log(10.5))),
+    M3 = rpois(100, exp(latent_M+log(11))),
+    treatment = factor(c(rep("unstim",50), rep("stim",50))),
+    patient = factor(c(rep("A",25), rep("B",25), rep("C",25), rep("D",25)))
+  )
+  protein_names = c("M1","M2", "M3")
+  condition = "treatment"
+  group = "patient"
+  ncores = 1
+
+  suppressWarnings(
+    obj <- cytoeffect::poisson_lognormal(df_samples_subset, protein_names,
+                                         warmup = 10, iter = 20,
+                                         condition = condition, group = group,
+                                         r_donor = 2,
+                                         num_chains = ncores)
+  )
+
+  expect_is(plot_pairs(obj, marker1 = "M1", marker2 = "M2", marker3 = "M3"), "ggplot")
+
+})

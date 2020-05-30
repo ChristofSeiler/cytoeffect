@@ -2,7 +2,9 @@
 #'
 #' @import ggplot2
 #' @import dplyr
-#' @import cowplot
+#' @importFrom cowplot plot_grid get_legend
+#' @importFrom ggthemes scale_colour_few
+#' @importFrom rstan extract
 #' @export
 #'
 #' @param obj Object of class \code{cytoeffect_poisson} computed
@@ -38,17 +40,18 @@ plot_pairs = function(obj, marker1, marker2, marker3) {
       pSTAT5 = post_beta[,pSTAT5_index,2]
     )
   )
+  names(tb_log_count) = c(obj$condition, marker1, marker2, marker3)
   plot_diag = function(marker) {
     ggplot(tb_log_count, aes_string(marker, fill = obj$condition)) +
       geom_histogram(bins = 40, position = "identity", alpha = 0.5) +
-      scale_fill_few()
+      ggthemes::scale_fill_few()
   }
   plot_off_diag = function(marker1, marker2) {
     ggplot(tb_log_count, aes_string(marker1, marker2, color = obj$condition)) +
       geom_density2d() +
-      scale_color_few()
+      ggthemes::scale_color_few()
   }
-  ppair = plot_grid(
+  ppair = cowplot::plot_grid(
     plot_diag(marker1) + theme(legend.position = "none"),
     NULL,
     NULL,
@@ -60,9 +63,10 @@ plot_pairs = function(obj, marker1, marker2, marker3) {
     plot_diag(marker3) + theme(legend.position = "none"),
     ncol = 3
   )
-  plot_grid(ppair,
-            get_legend(plot_diag(marker1) + theme(legend.position = "bottom")),
-            ncol = 1,
-            rel_heights = c(1, .1))
+  cowplot::plot_grid(ppair,
+                     cowplot::get_legend(plot_diag(marker1) +
+                                           theme(legend.position = "bottom")),
+                     ncol = 1,
+                     rel_heights = c(1, .1))
 
 }
