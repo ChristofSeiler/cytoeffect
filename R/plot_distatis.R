@@ -1,14 +1,17 @@
-#' Plot Multivariate Posterior Summaries for Poisson Log-Normal Mixed Model
+#' DiSTATIS Plot of Posterior or Bootstrap Samples
 #'
 #' @import ggplot2
 #' @importFrom magrittr %>% %<>%
 #' @import dplyr
 #' @import parallel
 #' @import ggrepel
+#' @importFrom DistatisR distatis
+#' @importFrom MASS mvrnorm
+#' @importFrom tidyr unnest
 #' @export
 #'
-#' @param obj Object of class \code{cytoeffect_poisson} computed
-#'   using \code{\link{poisson_lognormal}}
+#' @param obj Object of class \code{cytoeffect_poisson} or \code{cytoeffect_poisson_mcle}
+#'   computed by \code{\link{poisson_lognormal}} or\code{\link{poisson_lognormal_mcle}}
 #' @param ncores Number of cores
 #' @param show_donors Include donor random effect
 #' @param show_markers Include markers
@@ -21,8 +24,8 @@
 plot_distatis = function(obj, ncores = parallel::detectCores(),
                          show_donors = TRUE, show_markers = TRUE, repel = TRUE) {
 
-  if (class(obj) != "cytoeffect_poisson")
-    stop("Not a cytoeffect_poisson object.")
+  if (class(obj) != "cytoeffect_poisson" & class(obj) != "cytoeffect_poisson_mcle")
+    stop("Not a cytoeffect_poisson or cytoeffect_poisson_mcle object.")
 
   arrow_color = "darkgray"
   marker_color = "darkgray"
@@ -31,31 +34,52 @@ plot_distatis = function(obj, ncores = parallel::detectCores(),
   seed = 0xdada
 
   # sample all tables
-  sample_info_k = c(obj$group,obj$condition,"k")
-  n_chains = length(obj$fit_mcmc@stan_args)
-  stan_args = obj$fit_mcmc@stan_args[[1]]
-  n_total_draws = n_chains * (stan_args$iter - stan_args$warmup)
-  expr_median = mclapply(
-    1:n_total_draws,
-    function(i) {
-      set.seed(seed)
-      posterior_predictive_log_lambda(obj, k = i, show_donors = show_donors) %>%
-        group_by(.dots = sample_info_k) %>%
-        summarize_at(obj$protein_names,median)
-      },
-    mc.cores = ncores
-    )
+  if(class(obj) == "cytoeffect_poisson") {
+    # posterior samples
+    sample_info_k = c(obj$group,obj$condition,"k")
+    n_chains = length(obj$fit_mcmc@stan_args)
+    stan_args = obj$fit_mcmc@stan_args[[1]]
+    n_total_draws = n_chains * (stan_args$iter - stan_args$warmup)
+    expr_median = mclapply(
+      1:n_total_draws,
+      function(i) {
+        set.seed(seed)
+        posterior_predictive_log_lambda(obj, k = i, show_donors = show_donors) %>%
+          group_by(.dots = sample_info_k) %>%
+          summarize_at(obj$protein_names,median)
+        },
+      mc.cores = ncores
+      )
+  } else {
+    # parametric bootstrap samples
+    boot = function(tb_args) {
+      boot_list = lapply(1:nrow(tb_args), function(i) {
+        set.seed(seed)
+        Y_donor = MASS::mvrnorm(n = tb_args$n[i],
+                                mu = tb_args$fit[[i]]$beta,
+                                Sigma = tb_args$fit[[i]]$Sigma)
+        colnames(Y_donor) = obj$protein_names
+        Y_donor %>% as_tibble %>% summarize_all(median)
+      })
+      tb_args %>%
+        dplyr::select(-Y, -fit, -n) %>%
+        add_column(b = boot_list) %>%
+        tidyr::unnest(b) %>%
+        ungroup()
+    }
+    n_boot = 1000
+    expr_median = mclapply(1:n_boot, function(i) boot(obj$tb_args), mc.cores = ncores)
+  }
 
   # prepare three way arrary for distatis
   dist_matrix = lapply(expr_median, function(x) {
-    as.matrix(dist(x[,-seq(sample_info_k)]))
+    x %>%
+      ungroup() %>%
+      select_at(obj$protein_names) %>%
+      dist %>%
+      as.matrix
   })
-  dist_matrix_arr = array(
-    0, dim = c(dim(dist_matrix[[1]]), length(dist_matrix))
-    )
-  for(i in 1:dim(dist_matrix_arr)[3]) {
-    dist_matrix_arr[,,i] = dist_matrix[[i]]
-  }
+  dist_matrix_arr = simplify2array(dist_matrix)
 
   # run distatis
   fit_distatis = DistatisR::distatis(dist_matrix_arr, nfact2keep = 2)
@@ -74,7 +98,7 @@ plot_distatis = function(obj, ncores = parallel::detectCores(),
   tb_distatis_coords %<>% dplyr::rename(MDS1 = `Factor 1`,
                                         MDS2 = `Factor 2`)
   tb_consensus_coords = bind_cols(
-    expr_median[[1]][sample_info_k],
+    expr_median[[1]] %>% dplyr::select_at(vars(obj$group, obj$condition)),
     as_tibble(consensus_coords)) %>%
     ungroup()
   tb_consensus_coords %<>% dplyr::rename(MDS1 = `Factor 1`,
@@ -179,6 +203,10 @@ plot_distatis = function(obj, ncores = parallel::detectCores(),
   }
 
   # add title
-  ggmds + ggtitle("Posterior DiSTATIS of Latent Variable"~lambda)
+  if(class(obj) == "cytoeffect_poisson") {
+    ggmds + ggtitle("Posterior DiSTATIS of Latent Variable"~lambda)
+  } else {
+    ggmds + ggtitle("Parametric Bootstrap DiSTATIS of Latent Variable"~lambda)
+  }
 
 }

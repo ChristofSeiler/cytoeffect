@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_distatis.R
 \name{plot_distatis}
 \alias{plot_distatis}
-\title{Plot Multivariate Posterior Summaries for Poisson Log-Normal Mixed Model}
+\title{DiSTATIS Plot of Posterior or Bootstrap Samples}
 \usage{
 plot_distatis(
   obj,
@@ -13,8 +13,8 @@ plot_distatis(
 )
 }
 \arguments{
-\item{obj}{Object of class \code{cytoeffect_poisson} computed
-using \code{\link{poisson_lognormal}}}
+\item{obj}{Object of class \code{cytoeffect_poisson} or \code{cytoeffect_poisson_mcle}
+computed by \code{\link{poisson_lognormal}} or\code{\link{poisson_lognormal_mcle}}}
 
 \item{ncores}{Number of cores}
 
@@ -28,7 +28,7 @@ using \code{\link{poisson_lognormal}}}
 \code{\link[ggplot2]{ggplot2}} object
 }
 \description{
-Plot Multivariate Posterior Summaries for Poisson Log-Normal Mixed Model
+DiSTATIS Plot of Posterior or Bootstrap Samples
 }
 \examples{
 # fit = cytoeffect::poisson_lognormal(...)

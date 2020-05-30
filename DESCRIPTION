@@ -29,7 +29,13 @@ Imports:
     reshape2,
     stringr,
     tibble,
-    tidyr
+    tidyr,
+    PLNmodels,
+    statmod,
+    parallel,
+    Matrix,
+    matrixStats,
+    batchtools
 LinkingTo: 
     BH (>= 1.66.0),
     Rcpp (>= 0.12.0),
