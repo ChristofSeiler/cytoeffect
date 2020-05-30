@@ -115,6 +115,7 @@ test_that("fit poisson model", {
   expect_error(plot(obj, type = "something_crazy"))
 
   expect_is(plot_distatis(obj, ncores = 1), "ggplot")
+  expect_is(plot_distatis(obj, repel = FALSE, ncores = 1), "ggplot")
   expect_error(plot_distatis(obj$fit_mcmc))
 
 })
@@ -143,6 +144,7 @@ test_that("pairs plot", {
                                          num_chains = ncores)
   )
 
+  expect_is(obj, "cytoeffect_poisson")
   expect_is(plot_pairs(obj, marker1 = "M1", marker2 = "M2", marker3 = "M3"), "ggplot")
 
 })

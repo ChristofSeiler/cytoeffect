@@ -140,6 +140,7 @@ test_that("fit poisson model", {
   expect_error(plot(fit, type = "something_crazy"))
 
   expect_is(plot_distatis(fit, ncores = 1), "ggplot")
+  expect_is(plot_distatis(fit, repel = FALSE, ncores = 1), "ggplot")
   expect_error(plot_distatis(fit$protein_names))
 
 })
