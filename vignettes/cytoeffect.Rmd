@@ -1,10 +1,10 @@
 ---
-title: "Vignette Title"
-author: "Vignette Author"
+title: "cytoeffect Workflow"
+author: "Christof Seiler"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{cytoeffect Workflow}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,54 +12,146 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.height = 5,
+  fig.width = 5
 )
 ```
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+In this vignette, we show the `cytoeffect` workflow for both the full Bayesian hierarchical model and the parametric bootstrap with the simplified model.
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+## Generate Data
 
-## Vignette Info
+Simulate dataset.
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+```{r}
+library("tibble")
+library("magrittr")
+library("stringr")
+library("MASS")
+library("Matrix")
+library("dplyr")
 
-## Styles
+# parameters
+n_markers = 5            # number of markers
+n_true = 1               # number of differential markers
+n_samples = 8            # donors per group
+paired = TRUE            # paired experimental design
+n_cells = 100            # per sample
+pi = 0.05                # zero inflation probability
+beta_treatment = log(20) # log of mean in treatment
+beta_control = log(5)    # log of mean in control
+rho_b = 0.5              # cell level correlation
+rho_u = 0.5              # donor level correlation
+seed = 0xdada            # set random seed
 
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+# simulation parameters
+set.seed(seed)
 
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
+if (paired) {
+  n_donors = n_samples / 2
+} else {
+  n_donors = n_samples
+}
 
-## Figures
+# patient information
+donor = rep(1:n_donors, each = n_cells)
+if (paired) {
+  donor %<>% rep(2)
+  condition = c(rep("treatment", length(donor) / 2),
+                rep("control", length(donor) / 2))
+} else {
+  condition = c(rep("treatment", length(donor) / 2),
+                rep("control", length(donor) / 2))
+}
+df = tibble(donor, condition)
 
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+# generate protein counts
+protein_names = paste0("m", str_pad(1:n_markers, width = 2, pad = "0"))
+rcorr = function(rho) {
+  corr = rho ^ toeplitz(0:(n_markers - 1))
+  # random positive and negative correlations
+  lower_tri = lower.tri(corr)
+  upper_tri = upper.tri(corr)
+  signs = sample(c(1, -1), size = sum(lower_tri), replace = TRUE)
+  corr_sign = diag(1, n_markers)
+  corr_sign[lower_tri] = signs * corr[lower_tri]
+  corr_sign[upper_tri] = t(corr_sign)[upper_tri]
+  # project to nearest positive definite matrix
+  as.matrix(nearPD(corr_sign, corr = TRUE)$mat)
+}
+Sigma_b = rcorr(rho_b) # cell level variability
+Sigma_u = rcorr(rho_u) # donor level variability
+b = mvrnorm(n = nrow(df), mu = rep(0, n_markers), Sigma_b)
+u = mvrnorm(n = n_donors, mu = rep(0, n_markers), Sigma_u)
+u = u[donor,]
+beta = matrix(beta_control, nrow = nrow(b), ncol = n_markers)
+# collider confounding
+beta[, 1:n_true] = ifelse(condition == "treatment", beta_treatment, beta_control)
+log_lambda = beta + b + u
+lambda = exp(log_lambda)
+y = rpois(length(lambda), lambda)
+dim(y) = dim(lambda)
+I = rbinom(n = length(y), size = 1, prob = pi)
+I = matrix(I, ncol = n_markers)
+y = y * (1 - I)
+colnames(y) = protein_names
+df %<>% bind_cols(as_tibble(y))
+df$condition %<>% factor(levels = c("control",
+                                    "treatment"))
+df %<>% mutate(donor = paste0("pid", str_pad(donor, width = 2, pad = "0")))
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+## Full Bayesian Model
+ 
+Sample from posterior distribution using Stan.
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+```{r}
+library("cytoeffect")
+fit = poisson_lognormal(df, protein_names, condition = "condition", group = "donor",
+                        warmup = 100, iter = 200, r_donor = 2, num_chains = 1)
 ```
 
-Also a quote using `>`:
+Plot marginal credible intervals.
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+```{r}
+plot(fit, type = "theta")
+plot(fit, type = "beta")
+plot(fit, type = "sigma")
+plot(fit, type = "Cor")
+```
+
+Multivariate DiSTATIS plot.
+
+```{r}
+plot_distatis(fit)
+```
+
+## Parametric Bootstrap with Simplified Model
+
+Fit model using composite maximum likelihood estimatation.
+
+```{r}
+fit = poisson_lognormal_mcle(df, protein_names, condition = "condition", group = "donor",
+                             ncores = 1)
+```
+
+Plot marginal credible intervals.
+
+```{r}
+plot(fit, type = "beta")
+plot(fit, type = "sigma")
+plot(fit, type = "Cor")
+```
+
+Multivariate DiSTATIS plot.
+
+```{r}
+plot_distatis(fit)
+```
+
+Session info.
+
+```{r}
+sessionInfo()
+```

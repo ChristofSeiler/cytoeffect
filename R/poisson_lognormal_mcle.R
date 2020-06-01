@@ -45,7 +45,8 @@ poisson_lognormal_mcle = function(df_samples_subset,
 
   Y_list = lapply(1:nrow(tb_args), function(i) {
     df_samples_subset %>%
-      filter(get(group) == pull(tb_args, group)[i] & get(condition) == pull(tb_args, condition)[i]) %>%
+      filter(.data[[group]] == pull(tb_args, group)[i]) %>%
+      filter(.data[[condition]] == pull(tb_args, condition)[i]) %>%
       select_at(protein_names) %>%
       as.matrix()
   })

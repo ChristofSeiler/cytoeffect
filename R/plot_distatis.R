@@ -89,8 +89,8 @@ plot_distatis = function(obj, ncores = parallel::detectCores(),
   # reshape distatis results
   distatis_coords_list = lapply(
     1:dim(distatis_coords)[3],
-    function(i) bind_cols(expr_median[[1]],
-                          as_tibble(distatis_coords[,,1]))
+    function(i) bind_cols(expr_median[[i]],
+                          as_tibble(distatis_coords[,,i]))
   )
   tb_distatis_coords = distatis_coords_list %>%
     bind_rows() %>%
