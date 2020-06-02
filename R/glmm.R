@@ -5,7 +5,6 @@
 #' marker expressions.
 #'
 #' @import ggplot2
-#' @import reshape2
 #' @import dplyr
 #' @export
 #'
@@ -30,7 +29,7 @@ glmm = function(df_samples_subset,
                 group,
                 iter = 325,
                 warmup = 200,
-                num_chains = 4,
+                num_chains = 1,
                 eta = 1.0) {
 
   # some checks

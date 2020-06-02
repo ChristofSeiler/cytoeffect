@@ -26,7 +26,6 @@ Imports:
     ggrepel,
     magrittr,
     MASS,
-    reshape2,
     stringr,
     tibble,
     tidyr,

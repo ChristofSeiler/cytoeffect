@@ -4,7 +4,7 @@
 \alias{fit_poilog}
 \title{Composite Maximum Likelihood Estimation for Poisson Log-Normal Model}
 \usage{
-fit_poilog(Y, ncores = 8)
+fit_poilog(Y, ncores = 1)
 }
 \arguments{
 \item{Y}{Matrix with proteins counts with dimensions (number of cells) x (number of markers)}

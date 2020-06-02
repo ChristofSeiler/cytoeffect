@@ -11,7 +11,7 @@ glmm(
   group,
   iter = 325,
   warmup = 200,
-  num_chains = 4,
+  num_chains = 1,
   eta = 1
 )
 }

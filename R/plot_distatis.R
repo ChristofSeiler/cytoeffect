@@ -11,7 +11,7 @@
 #' @export
 #'
 #' @param obj Object of class \code{cytoeffect_poisson} or \code{cytoeffect_poisson_mcle}
-#'   computed by \code{\link{poisson_lognormal}} or\code{\link{poisson_lognormal_mcle}}
+#'   computed by \code{\link{poisson_lognormal}} or \code{\link{poisson_lognormal_mcle}}
 #' @param ncores Number of cores
 #' @param show_donors Include donor random effect
 #' @param show_markers Include markers
@@ -21,7 +21,7 @@
 #' @examples
 #' # fit = cytoeffect::poisson_lognormal(...)
 #' # cytoeffect::plot_distatis(fit)
-plot_distatis = function(obj, ncores = parallel::detectCores(),
+plot_distatis = function(obj, ncores = 1,
                          show_donors = TRUE, show_markers = TRUE, repel = TRUE) {
 
   if (class(obj) != "cytoeffect_poisson" & class(obj) != "cytoeffect_poisson_mcle")
@@ -32,6 +32,7 @@ plot_distatis = function(obj, ncores = parallel::detectCores(),
   segment_color = "black"
   marker_size = 5
   seed = 0xdada
+  options(mc.cores = ncores)
 
   # sample all tables
   if(class(obj) == "cytoeffect_poisson") {
@@ -47,8 +48,7 @@ plot_distatis = function(obj, ncores = parallel::detectCores(),
         posterior_predictive_log_lambda(obj, k = i, show_donors = show_donors) %>%
           group_by(.dots = sample_info_k) %>%
           summarize_at(obj$protein_names,median)
-        },
-      mc.cores = ncores
+        }
       )
   } else {
     # parametric bootstrap samples
@@ -68,7 +68,7 @@ plot_distatis = function(obj, ncores = parallel::detectCores(),
         ungroup()
     }
     n_boot = 1000
-    expr_median = mclapply(1:n_boot, function(i) boot(obj$tb_args), mc.cores = ncores)
+    expr_median = mclapply(1:n_boot, function(i) boot(obj$tb_args))
   }
 
   # prepare three way arrary for distatis

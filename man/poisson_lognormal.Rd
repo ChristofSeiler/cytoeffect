@@ -13,7 +13,7 @@ poisson_lognormal(
   eta = 1,
   iter = 325,
   warmup = 200,
-  num_chains = 4,
+  num_chains = 1,
   adapt_delta = 0.8,
   seed = 1
 )

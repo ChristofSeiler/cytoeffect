@@ -19,7 +19,7 @@
 #'   \item{Sigma}{estimated covariance parameter}
 #'
 
-fit_poilog = function(Y, ncores = 8) {
+fit_poilog = function(Y, ncores = 1) {
 
   if(nrow(Y) < 2)
     stop("Y has zero or one observations")

@@ -4,7 +4,6 @@
 #' Poisson log-normal mixed model. Each cell and protein marker has its own rate
 #' parameter following a linear model.
 #'
-#' @import reshape2
 #' @import dplyr
 #' @export
 #'
@@ -36,7 +35,7 @@ poisson_lognormal = function(df_samples_subset,
                              eta = 1,
                              iter = 325,
                              warmup = 200,
-                             num_chains = 4,
+                             num_chains = 1,
                              adapt_delta = 0.8,
                              seed = 1) {
 

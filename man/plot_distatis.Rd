@@ -6,7 +6,7 @@
 \usage{
 plot_distatis(
   obj,
-  ncores = parallel::detectCores(),
+  ncores = 1,
   show_donors = TRUE,
   show_markers = TRUE,
   repel = TRUE
@@ -14,7 +14,7 @@ plot_distatis(
 }
 \arguments{
 \item{obj}{Object of class \code{cytoeffect_poisson} or \code{cytoeffect_poisson_mcle}
-computed by \code{\link{poisson_lognormal}} or\code{\link{poisson_lognormal_mcle}}}
+computed by \code{\link{poisson_lognormal}} or \code{\link{poisson_lognormal_mcle}}}
 
 \item{ncores}{Number of cores}
 

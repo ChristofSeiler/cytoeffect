@@ -9,7 +9,7 @@ poisson_lognormal_mcle(
   protein_names,
   condition,
   group,
-  ncores = 4,
+  ncores = 1,
   slurm_settings = "slurm_batchtools.tmpl"
 )
 }
