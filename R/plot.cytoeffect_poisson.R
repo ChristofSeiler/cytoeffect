@@ -15,7 +15,7 @@
 #' @param x Object of class \code{cytoeffect_poisson} computed
 #'   using \code{\link{poisson_lognormal}}
 #' @param type A string with the parameter to plot:
-#'   \code{type = "beta"}, \code{type = "sigma"}, or \code{type = "Cor"}
+#'   \code{type = "theta"}, \code{type = "beta"}, \code{type = "sigma"}, or \code{type = "Cor"}
 #' @param selection A vector of strings with a selection of protein names to plot
 #' @param ... Other parameters
 #' @return \code{\link[ggplot2]{ggplot2}} object

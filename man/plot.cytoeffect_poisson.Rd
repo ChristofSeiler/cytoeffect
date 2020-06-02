@@ -11,7 +11,7 @@
 using \code{\link{poisson_lognormal}}}
 
 \item{type}{A string with the parameter to plot:
-\code{type = "beta"}, \code{type = "sigma"}, or \code{type = "Cor"}}
+\code{type = "theta"}, \code{type = "beta"}, \code{type = "sigma"}, or \code{type = "Cor"}}
 
 \item{selection}{A vector of strings with a selection of protein names to plot}
 
