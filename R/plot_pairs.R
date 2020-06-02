@@ -19,7 +19,7 @@
 #' # cytoeffect::plot_pairs(fit, marker1 = ..., marker2 = ..., marker3 = ...)
 plot_pairs = function(obj, marker1, marker2, marker3) {
 
-  if (class(obj) != "cytoeffect_poisson")
+  if (!is(obj, "cytoeffect_poisson"))
     stop("Not a cytoeffect_poisson object.")
 
   pSTAT1_index = which(obj$protein_names == marker1)

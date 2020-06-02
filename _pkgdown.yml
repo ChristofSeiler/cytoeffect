@@ -1,12 +1,14 @@
 reference:
-- title: "Poisson Model"
-  desc: "Functions to fit model and plot results"
+- title: "Bayesian Inference"
+  desc: "Functions to make inference about the full model using Stan"
   contents:
   - '`poisson_lognormal`'
   - '`plot.cytoeffect_poisson`'
-  - '`plot_mds`'
-- title: "Logistic Model"
-  desc: "Functions to fit model and plot results"
+  - '`plot_distatis`'
+  - '`plot_pairs`'
+- title: "Frequentist Inference"
+  desc: "Functions to make inference about the simplified model using the parametric bootstrap"
   contents:
-  - '`glmm`'
-  - '`plot.cytoeffect`'
+  - '`poisson_lognormal_mcle`'
+  - '`plot.cytoeffect_poisson_mcle`'
+  - '`plot_distatis`'

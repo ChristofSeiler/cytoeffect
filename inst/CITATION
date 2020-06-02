@@ -1,4 +1,4 @@
-citHeader("To cite the CytoGLMM package in publications, use:")
+citHeader("To cite the cytoeffect package in publications, use:")
 
 citEntry(
   entry = "article",

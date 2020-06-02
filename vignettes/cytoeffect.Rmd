@@ -13,8 +13,8 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.height = 5,
-  fig.width = 5
+  fig.height = 4,
+  fig.width = 7
 )
 library("cytoeffect")
 ```
@@ -34,17 +34,17 @@ group = "donor"
 protein_names = names(df)[3:ncol(df)]
 ```
 
-## Full Bayesian Model
+## Bayesian Inference
  
 Sample from posterior distribution using Stan.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 fit = poisson_lognormal(df, 
                         protein_names = protein_names, 
                         condition = condition, 
                         group = group,
                         r_donor = 2, 
-                        warmup = 100, iter = 200, 
+                        warmup = 200, iter = 1200, 
                         num_chains = 1)
 ```
 
@@ -63,11 +63,11 @@ Multivariate DiSTATIS plot.
 plot_distatis(fit)
 ```
 
-## Parametric Bootstrap with Simplified Model
+## Frequentist Inference
 
 Fit model using composite maximum likelihood estimatation.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 fit = poisson_lognormal_mcle(df, 
                              protein_names = protein_names, 
                              condition = condition, 

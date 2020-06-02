@@ -24,7 +24,7 @@
 plot_distatis = function(obj, ncores = 1,
                          show_donors = TRUE, show_markers = TRUE, repel = TRUE) {
 
-  if (class(obj) != "cytoeffect_poisson" & class(obj) != "cytoeffect_poisson_mcle")
+  if(!is(obj, "cytoeffect_poisson") & !is(obj, "cytoeffect_poisson_mcle"))
     stop("Not a cytoeffect_poisson or cytoeffect_poisson_mcle object.")
 
   arrow_color = "darkgray"

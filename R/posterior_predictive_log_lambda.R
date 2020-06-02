@@ -16,7 +16,7 @@
 #'
 posterior_predictive_log_lambda = function(obj, k = 1, show_donors = TRUE) {
 
-  if (class(obj) != "cytoeffect_poisson")
+  if(!is(obj, "cytoeffect_poisson"))
     stop("Not a cytoeffect_poisson object.")
 
   stan_pars = rstan::extract(obj$fit_mcmc,

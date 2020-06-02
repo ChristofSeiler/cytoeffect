@@ -11,7 +11,7 @@
 
 ## Goal
 
-Regression analysis for mass cytometry experiments.
+Regression analysis with multivariate outcomes for mass cytometry experiments.
 
 ## Reproducible Research 
 

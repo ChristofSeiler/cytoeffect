@@ -24,6 +24,10 @@ using \code{\link{poisson_lognormal}}}
 Plot Posterior Summaries for Poisson Log-Normal Mixed Model
 }
 \examples{
+# Bayesian inference
 # fit = cytoeffect::poisson_lognormal(...)
+# plot(fit)
+# Frequentist inference
+# fit = cytoeffect::poisson_lognormal_mcle(...)
 # plot(fit)
 }

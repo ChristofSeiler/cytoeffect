@@ -8,6 +8,7 @@
 #' @useDynLib cytoeffect, .registration = TRUE
 #' @import methods
 #' @import Rcpp
+#' @import rstantools
 #' @importFrom rstan sampling
 #'
 #' @references

@@ -8,21 +8,29 @@
 
 <title>HMC Sampling for Logistic Linear Mixed Model — glmm • cytoeffect</title>
 
+
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -30,12 +38,12 @@
 
 
 
-<meta property="og:title" content="HMC Sampling for Logistic Linear Mixed Model — glmm" />
 
+<meta property="og:title" content="HMC Sampling for Logistic Linear Mixed Model — glmm" />
 <meta property="og:description" content="glmm uses Hamiltonion Monte Carlo to sample form an extend logistic
 linear mixed model. We predict the experimental condition from protein
 marker expressions." />
-<meta name="twitter:card" content="summary" />
+
 
 
 
@@ -49,9 +57,10 @@ marker expressions." />
 <![endif]-->
 
 
+
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -65,7 +74,7 @@ marker expressions." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">cytoeffect</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
       </span>
     </div>
 
@@ -73,40 +82,24 @@ marker expressions." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../reference/index.html">Reference</a>
+  <a href="../articles/cytoeffect.html">Get started</a>
 </li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/Confounders.html">Confounders and Biases</a>
-    </li>
-    <li>
-      <a href="../articles/logistic/Reanalysis_Aghaeepour2017.html">Logistic Linear Mixed Model</a>
-    </li>
-    <li>
-      <a href="../articles/poisson/Reanalysis_Aghaeepour2017_Poisson.html">Poisson Log-Normal Mixed Model</a>
-    </li>
-  </ul>
+<li>
+  <a href="../reference/index.html">Reference</a>
 </li>
 <li>
   <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/ChristofSeiler/cytoeffect">
-    <span class="fa fa-github fa-lg"></span>
+  <a href="https://github.com/ChristofSeiler/cytoeffect/">
+    <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -117,6 +110,7 @@ marker expressions." />
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
@@ -128,16 +122,22 @@ marker expressions." />
     </div>
 
     <div class="ref-description">
-    
     <p><code>glmm</code> uses Hamiltonion Monte Carlo to sample form an extend logistic
 linear mixed model. We predict the experimental condition from protein
 marker expressions.</p>
-    
     </div>
 
-    <pre class="usage"><span class='fu'>glmm</span>(<span class='no'>df_samples_subset</span>, <span class='no'>protein_names</span>, <span class='no'>condition</span>, <span class='no'>group</span>, <span class='kw'>iter</span> <span class='kw'>=</span> <span class='fl'>325</span>,
-  <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>200</span>, <span class='kw'>num_chains</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>eta</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
-    
+    <pre class="usage"><span class='fu'>glmm</span>(
+  <span class='no'>df_samples_subset</span>,
+  <span class='no'>protein_names</span>,
+  <span class='no'>condition</span>,
+  <span class='no'>group</span>,
+  <span class='kw'>iter</span> <span class='kw'>=</span> <span class='fl'>325</span>,
+  <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>200</span>,
+  <span class='kw'>num_chains</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>eta</span> <span class='kw'>=</span> <span class='fl'>1</span>
+)</pre>
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -175,28 +175,24 @@ cell condition, and group information</p></td>
       <td><p>Hyperparametr for LKJ prior</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A list of class <em>cytoeffect</em> containing</p>
-<dt>fit_mcmc</dt><dd><p><code><a href='https://www.rdocumentation.org/packages/rstan/topics/rstan'>rstan</a></code> object</p></dd>
+<dt>fit_mcmc</dt><dd><p><code><a href='https://rdrr.io/pkg/rstan/man/rstan.html'>rstan</a></code> object</p></dd>
   <dt>protein_names</dt><dd><p>input protein names</p></dd>
   <dt>conditions</dt><dd><p>input condition variable</p></dd>
   <dt>X</dt><dd><p>prediction design matrix</p></dd>
 
-    
 
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#value">Value</a></li>
-          </ul>
-
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
+
 
       <footer>
       <div class="copyright">
@@ -204,13 +200,16 @@ cell condition, and group information</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

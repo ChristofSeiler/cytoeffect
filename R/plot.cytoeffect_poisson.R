@@ -21,7 +21,11 @@
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
+#' # Bayesian inference
 #' # fit = cytoeffect::poisson_lognormal(...)
+#' # plot(fit)
+#' # Frequentist inference
+#' # fit = cytoeffect::poisson_lognormal_mcle(...)
 #' # plot(fit)
 plot.cytoeffect_poisson = function(x, type = "beta",
                                    selection = x$protein_names, ...) {
@@ -61,7 +65,7 @@ plot.cytoeffect_poisson = function(x, type = "beta",
       geom_point(size = 2, position = dodge) +
       geom_errorbar(aes(ymin = `2.5%`, ymax = `97.5%`),
                     position = dodge) +
-      ggtitle("Regression Coefficients") +
+      ggtitle("Fixed Effects"~beta) +
       ylab("log expected count") +
       theme(axis.title.y = element_blank()) +
       coord_flip()
@@ -102,7 +106,7 @@ plot.cytoeffect_poisson = function(x, type = "beta",
       geom_point(size = 2, position = dodge) +
       geom_errorbar(aes(ymin = `2.5%`, ymax = `97.5%`),
                     position = dodge) +
-      ggtitle("Marker Standard Deviations") +
+      ggtitle("Marker Standard Deviation"~sigma) +
       ylab("sigma") +
       theme(axis.title.y = element_blank()) +
       coord_flip()
