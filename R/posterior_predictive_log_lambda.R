@@ -6,7 +6,6 @@
 #' @import parallel
 #' @importFrom MASS mvrnorm
 #' @importFrom rstan extract
-#' @export
 #'
 #' @param obj Object of class \code{cytoeffect_poisson} computed
 #'   using \code{\link{poisson_lognormal}}

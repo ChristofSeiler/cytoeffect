@@ -20,3 +20,10 @@ A list containing
 \code{fit_poilog} uses composite maximum likelihood estimation to fit the mean
 and the covariance of a Poisson log-normal mixed model.
 }
+\examples{
+df = simulate_data(n_cells = 10)
+str(df)
+Y = df \%>\% select(names(df)[3:ncol(df)])
+fit_poilog(Y)
+
+}
