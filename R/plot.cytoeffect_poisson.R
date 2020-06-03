@@ -141,7 +141,8 @@ plot.cytoeffect_poisson = function(x, type = "beta",
       coord_fixed() +
       theme(panel.background = element_rect(fill = "lightgray"),
             axis.text.x = element_text(angle = 90, hjust = 1),
-            axis.title = element_blank())
+            axis.title = element_blank()) +
+      ggtitle("Zero Inflation"~theta)
 
   } else {
 
