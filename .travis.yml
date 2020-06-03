@@ -1,5 +1,6 @@
 language: r
-sudo: FALSE
+os: linux
+dist: xenial
 
 cache:
   - packages
@@ -11,7 +12,7 @@ r_build_args: '--no-build-vignettes'
 r_check_args: '--ignore-vignettes'
 
 before_install:
-  - R -q -e 'install.packages("git2r", "covr"); source("https://raw.githubusercontent.com/stan-dev/rstan/develop/StanHeaders/install-github.R"); install_StanHeaders(rstan_branch = "develop", math_branch = "StanHeaders_2.21", library_branch = "StanHeaders_2.21")'
+  - R -q -e 'install.packages(c("git2r", "covr")); source("https://raw.githubusercontent.com/stan-dev/rstan/develop/StanHeaders/install-github.R"); install_StanHeaders(rstan_branch = "develop", math_branch = "StanHeaders_2.21", library_branch = "StanHeaders_2.21")'
   - mkdir -p ~/.R
   - echo "CXX14FLAGS=-O3 -march=native -mtune=native -fPIC" >> ~/.R/Makevars
   - echo "CXX14=g++" >> ~/.R/Makevars
