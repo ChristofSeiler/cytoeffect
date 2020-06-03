@@ -23,6 +23,15 @@
 #'   \item{group}{input group names}
 #'   \item{df_samples_subset}{input df_samples_subset table}
 #'
+#' @examples
+#' df = simulate_data(n_cells = 10)
+#' str(df)
+#' fit = poisson_lognormal_mcle(df,
+#'                              protein_names = names(df)[3:ncol(df)],
+#'                              condition = "condition",
+#'                              group = "donor",
+#'                              ncores = 1)
+#'
 poisson_lognormal_mcle = function(df_samples_subset,
                                   protein_names,
                                   condition,
@@ -88,6 +97,11 @@ poisson_lognormal_mcle = function(df_samples_subset,
   } else {
 
     # run locally
+    if(.Platform$OS.type == "windows") {
+      reg$cluster.functions = makeClusterFunctionsSocket(ncpus = ncores)
+    } else {
+      reg$cluster.functions = makeClusterFunctionsMulticore(ncpus = ncores)
+    }
     batchMap(fun = cytoeffect::fit_poilog,
              args = tb_args %>% ungroup %>% dplyr::select(Y),
              more.args = list(ncores = ncores))

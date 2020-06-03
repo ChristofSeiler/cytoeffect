@@ -44,7 +44,7 @@ fit = poisson_lognormal(df,
                         condition = condition, 
                         group = group,
                         r_donor = 2, 
-                        warmup = 200, iter = 1200, 
+                        warmup = 200, iter = 325, adapt_delta = 0.95,
                         num_chains = 1)
 ```
 
@@ -53,6 +53,7 @@ Plot marginal credible intervals.
 ```{r}
 plot(fit, type = "theta")
 plot(fit, type = "beta")
+plot_pairs(fit, "m01", "m02", "m03")
 plot(fit, type = "sigma")
 plot(fit, type = "Cor")
 ```

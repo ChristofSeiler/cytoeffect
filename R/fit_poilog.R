@@ -10,7 +10,6 @@
 #' @importFrom Matrix nearPD
 #' @importFrom Matrix cov2cor
 #' @importFrom matrixStats logSumExp
-#'
 #' @export
 #'
 #' @param Y Matrix with proteins counts with dimensions (number of cells) x (number of markers)
@@ -19,7 +18,6 @@
 #'   \item{beta}{estimated mean parameter}
 #'   \item{Sigma}{estimated covariance parameter}
 #'
-
 fit_poilog = function(Y, ncores = 1) {
 
   if(nrow(Y) < 2)

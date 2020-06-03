@@ -23,6 +23,11 @@
 #' @param seed set random seed
 #' @return \code{\link[tibble]{tibble}} data frame
 #'
+#' @examples
+#' df = simulate_data(n_cells = 10)
+#' str(df)
+#' df
+#'
 simulate_data = function(n_markers = 5,            # number of markers
                          n_true = 1,               # number of differential markers
                          n_samples = 8,            # donors per group

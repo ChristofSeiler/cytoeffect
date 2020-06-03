@@ -174,6 +174,21 @@ cell condition, and group information</p></td>
   <dt>df_samples_subset</dt><dd><p>input df_samples_subset table</p></dd>
 
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='no'>df</span> <span class='kw'>=</span> <span class='fu'><a href='simulate_data.html'>simulate_data</a></span>(<span class='kw'>n_cells</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+<span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	80 obs. of  7 variables:
+#&gt;  $ donor    : chr  "pid01" "pid01" "pid01" "pid01" ...
+#&gt;  $ condition: Factor w/ 2 levels "control","treatment": 2 2 2 2 2 2 2 2 2 2 ...
+#&gt;  $ m01      : num  16 39 14 15 44 61 34 2 13 30 ...
+#&gt;  $ m02      : num  12 8 3 1 6 20 18 2 30 10 ...
+#&gt;  $ m03      : num  3 9 5 0 8 4 4 4 8 2 ...
+#&gt;  $ m04      : num  2 0 0 0 1 8 1 2 10 6 ...
+#&gt;  $ m05      : num  6 29 4 1 22 2 5 5 11 2 ...</div><div class='input'><span class='no'>fit</span> <span class='kw'>=</span> <span class='fu'>poisson_lognormal_mcle</span>(<span class='no'>df</span>,
+                             <span class='kw'>protein_names</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='no'>df</span>)[<span class='fl'>3</span>:<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>df</span>)],
+                             <span class='kw'>condition</span> <span class='kw'>=</span> <span class='st'>"condition"</span>,
+                             <span class='kw'>group</span> <span class='kw'>=</span> <span class='st'>"donor"</span>,
+                             <span class='kw'>ncores</span> <span class='kw'>=</span> <span class='fl'>1</span>)</div><div class='output co'>#&gt; <span class='message'>No readable configuration file found</span></div><div class='output co'>#&gt; <span class='message'>Created registry in '/Users/cseiler/github_repos/cytoeffect/docs/reference/registry_2020_06_03_191417' using cluster functions 'Interactive'</span></div><div class='output co'>#&gt; <span class='message'>Adding 8 jobs ...</span></div><div class='output co'>#&gt; <span class='message'>Submitting 8 jobs in 8 chunks using cluster functions 'Multicore' ...</span></div><div class='output co'>#&gt; <span class='message'>This deletes all files in '/Users/cseiler/github_repos/cytoeffect/docs/reference/registry_2020_06_03_191417'. Proceeding in 5 seconds ...</span></div><div class='output co'>#&gt; <span class='message'>Unsetting registry as default</span></div><div class='output co'>#&gt; <span class='message'>Recursively removing files in '/Users/cseiler/github_repos/cytoeffect/docs/reference/registry_2020_06_03_191417' ...</span></div><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

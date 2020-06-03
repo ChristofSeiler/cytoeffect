@@ -162,8 +162,30 @@ computed by <code><a href='poisson_lognormal.html'>poisson_lognormal</a></code> 
     <p><code><a href='https://ggplot2.tidyverse.org/reference/ggplot2-package.html'>ggplot2</a></code> object</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'># fit = cytoeffect::poisson_lognormal(...)
-# cytoeffect::plot_distatis(fit)
+    <pre class="examples"><div class='input'><span class='no'>df</span> <span class='kw'>=</span> <span class='fu'><a href='simulate_data.html'>simulate_data</a></span>()
+<span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	800 obs. of  7 variables:
+#&gt;  $ donor    : chr  "pid01" "pid01" "pid01" "pid01" ...
+#&gt;  $ condition: Factor w/ 2 levels "control","treatment": 2 2 2 2 2 2 2 2 2 2 ...
+#&gt;  $ m01      : num  31 11 16 18 21 79 186 18 10 9 ...
+#&gt;  $ m02      : num  3 1 0 2 3 0 12 0 5 2 ...
+#&gt;  $ m03      : num  5 0 20 5 18 2 15 8 4 2 ...
+#&gt;  $ m04      : num  3 7 4 4 2 7 2 1 9 1 ...
+#&gt;  $ m05      : num  0 32 29 20 33 17 95 62 11 5 ...</div><div class='input'># commented out, see vignette
+# fit = poisson_lognormal(df,
+#                        protein_names = names(df)[3:ncol(df)],
+#                        condition = "condition",
+#                        group = "donor",
+#                        r_donor = 2,
+#                        warmup = 200, iter = 325, adapt_delta = 0.95,
+#                        num_chains = 1)
+# plot_distatis(fit)
+# fit = poisson_lognormal_mcle(df,
+#                              protein_names = names(df)[3:ncol(df)],
+#                              condition = "condition",
+#                              group = "donor",
+#                              ncores = 1)
+# plot_distatis(fit)
+
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

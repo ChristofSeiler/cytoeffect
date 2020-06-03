@@ -56,3 +56,15 @@ A list of class \code{cytoeffect_poisson} containing
 Poisson log-normal mixed model. Each cell and protein marker has its own rate
 parameter following a linear model.
 }
+\examples{
+df = simulate_data(n_cells = 10)
+str(df)
+fit = poisson_lognormal(df,
+                        protein_names = names(df)[3:ncol(df)],
+                        condition = "condition",
+                        group = "donor",
+                        r_donor = 2,
+                        warmup = 200, iter = 325, adapt_delta = 0.95,
+                        num_chains = 1)
+
+}

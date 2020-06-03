@@ -39,3 +39,13 @@ A list of class \code{cytoeffect_poisson_mcle} containing
 \code{poisson_lognormal} uses maximum composite likelihood estimation to fit
 Poisson log-normal models to each sample.
 }
+\examples{
+df = simulate_data(n_cells = 10)
+str(df)
+fit = poisson_lognormal_mcle(df,
+                             protein_names = names(df)[3:ncol(df)],
+                             condition = "condition",
+                             group = "donor",
+                             ncores = 1)
+
+}

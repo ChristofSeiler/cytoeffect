@@ -19,8 +19,24 @@
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
-#' # fit = cytoeffect::poisson_lognormal(...)
-#' # cytoeffect::plot_distatis(fit)
+#' df = simulate_data()
+#' str(df)
+#' # commented out, see vignette
+#' # fit = poisson_lognormal(df,
+#' #                        protein_names = names(df)[3:ncol(df)],
+#' #                        condition = "condition",
+#' #                        group = "donor",
+#' #                        r_donor = 2,
+#' #                        warmup = 200, iter = 325, adapt_delta = 0.95,
+#' #                        num_chains = 1)
+#' # plot_distatis(fit)
+#' # fit = poisson_lognormal_mcle(df,
+#' #                              protein_names = names(df)[3:ncol(df)],
+#' #                              condition = "condition",
+#' #                              group = "donor",
+#' #                              ncores = 1)
+#' # plot_distatis(fit)
+#'
 plot_distatis = function(obj, ncores = 1,
                          show_donors = TRUE, show_markers = TRUE, repel = TRUE) {
 

@@ -202,6 +202,53 @@ cell condition, and group information</p></td>
   <dt>df_samples_subset</dt><dd><p>input df_samples_subset table</p></dd>
 
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='no'>df</span> <span class='kw'>=</span> <span class='fu'><a href='simulate_data.html'>simulate_data</a></span>(<span class='kw'>n_cells</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+<span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	80 obs. of  7 variables:
+#&gt;  $ donor    : chr  "pid01" "pid01" "pid01" "pid01" ...
+#&gt;  $ condition: Factor w/ 2 levels "control","treatment": 2 2 2 2 2 2 2 2 2 2 ...
+#&gt;  $ m01      : num  16 39 14 15 44 61 34 2 13 30 ...
+#&gt;  $ m02      : num  12 8 3 1 6 20 18 2 30 10 ...
+#&gt;  $ m03      : num  3 9 5 0 8 4 4 4 8 2 ...
+#&gt;  $ m04      : num  2 0 0 0 1 8 1 2 10 6 ...
+#&gt;  $ m05      : num  6 29 4 1 22 2 5 5 11 2 ...</div><div class='input'><span class='no'>fit</span> <span class='kw'>=</span> <span class='fu'>poisson_lognormal</span>(<span class='no'>df</span>,
+                        <span class='kw'>protein_names</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='no'>df</span>)[<span class='fl'>3</span>:<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>df</span>)],
+                        <span class='kw'>condition</span> <span class='kw'>=</span> <span class='st'>"condition"</span>,
+                        <span class='kw'>group</span> <span class='kw'>=</span> <span class='st'>"donor"</span>,
+                        <span class='kw'>r_donor</span> <span class='kw'>=</span> <span class='fl'>2</span>,
+                        <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>200</span>, <span class='kw'>iter</span> <span class='kw'>=</span> <span class='fl'>325</span>, <span class='kw'>adapt_delta</span> <span class='kw'>=</span> <span class='fl'>0.95</span>,
+                        <span class='kw'>num_chains</span> <span class='kw'>=</span> <span class='fl'>1</span>)</div><div class='output co'>#&gt; 
+#&gt; SAMPLING FOR MODEL 'poisson' NOW (CHAIN 1).
+#&gt; Chain 1: 
+#&gt; Chain 1: Gradient evaluation took 0.000126 seconds
+#&gt; Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 1.26 seconds.
+#&gt; Chain 1: Adjust your expectations accordingly!
+#&gt; Chain 1: 
+#&gt; Chain 1: 
+#&gt; Chain 1: Iteration:   1 / 325 [  0%]  (Warmup)
+#&gt; Chain 1: Iteration:  32 / 325 [  9%]  (Warmup)
+#&gt; Chain 1: Iteration:  64 / 325 [ 19%]  (Warmup)
+#&gt; Chain 1: Iteration:  96 / 325 [ 29%]  (Warmup)
+#&gt; Chain 1: Iteration: 128 / 325 [ 39%]  (Warmup)
+#&gt; Chain 1: Iteration: 160 / 325 [ 49%]  (Warmup)
+#&gt; Chain 1: Iteration: 192 / 325 [ 59%]  (Warmup)
+#&gt; Chain 1: Iteration: 201 / 325 [ 61%]  (Sampling)
+#&gt; Chain 1: Iteration: 232 / 325 [ 71%]  (Sampling)
+#&gt; Chain 1: Iteration: 264 / 325 [ 81%]  (Sampling)
+#&gt; Chain 1: Iteration: 296 / 325 [ 91%]  (Sampling)
+#&gt; Chain 1: Iteration: 325 / 325 [100%]  (Sampling)
+#&gt; Chain 1: 
+#&gt; Chain 1:  Elapsed Time: 14.6529 seconds (Warm-up)
+#&gt; Chain 1:                6.5754 seconds (Sampling)
+#&gt; Chain 1:                21.2283 seconds (Total)
+#&gt; Chain 1: </div><div class='output co'>#&gt; <span class='warning'>Warning: The largest R-hat is NA, indicating chains have not mixed.</span>
+#&gt; <span class='warning'>Running the chains for more iterations may help. See</span>
+#&gt; <span class='warning'>http://mc-stan.org/misc/warnings.html#r-hat</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.</span>
+#&gt; <span class='warning'>Running the chains for more iterations may help. See</span>
+#&gt; <span class='warning'>http://mc-stan.org/misc/warnings.html#bulk-ess</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.</span>
+#&gt; <span class='warning'>Running the chains for more iterations may help. See</span>
+#&gt; <span class='warning'>http://mc-stan.org/misc/warnings.html#tail-ess</span></div><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

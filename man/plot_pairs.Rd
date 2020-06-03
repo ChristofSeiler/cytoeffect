@@ -23,6 +23,15 @@ using \code{\link{poisson_lognormal}}}
 Posterior multivariate pairs plot for Poisson Log-Normal Mixed Model
 }
 \examples{
-# fit = cytoeffect::poisson_lognormal(...)
-# cytoeffect::plot_pairs(fit, marker1 = ..., marker2 = ..., marker3 = ...)
+df = simulate_data(n_cells = 10)
+str(df)
+fit = poisson_lognormal(df,
+                        protein_names = names(df)[3:ncol(df)],
+                        condition = "condition",
+                        group = "donor",
+                        r_donor = 2,
+                        warmup = 200, iter = 325, adapt_delta = 0.95,
+                        num_chains = 1)
+plot_pairs(fit, "m01", "m02", "m03")
+
 }

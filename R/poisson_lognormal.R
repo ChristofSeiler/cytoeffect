@@ -27,6 +27,17 @@
 #'   \item{group}{input group names}
 #'   \item{df_samples_subset}{input df_samples_subset table}
 #'
+#' @examples
+#' df = simulate_data(n_cells = 10)
+#' str(df)
+#' fit = poisson_lognormal(df,
+#'                         protein_names = names(df)[3:ncol(df)],
+#'                         condition = "condition",
+#'                         group = "donor",
+#'                         r_donor = 2,
+#'                         warmup = 200, iter = 325, adapt_delta = 0.95,
+#'                         num_chains = 1)
+#'
 poisson_lognormal = function(df_samples_subset,
                              protein_names,
                              condition,

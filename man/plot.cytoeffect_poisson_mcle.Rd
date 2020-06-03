@@ -24,6 +24,13 @@ using \code{\link{poisson_lognormal}}}
 Plot Point Estimates for MCLE Fit
 }
 \examples{
-# fit = cytoeffect::poisson_lognormal_mcle(...)
-# plot(fit)
+df = simulate_data(n_cells = 10)
+str(df)
+fit = poisson_lognormal_mcle(df,
+                             protein_names = names(df)[3:ncol(df)],
+                             condition = "condition",
+                             group = "donor",
+                             ncores = 1)
+plot(fit, type = "beta")
+
 }

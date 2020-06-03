@@ -47,3 +47,9 @@ simulate_data(
 \description{
 Generate Dataset for Vignettes and Simulation Studies
 }
+\examples{
+df = simulate_data(n_cells = 10)
+str(df)
+df
+
+}
