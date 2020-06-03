@@ -4,8 +4,9 @@
 #' Poisson log-normal models to each sample.
 #'
 #' @import dplyr
-#' @importFrom magrittr %>% %<>%
 #' @import batchtools
+#' @importFrom magrittr %>% %<>%
+#' @importFrom Matrix cov2cor
 #' @export
 #'
 #' @param df_samples_subset Data frame or tibble with proteins counts,

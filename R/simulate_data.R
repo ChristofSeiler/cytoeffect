@@ -6,6 +6,7 @@
 #' @importFrom magrittr %>% %<>%
 #' @importFrom MASS mvrnorm
 #' @importFrom Matrix nearPD
+#' @importFrom Matrix toeplitz
 #' @importFrom stringr str_pad
 #' @export
 #'

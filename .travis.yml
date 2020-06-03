@@ -1,52 +1,48 @@
 language: r
 sudo: false
-r: devel
 cache: packages
 
 latex: true
 
-
 env:
-  matrix:
-    - CXX_OLEVEL=2 CXX=clang++
+  global:
+    - MAKEFLAGS="-j 2"
 
 matrix:
   include:
     - os: linux
-      compiler: clang
       addons:
         apt:
-          sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-precise-5.0' ]
+          sources:
+            - ubuntu-toolchain-r-test
           packages:
-            - llvm-5.0-dev
+            - g++-7
+            - libv8-dev
       env:
-        - CXX_OLEVEL=2 CXX=clang++
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
+# for code coverage
+r_packages:
+  - covr
 
 before_install:
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  - sudo apt-get update -q
   - mkdir -p ~/.R/
-  - echo "CXX = `R CMD config CXX`" >> ~/.R/Makevars
-  - echo "CXXFLAGS = `R CMD config CXXFLAGS` -pedantic -g0 -flto -stdlib=libc++" >> ~/.R/Makevars
-  - echo "LDFLAGS += -flto -stdlib=libc++" >> ~/.R/Makevars
-  - export CLANG_EXTRA_ARG=""
-  - if [[ $CXX = "clang++" ]] ;  then export CLANG_EXTRA_ARG=" -Qunused-arguments -fcolor-diagnostics " ; fi
-  - sed -i.bak "s/ g++/ ${CXX}${CLANG_EXTRA_ARG}/" ~/.R/Makevars
-  - sed -i.bak "s/O[0-3]/O$CXX_OLEVEL/" ~/.R/Makevars
+  - echo "CXX14 = g++-7 -fPIC -flto=2" >> ~/.R/Makevars
+  - echo "CXX14FLAGS = -mtune=native -march=native -Wno-unused-variable -Wno-unused-function -Wno-unused-local-typedefs -Wno-ignored-attributes -Wno-deprecated-declarations -Wno-attributes -O3" >> ~/.R/Makevars
+
+install:
+  - R -e "install.packages('rstan', repos = 'https://cloud.r-project.org/', dependencies = TRUE)"
+  - R -e "install.packages('devtools', repos = 'https://cloud.r-project.org/', dependencies = TRUE)"
+  - R -e 'devtools::install_deps(dep = T)'
 
 script:
-  - |
-    travis_wait 42 R CMD build .
-    travis_wait 59 R CMD check cytoeffect*tar.gz
+  - R -e "rstan::stan_version()"
+  - R CMD build --no-build-vignettes --as-cran .
+  - R CMD check --no-vignettes --no-build-vignettes cytoeffect_*.tar.gz
 
 after_script:
   - tar -ztvf cytoeffect_*.tar.gz
   - echo ${NOT_CRAN}
 
 after_success:
-  - travis_wait 40 tar -C .. -xf $PKG_TARBALL
   - Rscript -e 'covr::codecov()'
-
-after_failure:
-- cat cytoeffect.Rcheck/00*

@@ -35,7 +35,7 @@ plot_distatis = function(obj, ncores = 1,
   options(mc.cores = ncores)
 
   # sample all tables
-  if(class(obj) == "cytoeffect_poisson") {
+  if(is(obj, "cytoeffect_poisson")) {
     # posterior samples
     sample_info_k = c(obj$group,obj$condition,"k")
     n_chains = length(obj$fit_mcmc@stan_args)
@@ -203,7 +203,7 @@ plot_distatis = function(obj, ncores = 1,
   }
 
   # add title
-  if(class(obj) == "cytoeffect_poisson") {
+  if(is(obj, "cytoeffect_poisson")) {
     ggmds + ggtitle("Posterior DiSTATIS of Latent Variable"~lambda)
   } else {
     ggmds + ggtitle("Parametric Bootstrap DiSTATIS of Latent Variable"~lambda)

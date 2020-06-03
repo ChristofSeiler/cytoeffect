@@ -8,6 +8,7 @@
 #' @importFrom statmod gauss.quad
 #' @importFrom parallel mclapply
 #' @importFrom Matrix nearPD
+#' @importFrom Matrix cov2cor
 #' @importFrom matrixStats logSumExp
 #'
 #' @export
