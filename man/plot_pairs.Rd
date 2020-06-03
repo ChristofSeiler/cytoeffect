@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_pairs.R
 \name{plot_pairs}
 \alias{plot_pairs}
-\title{Posterior multivariate pairs plot for Poisson Log-Normal Mixed Model}
+\title{Posterior Multivariate Pairs Plot for Poisson Log-Normal Mixed Model}
 \usage{
 plot_pairs(obj, marker1, marker2, marker3)
 }
@@ -20,7 +20,7 @@ using \code{\link{poisson_lognormal}}}
 \code{\link[ggplot2]{ggplot2}} object
 }
 \description{
-Posterior multivariate pairs plot for Poisson Log-Normal Mixed Model
+Posterior Multivariate Pairs Plot for Poisson Log-Normal Mixed Model
 }
 \examples{
 df = simulate_data(n_cells = 10)

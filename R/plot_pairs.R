@@ -1,4 +1,4 @@
-#' Posterior multivariate pairs plot for Poisson Log-Normal Mixed Model
+#' Posterior Multivariate Pairs Plot for Poisson Log-Normal Mixed Model
 #'
 #' @import ggplot2
 #' @import dplyr

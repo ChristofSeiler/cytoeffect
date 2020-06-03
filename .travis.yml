@@ -22,7 +22,7 @@ matrix:
 
 before_install:
   - R -q -e 'install.packages(c("BH", "Rcpp", "RcppEigen"))'
-  - R -q -e 'source("https://raw.githubusercontent.com/stan-dev/rstan/develop/StanHeaders/install-github.R"); install_StanHeaders(rstan_branch = "develop", math_branch = "StanHeaders_2.21", library_branch = "StanHeaders_2.21")'
+  - R -q -e 'install.packages("git2r"); source("https://raw.githubusercontent.com/stan-dev/rstan/develop/StanHeaders/install-github.R"); install_StanHeaders(rstan_branch = "develop", math_branch = "StanHeaders_2.21", library_branch = "StanHeaders_2.21")'
   - R -q -e 'install.packages(c("rstantools", "rstan", "covr"))'
   - mkdir -p ~/.R/
   - echo "CXX14 = g++-7 -fPIC -flto=2" >> ~/.R/Makevars
