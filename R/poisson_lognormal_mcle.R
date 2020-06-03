@@ -1,4 +1,4 @@
-#' HMC Sampling for Poisson Log-Normal Mixed Model
+#' Fit Simplified Poisson Log-Normal Model
 #'
 #' \code{poisson_lognormal} uses maximum composite likelihood estimation to fit
 #' Poisson log-normal models to each sample.
@@ -66,6 +66,7 @@ poisson_lognormal_mcle = function(df_samples_subset,
     str_replace_all(":","") %>%
     str_replace_all("-| ","_")
   reg = makeRegistry(file.dir = paste0("registry_",current_time),
+                     conf.file = NA,
                      packages = "cytoeffect")
 
   if(file.exists(slurm_settings)) {

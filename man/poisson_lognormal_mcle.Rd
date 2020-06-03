@@ -2,7 +2,7 @@
 % Please edit documentation in R/poisson_lognormal_mcle.R
 \name{poisson_lognormal_mcle}
 \alias{poisson_lognormal_mcle}
-\title{HMC Sampling for Poisson Log-Normal Mixed Model}
+\title{Fit Simplified Poisson Log-Normal Model}
 \usage{
 poisson_lognormal_mcle(
   df_samples_subset,

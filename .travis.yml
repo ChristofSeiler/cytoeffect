@@ -21,13 +21,8 @@ matrix:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
 before_install:
-  - R -q -e 'install.packages(c("BH", "Rcpp", "RcppEigen",
-                                #"StanHeaders", bug on CRAN version: https://discourse.mc-stan.org/t/problems-linking-to-tbb-with-latest-stanheaders/15562
-                                #"rstantools",
-                                #"rstan", "covr"
-                                ))'
-  - R -q -e 'source("https://raw.githubusercontent.com/stan-dev/rstan/develop/StanHeaders/install-github.R");
-             install_StanHeaders(rstan_branch = "develop", math_branch = "StanHeaders_2.21", library_branch = "StanHeaders_2.21")'
+  - R -q -e 'install.packages(c("BH", "Rcpp", "RcppEigen"))'
+  - R -q -e 'source("https://raw.githubusercontent.com/stan-dev/rstan/develop/StanHeaders/install-github.R"); install_StanHeaders(rstan_branch = "develop", math_branch = "StanHeaders_2.21", library_branch = "StanHeaders_2.21")'
   - R -q -e 'install.packages(c("rstantools", "rstan", "covr"))'
   - mkdir -p ~/.R/
   - echo "CXX14 = g++-7 -fPIC -flto=2" >> ~/.R/Makevars
