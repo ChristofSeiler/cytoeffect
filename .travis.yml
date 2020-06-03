@@ -31,8 +31,8 @@ r_build_args: '--no-build-vignettes'
 r_check_args: '--ignore-vignettes'
 
 script:
-  - travis_wait 40 R CMD build
-  - R CMD check *tar.gz
+  - travis_wait 40 R CMD build .
+  - R CMD check cytoeffect_*.tar.gz
 
 after_script:
   - tar -ztvf cytoeffect_*.tar.gz
