@@ -1,8 +1,6 @@
 language: r
-sudo: false
-cache: packages
-
-latex: true
+r: bioc-devel
+sudo: TRUE
 
 env:
   global:
@@ -21,28 +19,27 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
-# for code coverage
-r_packages:
-  - covr
-
 before_install:
+  - R -q -e 'install.packages(c("BH", "Rcpp", "RcppEigen",
+                                "StanHeaders", "rstantools",
+                                "rstan", "covr"))'
   - mkdir -p ~/.R/
   - echo "CXX14 = g++-7 -fPIC -flto=2" >> ~/.R/Makevars
   - echo "CXX14FLAGS = -mtune=native -march=native -Wno-unused-variable -Wno-unused-function -Wno-unused-local-typedefs -Wno-ignored-attributes -Wno-deprecated-declarations -Wno-attributes -O3" >> ~/.R/Makevars
 
-install:
-  - R -e "install.packages('rstan', repos = 'https://cloud.r-project.org/', dependencies = TRUE)"
-  - R -e "install.packages('devtools', repos = 'https://cloud.r-project.org/', dependencies = TRUE)"
-  - R -e 'devtools::install_deps(dep = T)'
+r_build_args: '--no-build-vignettes'
+r_check_args: '--ignore-vignettes'
 
 script:
-  - R -e "rstan::stan_version()"
-  - R CMD build --no-build-vignettes --as-cran .
-  - R CMD check --no-vignettes --no-build-vignettes cytoeffect_*.tar.gz
+  - travis_wait 40 R CMD build
+  - R CMD check *tar.gz
 
 after_script:
   - tar -ztvf cytoeffect_*.tar.gz
   - echo ${NOT_CRAN}
 
 after_success:
-  - Rscript -e 'covr::codecov()'
+  - R -q -e 'covr::codecov()'
+
+after_failure:
+  - cat cytoeffect_*.failure.txt
