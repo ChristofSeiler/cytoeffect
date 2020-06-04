@@ -12,7 +12,6 @@ r_build_args: '--no-build-vignettes'
 r_check_args: '--ignore-vignettes'
 
 before_install:
-  - R -q -e 'install.packages(c("git2r", "covr", "RcppParallel", "RcppEigen")); source("https://raw.githubusercontent.com/stan-dev/rstan/develop/StanHeaders/install-github.R"); install_StanHeaders(rstan_branch = "develop", math_branch = "StanHeaders_2.21", library_branch = "StanHeaders_2.21")'
   - mkdir -p ~/.R
   - echo "CXX14FLAGS=-O3 -march=native -mtune=native -fPIC" >> ~/.R/Makevars
   - echo "CXX14=g++" >> ~/.R/Makevars
@@ -21,4 +20,4 @@ after_success:
   - travis_wait 40 Rscript -e 'covr::codecov()'
 
 after_failure:
-  - travis_wait 40 cat cytoeffect.Rcheck/00check.log
+  - travis_wait 40
