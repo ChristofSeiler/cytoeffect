@@ -21,5 +21,4 @@ after_success:
   - travis_wait 40 Rscript -e 'covr::codecov()'
 
 after_failure:
-  - travis_wait 40 for name in $(find "${RCHECK_DIR}" -type f -name "*fail");do echo ">>> Filename: ${name} <<<";cat ${name};done
-  - travis_wait 40 for name in $(find "${RCHECK_DIR}" -type f -name "*log");do echo ">>> Filename: ${name} <<<";cat ${name};done
+  - travis_wait 40 cat cytoeffect.Rcheck/00check.log
