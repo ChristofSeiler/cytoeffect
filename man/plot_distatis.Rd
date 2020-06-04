@@ -2,10 +2,11 @@
 % Please edit documentation in R/plot_distatis.R
 \name{plot_distatis}
 \alias{plot_distatis}
-\title{DiSTATIS Plot of Posterior or Bootstrap Samples}
+\title{DiSTATIS plot of posterior or bootstrap samples}
 \usage{
 plot_distatis(
   obj,
+  ndraws = 1000,
   ncores = 1,
   show_donors = TRUE,
   show_markers = TRUE,
@@ -15,6 +16,8 @@ plot_distatis(
 \arguments{
 \item{obj}{Object of class \code{cytoeffect_poisson} or \code{cytoeffect_poisson_mcle}
 computed by \code{\link{poisson_lognormal}} or \code{\link{poisson_lognormal_mcle}}}
+
+\item{ndraws}{Number of posterior or bootstrap samples}
 
 \item{ncores}{Number of cores}
 
@@ -28,25 +31,27 @@ computed by \code{\link{poisson_lognormal}} or \code{\link{poisson_lognormal_mcl
 \code{\link[ggplot2]{ggplot2}} object
 }
 \description{
-DiSTATIS Plot of Posterior or Bootstrap Samples
+DiSTATIS plot of posterior or bootstrap samples
 }
 \examples{
+\dontrun{
+set.seed(1)
 df = simulate_data()
 str(df)
-# commented out, see vignette
-# fit = poisson_lognormal(df,
-#                        protein_names = names(df)[3:ncol(df)],
-#                        condition = "condition",
-#                        group = "donor",
-#                        r_donor = 2,
-#                        warmup = 200, iter = 325, adapt_delta = 0.95,
-#                        num_chains = 1)
-# plot_distatis(fit)
-# fit = poisson_lognormal_mcle(df,
-#                              protein_names = names(df)[3:ncol(df)],
-#                              condition = "condition",
-#                              group = "donor",
-#                              ncores = 1)
-# plot_distatis(fit)
+fit = poisson_lognormal(df,
+                        protein_names = names(df)[3:ncol(df)],
+                        condition = "condition",
+                        group = "donor",
+                        r_donor = 2,
+                        warmup = 200, iter = 325, adapt_delta = 0.95,
+                        num_chains = 1)
+plot_distatis(fit, ndraws = 125)
+fit = poisson_lognormal_mcle(df,
+                             protein_names = names(df)[3:ncol(df)],
+                             condition = "condition",
+                             group = "donor",
+                             ncores = 1)
+plot_distatis(fit, ndraws = 125)
+}
 
 }

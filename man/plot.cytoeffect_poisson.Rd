@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.cytoeffect_poisson.R
 \name{plot.cytoeffect_poisson}
 \alias{plot.cytoeffect_poisson}
-\title{Plot Posterior Summaries for Poisson Log-Normal Mixed Model}
+\title{Plot posterior summaries for Poisson log-normal mixed model}
 \usage{
 \method{plot}{cytoeffect_poisson}(x, type = "beta", selection = x$protein_names, ...)
 }
@@ -21,9 +21,10 @@ using \code{\link{poisson_lognormal}}}
 \code{\link[ggplot2]{ggplot2}} object
 }
 \description{
-Plot Posterior Summaries for Poisson Log-Normal Mixed Model
+Plot posterior summaries for Poisson log-normal mixed model
 }
 \examples{
+set.seed(1)
 df = simulate_data(n_cells = 10)
 str(df)
 fit = poisson_lognormal(df,

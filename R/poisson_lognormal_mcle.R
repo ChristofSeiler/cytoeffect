@@ -1,4 +1,4 @@
-#' Fit Simplified Poisson Log-Normal Model
+#' Fit simplified Poisson log-normal model
 #'
 #' \code{poisson_lognormal} uses maximum composite likelihood estimation to fit
 #' Poisson log-normal models to each sample.
@@ -24,6 +24,7 @@
 #'   \item{df_samples_subset}{input df_samples_subset table}
 #'
 #' @examples
+#' set.seed(1)
 #' df = simulate_data(n_cells = 10)
 #' str(df)
 #' fit = poisson_lognormal_mcle(df,

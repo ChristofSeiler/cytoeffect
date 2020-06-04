@@ -1,4 +1,4 @@
-#' HMC Sampling for Poisson Log-Normal Mixed Model
+#' HMC sampling for Poisson log-normal mixed model
 #'
 #' \code{poisson_lognormal} uses Hamiltonion Monte Carlo to sample form an extend
 #' Poisson log-normal mixed model. Each cell and protein marker has its own rate
@@ -28,6 +28,7 @@
 #'   \item{df_samples_subset}{input df_samples_subset table}
 #'
 #' @examples
+#' set.seed(1)
 #' df = simulate_data(n_cells = 10)
 #' str(df)
 #' fit = poisson_lognormal(df,

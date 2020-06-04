@@ -1,4 +1,4 @@
-#' Plot Point Estimates for MCLE Fit
+#' Plot point estimates for MCLE fit
 #'
 #' @aliases plot.cytoeffect_poisson_mcle
 #' @method plot cytoeffect_poisson_mcle
@@ -20,6 +20,7 @@
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
+#' set.seed(1)
 #' df = simulate_data(n_cells = 10)
 #' str(df)
 #' fit = poisson_lognormal_mcle(df,
@@ -39,7 +40,6 @@ plot.cytoeffect_poisson_mcle = function(x, type = "beta",
 
   if(type == "beta") {
 
-    set.seed(0xdada)
     coefs = lapply(tb_args$fit, function(x) x$beta) %>% bind_cols %>% t
     colnames(coefs) = protein_names
     tb_args %>%
@@ -54,7 +54,6 @@ plot.cytoeffect_poisson_mcle = function(x, type = "beta",
 
   } else if (type == "sigma") {
 
-    set.seed(0xdada)
     sds = lapply(tb_args$fit, function(x) sqrt(diag(x$Sigma))) %>% bind_cols %>% t
     colnames(sds) = protein_names
     tb_args %>%

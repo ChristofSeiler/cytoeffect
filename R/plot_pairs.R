@@ -1,4 +1,4 @@
-#' Posterior Multivariate Pairs Plot for Poisson Log-Normal Mixed Model
+#' Posterior multivariate pairs plot for Poisson log-normal mixed model
 #'
 #' @import ggplot2
 #' @import dplyr
@@ -15,6 +15,7 @@
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
+#' set.seed(1)
 #' df = simulate_data(n_cells = 10)
 #' str(df)
 #' fit = poisson_lognormal(df,

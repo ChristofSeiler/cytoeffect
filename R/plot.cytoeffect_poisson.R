@@ -1,4 +1,4 @@
-#' Plot Posterior Summaries for Poisson Log-Normal Mixed Model
+#' Plot posterior summaries for Poisson log-normal mixed model
 #'
 #' @aliases plot.cytoeffect_poisson
 #' @method plot cytoeffect_poisson
@@ -21,6 +21,7 @@
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
+#' set.seed(1)
 #' df = simulate_data(n_cells = 10)
 #' str(df)
 #' fit = poisson_lognormal(df,

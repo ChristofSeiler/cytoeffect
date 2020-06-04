@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulate_data.R
 \name{simulate_data}
 \alias{simulate_data}
-\title{Generate Dataset for Vignettes and Simulation Studies}
+\title{Generate dataset for vignettes and simulation studies}
 \usage{
 simulate_data(
   n_markers = 5,
@@ -14,8 +14,7 @@ simulate_data(
   beta_treatment = log(20),
   beta_control = log(5),
   rho_b = 0.5,
-  rho_u = 0.5,
-  seed = 56026
+  rho_u = 0.5
 )
 }
 \arguments{
@@ -38,16 +37,15 @@ simulate_data(
 \item{rho_b}{cell level correlation}
 
 \item{rho_u}{donor level correlation}
-
-\item{seed}{set random seed}
 }
 \value{
 \code{\link[tibble]{tibble}} data frame
 }
 \description{
-Generate Dataset for Vignettes and Simulation Studies
+Generate dataset for vignettes and simulation studies
 }
 \examples{
+set.seed(1)
 df = simulate_data(n_cells = 10)
 str(df)
 df

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Posterior multivariate pairs plot for Poisson Log-Normal Mixed Model — plot_pairs • cytoeffect</title>
+<title>Posterior multivariate pairs plot for Poisson log-normal mixed model — plot_pairs • cytoeffect</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="Posterior multivariate pairs plot for Poisson Log-Normal Mixed Model — plot_pairs" />
-<meta property="og:description" content="Posterior multivariate pairs plot for Poisson Log-Normal Mixed Model" />
+<meta property="og:title" content="Posterior multivariate pairs plot for Poisson log-normal mixed model — plot_pairs" />
+<meta property="og:description" content="Posterior multivariate pairs plot for Poisson log-normal mixed model" />
 
 
 
@@ -114,13 +114,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Posterior multivariate pairs plot for Poisson Log-Normal Mixed Model</h1>
+    <h1>Posterior multivariate pairs plot for Poisson log-normal mixed model</h1>
     <small class="dont-index">Source: <a href='https://github.com/ChristofSeiler/cytoeffect/blob/master/R/plot_pairs.R'><code>R/plot_pairs.R</code></a></small>
     <div class="hidden name"><code>plot_pairs.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Posterior multivariate pairs plot for Poisson Log-Normal Mixed Model</p>
+    <p>Posterior multivariate pairs plot for Poisson log-normal mixed model</p>
     </div>
 
     <pre class="usage"><span class='fu'>plot_pairs</span>(<span class='no'>obj</span>, <span class='no'>marker1</span>, <span class='no'>marker2</span>, <span class='no'>marker3</span>)</pre>
@@ -152,15 +152,16 @@ using <code><a href='poisson_lognormal.html'>poisson_lognormal</a></code></p></t
     <p><code><a href='https://ggplot2.tidyverse.org/reference/ggplot2-package.html'>ggplot2</a></code> object</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>df</span> <span class='kw'>=</span> <span class='fu'><a href='simulate_data.html'>simulate_data</a></span>(<span class='kw'>n_cells</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>1</span>)
+<span class='no'>df</span> <span class='kw'>=</span> <span class='fu'><a href='simulate_data.html'>simulate_data</a></span>(<span class='kw'>n_cells</span> <span class='kw'>=</span> <span class='fl'>10</span>)
 <span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	80 obs. of  7 variables:
 #&gt;  $ donor    : chr  "pid01" "pid01" "pid01" "pid01" ...
 #&gt;  $ condition: Factor w/ 2 levels "control","treatment": 2 2 2 2 2 2 2 2 2 2 ...
-#&gt;  $ m01      : num  16 39 14 15 44 61 34 2 13 30 ...
-#&gt;  $ m02      : num  12 8 3 1 6 20 18 2 30 10 ...
-#&gt;  $ m03      : num  3 9 5 0 8 4 4 4 8 2 ...
-#&gt;  $ m04      : num  2 0 0 0 1 8 1 2 10 6 ...
-#&gt;  $ m05      : num  6 29 4 1 22 2 5 5 11 2 ...</div><div class='input'><span class='no'>fit</span> <span class='kw'>=</span> <span class='fu'><a href='poisson_lognormal.html'>poisson_lognormal</a></span>(<span class='no'>df</span>,
+#&gt;  $ m01      : num  66 3 3 3 7 7 171 46 50 46 ...
+#&gt;  $ m02      : num  27 3 3 1 5 4 3 20 27 7 ...
+#&gt;  $ m03      : num  3 6 10 35 1 6 3 0 7 7 ...
+#&gt;  $ m04      : num  6 0 1 14 1 6 13 4 14 7 ...
+#&gt;  $ m05      : num  6 1 1 0 5 0 2 8 0 0 ...</div><div class='input'><span class='no'>fit</span> <span class='kw'>=</span> <span class='fu'><a href='poisson_lognormal.html'>poisson_lognormal</a></span>(<span class='no'>df</span>,
                         <span class='kw'>protein_names</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='no'>df</span>)[<span class='fl'>3</span>:<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>df</span>)],
                         <span class='kw'>condition</span> <span class='kw'>=</span> <span class='st'>"condition"</span>,
                         <span class='kw'>group</span> <span class='kw'>=</span> <span class='st'>"donor"</span>,
@@ -169,8 +170,8 @@ using <code><a href='poisson_lognormal.html'>poisson_lognormal</a></code></p></t
                         <span class='kw'>num_chains</span> <span class='kw'>=</span> <span class='fl'>1</span>)</div><div class='output co'>#&gt; 
 #&gt; SAMPLING FOR MODEL 'poisson' NOW (CHAIN 1).
 #&gt; Chain 1: 
-#&gt; Chain 1: Gradient evaluation took 0.000238 seconds
-#&gt; Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 2.38 seconds.
+#&gt; Chain 1: Gradient evaluation took 0.000161 seconds
+#&gt; Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 1.61 seconds.
 #&gt; Chain 1: Adjust your expectations accordingly!
 #&gt; Chain 1: 
 #&gt; Chain 1: 
@@ -187,10 +188,11 @@ using <code><a href='poisson_lognormal.html'>poisson_lognormal</a></code></p></t
 #&gt; Chain 1: Iteration: 296 / 325 [ 91%]  (Sampling)
 #&gt; Chain 1: Iteration: 325 / 325 [100%]  (Sampling)
 #&gt; Chain 1: 
-#&gt; Chain 1:  Elapsed Time: 16.9739 seconds (Warm-up)
-#&gt; Chain 1:                7.20583 seconds (Sampling)
-#&gt; Chain 1:                24.1797 seconds (Total)
-#&gt; Chain 1: </div><div class='output co'>#&gt; <span class='warning'>Warning: The largest R-hat is NA, indicating chains have not mixed.</span>
+#&gt; Chain 1:  Elapsed Time: 15.456 seconds (Warm-up)
+#&gt; Chain 1:                14.5051 seconds (Sampling)
+#&gt; Chain 1:                29.9611 seconds (Total)
+#&gt; Chain 1: </div><div class='output co'>#&gt; <span class='warning'>Warning: There were 125 transitions after warmup that exceeded the maximum treedepth. Increase max_treedepth above 10. See</span>
+#&gt; <span class='warning'>http://mc-stan.org/misc/warnings.html#maximum-treedepth-exceeded</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Examine the pairs() plot to diagnose sampling problems</span></div><div class='output co'>#&gt; <span class='warning'>Warning: The largest R-hat is NA, indicating chains have not mixed.</span>
 #&gt; <span class='warning'>Running the chains for more iterations may help. See</span>
 #&gt; <span class='warning'>http://mc-stan.org/misc/warnings.html#r-hat</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.</span>
 #&gt; <span class='warning'>Running the chains for more iterations may help. See</span>

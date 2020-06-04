@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Fit Simplified Poisson Log-Normal Model — poisson_lognormal_mcle • cytoeffect</title>
+<title>Fit simplified Poisson log-normal model — poisson_lognormal_mcle • cytoeffect</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,7 @@
 
 
 
-<meta property="og:title" content="Fit Simplified Poisson Log-Normal Model — poisson_lognormal_mcle" />
+<meta property="og:title" content="Fit simplified Poisson log-normal model — poisson_lognormal_mcle" />
 <meta property="og:description" content="poisson_lognormal uses maximum composite likelihood estimation to fit
 Poisson log-normal models to each sample." />
 
@@ -115,7 +115,7 @@ Poisson log-normal models to each sample." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Fit Simplified Poisson Log-Normal Model</h1>
+    <h1>Fit simplified Poisson log-normal model</h1>
     <small class="dont-index">Source: <a href='https://github.com/ChristofSeiler/cytoeffect/blob/master/R/poisson_lognormal_mcle.R'><code>R/poisson_lognormal_mcle.R</code></a></small>
     <div class="hidden name"><code>poisson_lognormal_mcle.Rd</code></div>
     </div>
@@ -175,19 +175,20 @@ cell condition, and group information</p></td>
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>df</span> <span class='kw'>=</span> <span class='fu'><a href='simulate_data.html'>simulate_data</a></span>(<span class='kw'>n_cells</span> <span class='kw'>=</span> <span class='fl'>10</span>)
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>1</span>)
+<span class='no'>df</span> <span class='kw'>=</span> <span class='fu'><a href='simulate_data.html'>simulate_data</a></span>(<span class='kw'>n_cells</span> <span class='kw'>=</span> <span class='fl'>10</span>)
 <span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	80 obs. of  7 variables:
 #&gt;  $ donor    : chr  "pid01" "pid01" "pid01" "pid01" ...
 #&gt;  $ condition: Factor w/ 2 levels "control","treatment": 2 2 2 2 2 2 2 2 2 2 ...
-#&gt;  $ m01      : num  16 39 14 15 44 61 34 2 13 30 ...
-#&gt;  $ m02      : num  12 8 3 1 6 20 18 2 30 10 ...
-#&gt;  $ m03      : num  3 9 5 0 8 4 4 4 8 2 ...
-#&gt;  $ m04      : num  2 0 0 0 1 8 1 2 10 6 ...
-#&gt;  $ m05      : num  6 29 4 1 22 2 5 5 11 2 ...</div><div class='input'><span class='no'>fit</span> <span class='kw'>=</span> <span class='fu'>poisson_lognormal_mcle</span>(<span class='no'>df</span>,
+#&gt;  $ m01      : num  66 3 3 3 7 7 171 46 50 46 ...
+#&gt;  $ m02      : num  27 3 3 1 5 4 3 20 27 7 ...
+#&gt;  $ m03      : num  3 6 10 35 1 6 3 0 7 7 ...
+#&gt;  $ m04      : num  6 0 1 14 1 6 13 4 14 7 ...
+#&gt;  $ m05      : num  6 1 1 0 5 0 2 8 0 0 ...</div><div class='input'><span class='no'>fit</span> <span class='kw'>=</span> <span class='fu'>poisson_lognormal_mcle</span>(<span class='no'>df</span>,
                              <span class='kw'>protein_names</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='no'>df</span>)[<span class='fl'>3</span>:<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>df</span>)],
                              <span class='kw'>condition</span> <span class='kw'>=</span> <span class='st'>"condition"</span>,
                              <span class='kw'>group</span> <span class='kw'>=</span> <span class='st'>"donor"</span>,
-                             <span class='kw'>ncores</span> <span class='kw'>=</span> <span class='fl'>1</span>)</div><div class='output co'>#&gt; <span class='message'>No readable configuration file found</span></div><div class='output co'>#&gt; <span class='message'>Created registry in '/Users/cseiler/github_repos/cytoeffect/docs/reference/registry_2020_06_03_220549' using cluster functions 'Interactive'</span></div><div class='output co'>#&gt; <span class='message'>Adding 8 jobs ...</span></div><div class='output co'>#&gt; <span class='message'>Submitting 8 jobs in 8 chunks using cluster functions 'Multicore' ...</span></div><div class='output co'>#&gt; <span class='message'>This deletes all files in '/Users/cseiler/github_repos/cytoeffect/docs/reference/registry_2020_06_03_220549'. Proceeding in 5 seconds ...</span></div><div class='output co'>#&gt; <span class='message'>Unsetting registry as default</span></div><div class='output co'>#&gt; <span class='message'>Recursively removing files in '/Users/cseiler/github_repos/cytoeffect/docs/reference/registry_2020_06_03_220549' ...</span></div><div class='input'>
+                             <span class='kw'>ncores</span> <span class='kw'>=</span> <span class='fl'>1</span>)</div><div class='output co'>#&gt; <span class='message'>No readable configuration file found</span></div><div class='output co'>#&gt; <span class='message'>Created registry in '/Users/cseiler/github_repos/cytoeffect/docs/reference/registry_2020_06_04_180623' using cluster functions 'Interactive'</span></div><div class='output co'>#&gt; <span class='message'>Adding 8 jobs ...</span></div><div class='output co'>#&gt; <span class='message'>Submitting 8 jobs in 8 chunks using cluster functions 'Multicore' ...</span></div><div class='output co'>#&gt; <span class='message'>This deletes all files in '/Users/cseiler/github_repos/cytoeffect/docs/reference/registry_2020_06_04_180623'. Proceeding in 5 seconds ...</span></div><div class='output co'>#&gt; <span class='message'>Unsetting registry as default</span></div><div class='output co'>#&gt; <span class='message'>Recursively removing files in '/Users/cseiler/github_repos/cytoeffect/docs/reference/registry_2020_06_04_180623' ...</span></div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

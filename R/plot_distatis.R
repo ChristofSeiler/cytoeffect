@@ -1,4 +1,4 @@
-#' DiSTATIS Plot of Posterior or Bootstrap Samples
+#' DiSTATIS plot of posterior or bootstrap samples
 #'
 #' @import ggplot2
 #' @importFrom magrittr %>% %<>%
@@ -12,6 +12,7 @@
 #'
 #' @param obj Object of class \code{cytoeffect_poisson} or \code{cytoeffect_poisson_mcle}
 #'   computed by \code{\link{poisson_lognormal}} or \code{\link{poisson_lognormal_mcle}}
+#' @param ndraws Number of posterior or bootstrap samples
 #' @param ncores Number of cores
 #' @param show_donors Include donor random effect
 #' @param show_markers Include markers
@@ -19,25 +20,27 @@
 #' @return \code{\link[ggplot2]{ggplot2}} object
 #'
 #' @examples
+#' \dontrun{
+#' set.seed(1)
 #' df = simulate_data()
 #' str(df)
-#' # commented out, see vignette
-#' # fit = poisson_lognormal(df,
-#' #                        protein_names = names(df)[3:ncol(df)],
-#' #                        condition = "condition",
-#' #                        group = "donor",
-#' #                        r_donor = 2,
-#' #                        warmup = 200, iter = 325, adapt_delta = 0.95,
-#' #                        num_chains = 1)
-#' # plot_distatis(fit)
-#' # fit = poisson_lognormal_mcle(df,
-#' #                              protein_names = names(df)[3:ncol(df)],
-#' #                              condition = "condition",
-#' #                              group = "donor",
-#' #                              ncores = 1)
-#' # plot_distatis(fit)
+#' fit = poisson_lognormal(df,
+#'                         protein_names = names(df)[3:ncol(df)],
+#'                         condition = "condition",
+#'                         group = "donor",
+#'                         r_donor = 2,
+#'                         warmup = 200, iter = 325, adapt_delta = 0.95,
+#'                         num_chains = 1)
+#' plot_distatis(fit, ndraws = 125)
+#' fit = poisson_lognormal_mcle(df,
+#'                              protein_names = names(df)[3:ncol(df)],
+#'                              condition = "condition",
+#'                              group = "donor",
+#'                              ncores = 1)
+#' plot_distatis(fit, ndraws = 125)
+#' }
 #'
-plot_distatis = function(obj, ncores = 1,
+plot_distatis = function(obj, ndraws = 1000, ncores = 1,
                          show_donors = TRUE, show_markers = TRUE, repel = TRUE) {
 
   if(!is(obj, "cytoeffect_poisson") & !is(obj, "cytoeffect_poisson_mcle"))
@@ -47,7 +50,6 @@ plot_distatis = function(obj, ncores = 1,
   marker_color = "darkgray"
   segment_color = "black"
   marker_size = 5
-  seed = 0xdada
   options(mc.cores = ncores)
 
   # sample all tables
@@ -56,11 +58,11 @@ plot_distatis = function(obj, ncores = 1,
     sample_info_k = c(obj$group,obj$condition,"k")
     n_chains = length(obj$fit_mcmc@stan_args)
     stan_args = obj$fit_mcmc@stan_args[[1]]
-    n_total_draws = n_chains * (stan_args$iter - stan_args$warmup)
+    nsamples = n_chains * (stan_args$iter - stan_args$warmup)
+    ndraws = min(nsamples, ndraws)
     expr_median = mclapply(
-      1:n_total_draws,
+      seq_len(ndraws),
       function(i) {
-        set.seed(seed)
         posterior_predictive_log_lambda(obj, k = i, show_donors = show_donors) %>%
           group_by(.dots = sample_info_k) %>%
           summarize_at(obj$protein_names,median)
@@ -70,7 +72,6 @@ plot_distatis = function(obj, ncores = 1,
     # parametric bootstrap samples
     boot = function(tb_args) {
       boot_list = lapply(1:nrow(tb_args), function(i) {
-        set.seed(seed)
         Y_donor = MASS::mvrnorm(n = tb_args$n[i],
                                 mu = tb_args$fit[[i]]$beta,
                                 Sigma = tb_args$fit[[i]]$Sigma)
@@ -83,8 +84,7 @@ plot_distatis = function(obj, ncores = 1,
         tidyr::unnest(b) %>%
         ungroup()
     }
-    n_boot = 1000
-    expr_median = mclapply(1:n_boot, function(i) boot(obj$tb_args))
+    expr_median = mclapply(1:ndraws, function(i) boot(obj$tb_args))
   }
 
   # prepare three way arrary for distatis
@@ -170,7 +170,7 @@ plot_distatis = function(obj, ncores = 1,
                                       aes(x = MDS1, y = MDS2,
                                           label = protein_selection),
                                       color = marker_color,
-                                      alpha = 1.0, seed = seed)
+                                      alpha = 1.0)
     } else {
       ggmds = ggmds + geom_text(data = expr_cor,
                                 aes(x = MDS1, y = MDS2,

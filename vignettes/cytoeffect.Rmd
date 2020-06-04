@@ -26,6 +26,7 @@ In this vignette, we show the `cytoeffect` workflow for both the full Bayesian h
 Simulate dataset.
 
 ```{r}
+set.seed(1)
 df = simulate_data()
 str(df)
 df
@@ -44,7 +45,7 @@ fit = poisson_lognormal(df,
                         condition = condition, 
                         group = group,
                         r_donor = 2, 
-                        warmup = 200, iter = 325, adapt_delta = 0.95,
+                        warmup = 200, iter = 325, adapt_delta = 0.8,
                         num_chains = 1)
 ```
 
@@ -61,7 +62,7 @@ plot(fit, type = "Cor")
 Multivariate DiSTATIS plot.
 
 ```{r}
-plot_distatis(fit)
+plot_distatis(fit, ndraws = 125)
 ```
 
 ## Frequentist Inference
@@ -87,5 +88,5 @@ plot(fit, type = "Cor")
 Multivariate DiSTATIS plot.
 
 ```{r}
-plot_distatis(fit)
+plot_distatis(fit, ndraws = 125)
 ```

@@ -2,7 +2,7 @@
 % Please edit documentation in R/fit_poilog.R
 \name{fit_poilog}
 \alias{fit_poilog}
-\title{Composite Maximum Likelihood Estimation for Poisson Log-Normal Model}
+\title{Composite maximum likelihood estimation for Poisson log-normal model}
 \usage{
 fit_poilog(Y, ncores = 1)
 }
@@ -21,6 +21,7 @@ A list containing
 and the covariance of a Poisson log-normal mixed model.
 }
 \examples{
+set.seed(1)
 df = simulate_data(n_cells = 10)
 str(df)
 Y = df \%>\% select(names(df)[3:ncol(df)])

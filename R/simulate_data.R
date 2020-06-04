@@ -1,4 +1,4 @@
-#' Generate Dataset for Vignettes and Simulation Studies
+#' Generate dataset for vignettes and simulation studies
 #'
 #' @import ggplot2
 #' @import dplyr
@@ -20,10 +20,10 @@
 #' @param beta_control log of mean in control
 #' @param rho_b cell level correlation
 #' @param rho_u donor level correlation
-#' @param seed set random seed
 #' @return \code{\link[tibble]{tibble}} data frame
 #'
 #' @examples
+#' set.seed(1)
 #' df = simulate_data(n_cells = 10)
 #' str(df)
 #' df
@@ -37,12 +37,8 @@ simulate_data = function(n_markers = 5,            # number of markers
                          beta_treatment = log(20), # log of mean in treatment
                          beta_control = log(5),    # log of mean in control
                          rho_b = 0.5,              # cell level correlation
-                         rho_u = 0.5,              # donor level correlation
-                         seed = 0xdada             # set random seed
+                         rho_u = 0.5              # donor level correlation
                          ) {
-
-  # simulation parameters
-  set.seed(seed)
 
   if (paired) {
     n_donors = n_samples / 2

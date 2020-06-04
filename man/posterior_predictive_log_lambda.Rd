@@ -2,7 +2,7 @@
 % Please edit documentation in R/posterior_predictive_log_lambda.R
 \name{posterior_predictive_log_lambda}
 \alias{posterior_predictive_log_lambda}
-\title{Plot Multivariate Posterior Summaries for Poisson Log-Normal Mixed Model}
+\title{Posterior predictive of Poisson log-normal mixed model}
 \usage{
 posterior_predictive_log_lambda(obj, k = 1, show_donors = TRUE)
 }
@@ -18,5 +18,5 @@ using \code{\link{poisson_lognormal}}}
 \code{\link[tibble]{tibble}} object
 }
 \description{
-Plot Multivariate Posterior Summaries for Poisson Log-Normal Mixed Model
+Posterior predictive of Poisson log-normal mixed model
 }

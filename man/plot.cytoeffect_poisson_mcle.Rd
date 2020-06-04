@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.cytoeffect_poisson_mcle.R
 \name{plot.cytoeffect_poisson_mcle}
 \alias{plot.cytoeffect_poisson_mcle}
-\title{Plot Point Estimates for MCLE Fit}
+\title{Plot point estimates for MCLE fit}
 \usage{
 \method{plot}{cytoeffect_poisson_mcle}(x, type = "beta", selection = x$protein_names, ...)
 }
@@ -21,9 +21,10 @@ using \code{\link{poisson_lognormal}}}
 \code{\link[ggplot2]{ggplot2}} object
 }
 \description{
-Plot Point Estimates for MCLE Fit
+Plot point estimates for MCLE fit
 }
 \examples{
+set.seed(1)
 df = simulate_data(n_cells = 10)
 str(df)
 fit = poisson_lognormal_mcle(df,

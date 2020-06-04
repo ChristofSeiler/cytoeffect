@@ -2,7 +2,7 @@
 % Please edit documentation in R/poisson_lognormal.R
 \name{poisson_lognormal}
 \alias{poisson_lognormal}
-\title{HMC Sampling for Poisson Log-Normal Mixed Model}
+\title{HMC sampling for Poisson log-normal mixed model}
 \usage{
 poisson_lognormal(
   df_samples_subset,
@@ -57,6 +57,7 @@ Poisson log-normal mixed model. Each cell and protein marker has its own rate
 parameter following a linear model.
 }
 \examples{
+set.seed(1)
 df = simulate_data(n_cells = 10)
 str(df)
 fit = poisson_lognormal(df,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/poisson_lognormal_mcle.R
 \name{poisson_lognormal_mcle}
 \alias{poisson_lognormal_mcle}
-\title{Fit Simplified Poisson Log-Normal Model}
+\title{Fit simplified Poisson log-normal model}
 \usage{
 poisson_lognormal_mcle(
   df_samples_subset,
@@ -40,6 +40,7 @@ A list of class \code{cytoeffect_poisson_mcle} containing
 Poisson log-normal models to each sample.
 }
 \examples{
+set.seed(1)
 df = simulate_data(n_cells = 10)
 str(df)
 fit = poisson_lognormal_mcle(df,

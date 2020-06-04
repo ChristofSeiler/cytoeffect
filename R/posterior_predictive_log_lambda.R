@@ -1,4 +1,4 @@
-#' Plot Multivariate Posterior Summaries for Poisson Log-Normal Mixed Model
+#' Posterior predictive of Poisson log-normal mixed model
 #'
 #' @import ggplot2
 #' @importFrom magrittr %>% %<>%

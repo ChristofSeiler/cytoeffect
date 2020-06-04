@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>DiSTATIS Plot of Posterior or Bootstrap Samples — plot_distatis • cytoeffect</title>
+<title>DiSTATIS plot of posterior or bootstrap samples — plot_distatis • cytoeffect</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,8 @@
 
 
 
-<meta property="og:title" content="DiSTATIS Plot of Posterior or Bootstrap Samples — plot_distatis" />
-<meta property="og:description" content="DiSTATIS Plot of Posterior or Bootstrap Samples" />
+<meta property="og:title" content="DiSTATIS plot of posterior or bootstrap samples — plot_distatis" />
+<meta property="og:description" content="DiSTATIS plot of posterior or bootstrap samples" />
 
 
 
@@ -114,17 +114,18 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>DiSTATIS Plot of Posterior or Bootstrap Samples</h1>
+    <h1>DiSTATIS plot of posterior or bootstrap samples</h1>
     <small class="dont-index">Source: <a href='https://github.com/ChristofSeiler/cytoeffect/blob/master/R/plot_distatis.R'><code>R/plot_distatis.R</code></a></small>
     <div class="hidden name"><code>plot_distatis.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>DiSTATIS Plot of Posterior or Bootstrap Samples</p>
+    <p>DiSTATIS plot of posterior or bootstrap samples</p>
     </div>
 
     <pre class="usage"><span class='fu'>plot_distatis</span>(
   <span class='no'>obj</span>,
+  <span class='kw'>ndraws</span> <span class='kw'>=</span> <span class='fl'>1000</span>,
   <span class='kw'>ncores</span> <span class='kw'>=</span> <span class='fl'>1</span>,
   <span class='kw'>show_donors</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>show_markers</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
@@ -138,6 +139,10 @@
       <th>obj</th>
       <td><p>Object of class <code>cytoeffect_poisson</code> or <code>cytoeffect_poisson_mcle</code>
 computed by <code><a href='poisson_lognormal.html'>poisson_lognormal</a></code> or <code><a href='poisson_lognormal_mcle.html'>poisson_lognormal_mcle</a></code></p></td>
+    </tr>
+    <tr>
+      <th>ndraws</th>
+      <td><p>Number of posterior or bootstrap samples</p></td>
     </tr>
     <tr>
       <th>ncores</th>
@@ -162,31 +167,25 @@ computed by <code><a href='poisson_lognormal.html'>poisson_lognormal</a></code> 
     <p><code><a href='https://ggplot2.tidyverse.org/reference/ggplot2-package.html'>ggplot2</a></code> object</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>df</span> <span class='kw'>=</span> <span class='fu'><a href='simulate_data.html'>simulate_data</a></span>()
-<span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	800 obs. of  7 variables:
-#&gt;  $ donor    : chr  "pid01" "pid01" "pid01" "pid01" ...
-#&gt;  $ condition: Factor w/ 2 levels "control","treatment": 2 2 2 2 2 2 2 2 2 2 ...
-#&gt;  $ m01      : num  31 11 16 18 21 79 186 18 10 9 ...
-#&gt;  $ m02      : num  3 1 0 2 3 0 12 0 5 2 ...
-#&gt;  $ m03      : num  5 0 20 5 18 2 15 8 4 2 ...
-#&gt;  $ m04      : num  3 7 4 4 2 7 2 1 9 1 ...
-#&gt;  $ m05      : num  0 32 29 20 33 17 95 62 11 5 ...</div><div class='input'># commented out, see vignette
-# fit = poisson_lognormal(df,
-#                        protein_names = names(df)[3:ncol(df)],
-#                        condition = "condition",
-#                        group = "donor",
-#                        r_donor = 2,
-#                        warmup = 200, iter = 325, adapt_delta = 0.95,
-#                        num_chains = 1)
-# plot_distatis(fit)
-# fit = poisson_lognormal_mcle(df,
-#                              protein_names = names(df)[3:ncol(df)],
-#                              condition = "condition",
-#                              group = "donor",
-#                              ncores = 1)
-# plot_distatis(fit)
-
-</div></pre>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>1</span>)
+<span class='no'>df</span> <span class='kw'>=</span> <span class='fu'><a href='simulate_data.html'>simulate_data</a></span>()
+<span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span>(<span class='no'>df</span>)
+<span class='no'>fit</span> <span class='kw'>=</span> <span class='fu'><a href='poisson_lognormal.html'>poisson_lognormal</a></span>(<span class='no'>df</span>,
+                        <span class='kw'>protein_names</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='no'>df</span>)[<span class='fl'>3</span>:<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>df</span>)],
+                        <span class='kw'>condition</span> <span class='kw'>=</span> <span class='st'>"condition"</span>,
+                        <span class='kw'>group</span> <span class='kw'>=</span> <span class='st'>"donor"</span>,
+                        <span class='kw'>r_donor</span> <span class='kw'>=</span> <span class='fl'>2</span>,
+                        <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>200</span>, <span class='kw'>iter</span> <span class='kw'>=</span> <span class='fl'>325</span>, <span class='kw'>adapt_delta</span> <span class='kw'>=</span> <span class='fl'>0.95</span>,
+                        <span class='kw'>num_chains</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='fu'>plot_distatis</span>(<span class='no'>fit</span>, <span class='kw'>ndraws</span> <span class='kw'>=</span> <span class='fl'>125</span>)
+<span class='no'>fit</span> <span class='kw'>=</span> <span class='fu'><a href='poisson_lognormal_mcle.html'>poisson_lognormal_mcle</a></span>(<span class='no'>df</span>,
+                             <span class='kw'>protein_names</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='no'>df</span>)[<span class='fl'>3</span>:<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>df</span>)],
+                             <span class='kw'>condition</span> <span class='kw'>=</span> <span class='st'>"condition"</span>,
+                             <span class='kw'>group</span> <span class='kw'>=</span> <span class='st'>"donor"</span>,
+                             <span class='kw'>ncores</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='fu'>plot_distatis</span>(<span class='no'>fit</span>, <span class='kw'>ndraws</span> <span class='kw'>=</span> <span class='fl'>125</span>)
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
