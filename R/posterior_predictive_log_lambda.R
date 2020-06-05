@@ -6,12 +6,26 @@
 #' @import parallel
 #' @importFrom MASS mvrnorm
 #' @importFrom rstan extract
+#' @export
 #'
 #' @param obj Object of class \code{cytoeffect_poisson} computed
 #'   using \code{\link{poisson_lognormal}}
 #' @param k Draw from HMC chain
 #' @param show_donors Include donor random effect
 #' @return \code{\link[tibble]{tibble}} object
+#'
+#' @examples
+#' set.seed(1)
+#' df = simulate_data(n_cells = 10)
+#' str(df)
+#' fit = poisson_lognormal(df,
+#'                         protein_names = names(df)[3:ncol(df)],
+#'                         condition = "condition",
+#'                         group = "donor",
+#'                         r_donor = 2,
+#'                         warmup = 200, iter = 325,
+#'                         num_chains = 1)
+#' posterior_predictive_log_lambda(fit, k = 1)
 #'
 posterior_predictive_log_lambda = function(obj, k = 1, show_donors = TRUE) {
 

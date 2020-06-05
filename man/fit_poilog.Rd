@@ -24,7 +24,7 @@ and the covariance of a Poisson log-normal mixed model.
 set.seed(1)
 df = simulate_data(n_cells = 10)
 str(df)
-Y = select(df, names(df)[3:ncol(df)])
+Y = dplyr::select(df, names(df)[3:ncol(df)])
 fit_poilog(Y)
 
 }

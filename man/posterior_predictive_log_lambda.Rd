@@ -20,3 +20,17 @@ using \code{\link{poisson_lognormal}}}
 \description{
 Posterior predictive of Poisson log-normal mixed model
 }
+\examples{
+set.seed(1)
+df = simulate_data(n_cells = 10)
+str(df)
+fit = poisson_lognormal(df,
+                        protein_names = names(df)[3:ncol(df)],
+                        condition = "condition",
+                        group = "donor",
+                        r_donor = 2,
+                        warmup = 200, iter = 325,
+                        num_chains = 1)
+posterior_predictive_log_lambda(fit, k = 1)
+
+}
