@@ -10,6 +10,7 @@
 #' @importFrom Matrix nearPD
 #' @importFrom Matrix cov2cor
 #' @importFrom matrixStats logSumExp
+#' @importFrom magrittr %>% %<>%
 #' @export
 #'
 #' @param Y Matrix with proteins counts with dimensions (number of cells) x (number of markers)
