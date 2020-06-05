@@ -18,3 +18,7 @@ before_install:
 
 after_success:
   - travis_wait 40 Rscript -e 'covr::codecov()'
+
+# After script sleep avoids Job log truncation
+after_script:
+  - sleep 1
