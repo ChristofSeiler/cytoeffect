@@ -62,7 +62,9 @@ jobs:
           sudo apt install devscripts
 
       - name: Install dependencies
+      # currently there is a bug in rstantools 2.1.0 (tbb header missing)
         run: |
+          remotes::install_version("rstantools", version = "2.0.0", repos = "http://cran.us.r-project.org")
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
