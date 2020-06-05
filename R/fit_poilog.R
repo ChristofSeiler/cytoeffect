@@ -23,7 +23,7 @@
 #' set.seed(1)
 #' df = simulate_data(n_cells = 10)
 #' str(df)
-#' Y = df %>% select(names(df)[3:ncol(df)])
+#' Y = select(df, names(df)[3:ncol(df)])
 #' fit_poilog(Y)
 #'
 fit_poilog = function(Y, ncores = 1) {

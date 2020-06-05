@@ -11,7 +11,10 @@ warnings_are_errors: FALSE
 r_build_args: '--no-build-vignettes'
 r_check_args: '--ignore-vignettes'
 
+# currently there is a bug in rstantools 2.1.0 (tbb header missing)
 before_install:
+  - Rscript -e 'install.packages("remotes")'
+  - Rscript -e 'remotes::install_version("rstantools", version = "2.0.0", repos = "http://cran.us.r-project.org")'
   - mkdir -p ~/.R
   - echo "CXX14FLAGS=-O3 -march=native -mtune=native -fPIC" >> ~/.R/Makevars
   - echo "CXX14=g++" >> ~/.R/Makevars
