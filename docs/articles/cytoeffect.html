@@ -76,7 +76,7 @@
       <h1 data-toc-skip>cytoeffect Workflow</h1>
                         <h4 class="author">Christof Seiler</h4>
             
-            <h4 class="date">2020-06-04</h4>
+            <h4 class="date">2020-11-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/ChristofSeiler/cytoeffect/blob/master/vignettes/cytoeffect.Rmd"><code>vignettes/cytoeffect.Rmd</code></a></small>
       <div class="hidden name"><code>cytoeffect.Rmd</code></div>
@@ -93,14 +93,14 @@
 <div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="fl">1</span>)
 <span class="no">df</span> <span class="kw">=</span> <span class="fu"><a href="../reference/simulate_data.html">simulate_data</a></span>()
 <span class="fu"><a href="https://rdrr.io/r/utils/str.html">str</a></span>(<span class="no">df</span>)
-<span class="co">#&gt; Classes 'tbl_df', 'tbl' and 'data.frame':    800 obs. of  7 variables:</span>
-<span class="co">#&gt;  $ donor    : chr  "pid01" "pid01" "pid01" "pid01" ...</span>
+<span class="co">#&gt; tibble [800 × 7] (S3: tbl_df/tbl/data.frame)</span>
+<span class="co">#&gt;  $ donor    : chr [1:800] "pid01" "pid01" "pid01" "pid01" ...</span>
 <span class="co">#&gt;  $ condition: Factor w/ 2 levels "control","treatment": 2 2 2 2 2 2 2 2 2 2 ...</span>
-<span class="co">#&gt;  $ m01      : num  64 22 36 33 87 9 11 143 81 105 ...</span>
-<span class="co">#&gt;  $ m02      : num  37 8 1 20 44 0 10 96 149 11 ...</span>
-<span class="co">#&gt;  $ m03      : num  3 1 14 31 4 19 2 2 0 6 ...</span>
-<span class="co">#&gt;  $ m04      : num  0 1 2 40 0 0 0 0 4 2 ...</span>
-<span class="co">#&gt;  $ m05      : num  10 1 4 0 1 8 4 0 1 11 ...</span>
+<span class="co">#&gt;  $ m01      : num [1:800] 64 22 36 33 87 9 11 143 81 105 ...</span>
+<span class="co">#&gt;  $ m02      : num [1:800] 37 8 1 20 44 0 10 96 149 11 ...</span>
+<span class="co">#&gt;  $ m03      : num [1:800] 3 1 14 31 4 19 2 2 0 6 ...</span>
+<span class="co">#&gt;  $ m04      : num [1:800] 0 1 2 40 0 0 0 0 4 2 ...</span>
+<span class="co">#&gt;  $ m05      : num [1:800] 10 1 4 0 1 8 4 0 1 11 ...</span>
 <span class="no">df</span>
 <span class="co">#&gt; # A tibble: 800 x 7</span>
 <span class="co">#&gt;    donor condition   m01   m02   m03   m04   m05</span>
@@ -134,8 +134,8 @@
 <span class="co">#&gt; </span>
 <span class="co">#&gt; SAMPLING FOR MODEL 'poisson' NOW (CHAIN 1).</span>
 <span class="co">#&gt; Chain 1: </span>
-<span class="co">#&gt; Chain 1: Gradient evaluation took 0.001165 seconds</span>
-<span class="co">#&gt; Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 11.65 seconds.</span>
+<span class="co">#&gt; Chain 1: Gradient evaluation took 0.001177 seconds</span>
+<span class="co">#&gt; Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 11.77 seconds.</span>
 <span class="co">#&gt; Chain 1: Adjust your expectations accordingly!</span>
 <span class="co">#&gt; Chain 1: </span>
 <span class="co">#&gt; Chain 1: </span>
@@ -152,9 +152,9 @@
 <span class="co">#&gt; Chain 1: Iteration: 296 / 325 [ 91%]  (Sampling)</span>
 <span class="co">#&gt; Chain 1: Iteration: 325 / 325 [100%]  (Sampling)</span>
 <span class="co">#&gt; Chain 1: </span>
-<span class="co">#&gt; Chain 1:  Elapsed Time: 121.135 seconds (Warm-up)</span>
-<span class="co">#&gt; Chain 1:                92.4631 seconds (Sampling)</span>
-<span class="co">#&gt; Chain 1:                213.598 seconds (Total)</span>
+<span class="co">#&gt; Chain 1:  Elapsed Time: 122.713 seconds (Warm-up)</span>
+<span class="co">#&gt; Chain 1:                93.3971 seconds (Sampling)</span>
+<span class="co">#&gt; Chain 1:                216.11 seconds (Total)</span>
 <span class="co">#&gt; Chain 1:</span></pre></body></html></div>
 <p>Plot marginal credible intervals.</p>
 <div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="no">fit</span>, <span class="kw">type</span> <span class="kw">=</span> <span class="st">"theta"</span>)</pre></body></html></div>
@@ -163,7 +163,14 @@
 <p><img src="cytoeffect_files/figure-html/unnamed-chunk-3-2.png" width="672"></p>
 <div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="fu"><a href="../reference/plot_pairs.html">plot_pairs</a></span>(<span class="no">fit</span>, <span class="st">"m01"</span>, <span class="st">"m02"</span>, <span class="st">"m03"</span>)</pre></body></html></div>
 <p><img src="cytoeffect_files/figure-html/unnamed-chunk-3-3.png" width="672"></p>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="no">fit</span>, <span class="kw">type</span> <span class="kw">=</span> <span class="st">"sigma"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="no">fit</span>, <span class="kw">type</span> <span class="kw">=</span> <span class="st">"sigma"</span>)
+<span class="co">#&gt; New names:</span>
+<span class="co">#&gt; * NA -&gt; ...1</span>
+<span class="co">#&gt; * NA -&gt; ...2</span>
+<span class="co">#&gt; * NA -&gt; ...3</span>
+<span class="co">#&gt; * NA -&gt; ...4</span>
+<span class="co">#&gt; * NA -&gt; ...5</span>
+<span class="co">#&gt; * ...</span></pre></body></html></div>
 <p><img src="cytoeffect_files/figure-html/unnamed-chunk-3-4.png" width="672"></p>
 <div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="no">fit</span>, <span class="kw">type</span> <span class="kw">=</span> <span class="st">"Cor"</span>)
 <span class="co">#&gt; [[1]]</span></pre></body></html></div>
@@ -185,9 +192,23 @@
                              <span class="kw">group</span> <span class="kw">=</span> <span class="no">group</span>,
                              <span class="kw">ncores</span> <span class="kw">=</span> <span class="fl">1</span>)</pre></body></html></div>
 <p>Plot marginal credible intervals.</p>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="no">fit</span>, <span class="kw">type</span> <span class="kw">=</span> <span class="st">"beta"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="no">fit</span>, <span class="kw">type</span> <span class="kw">=</span> <span class="st">"beta"</span>)
+<span class="co">#&gt; New names:</span>
+<span class="co">#&gt; * NA -&gt; ...1</span>
+<span class="co">#&gt; * NA -&gt; ...2</span>
+<span class="co">#&gt; * NA -&gt; ...3</span>
+<span class="co">#&gt; * NA -&gt; ...4</span>
+<span class="co">#&gt; * NA -&gt; ...5</span>
+<span class="co">#&gt; * ...</span></pre></body></html></div>
 <p><img src="cytoeffect_files/figure-html/unnamed-chunk-6-1.png" width="672"></p>
-<div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="no">fit</span>, <span class="kw">type</span> <span class="kw">=</span> <span class="st">"sigma"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb12"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="no">fit</span>, <span class="kw">type</span> <span class="kw">=</span> <span class="st">"sigma"</span>)
+<span class="co">#&gt; New names:</span>
+<span class="co">#&gt; * NA -&gt; ...1</span>
+<span class="co">#&gt; * NA -&gt; ...2</span>
+<span class="co">#&gt; * NA -&gt; ...3</span>
+<span class="co">#&gt; * NA -&gt; ...4</span>
+<span class="co">#&gt; * NA -&gt; ...5</span>
+<span class="co">#&gt; * ...</span></pre></body></html></div>
 <p><img src="cytoeffect_files/figure-html/unnamed-chunk-6-2.png" width="672"></p>
 <div class="sourceCode" id="cb13"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="no">fit</span>, <span class="kw">type</span> <span class="kw">=</span> <span class="st">"Cor"</span>)</pre></body></html></div>
 <p><img src="cytoeffect_files/figure-html/unnamed-chunk-6-3.png" width="672"></p>

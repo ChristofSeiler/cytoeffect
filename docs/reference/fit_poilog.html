@@ -150,14 +150,158 @@ and the covariance of a Poisson log-normal mixed model.</p>
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/Random.html'>set.seed</a></span>(<span class='fl'>1</span>)
 <span class='no'>df</span> <span class='kw'>=</span> <span class='fu'><a href='simulate_data.html'>simulate_data</a></span>(<span class='kw'>n_cells</span> <span class='kw'>=</span> <span class='fl'>10</span>)
-<span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; Classes ‘tbl_df’, ‘tbl’ and 'data.frame':	80 obs. of  7 variables:
-#&gt;  $ donor    : chr  "pid01" "pid01" "pid01" "pid01" ...
+<span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span>(<span class='no'>df</span>)</div><div class='output co'>#&gt; tibble [80 × 7] (S3: tbl_df/tbl/data.frame)
+#&gt;  $ donor    : chr [1:80] "pid01" "pid01" "pid01" "pid01" ...
 #&gt;  $ condition: Factor w/ 2 levels "control","treatment": 2 2 2 2 2 2 2 2 2 2 ...
-#&gt;  $ m01      : num  66 3 3 3 7 7 171 46 50 46 ...
-#&gt;  $ m02      : num  27 3 3 1 5 4 3 20 27 7 ...
-#&gt;  $ m03      : num  3 6 10 35 1 6 3 0 7 7 ...
-#&gt;  $ m04      : num  6 0 1 14 1 6 13 4 14 7 ...
-#&gt;  $ m05      : num  6 1 1 0 5 0 2 8 0 0 ...</div><div class='input'><span class='no'>Y</span> <span class='kw'>=</span> <span class='no'>df</span> <span class='kw'>%&gt;%</span> <span class='fu'>select</span>(<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='no'>df</span>)[<span class='fl'>3</span>:<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>df</span>)])</div><div class='output co'>#&gt; <span class='error'>Error in df %&gt;% select(names(df)[3:ncol(df)]): could not find function "%&gt;%"</span></div><div class='input'><span class='fu'>fit_poilog</span>(<span class='no'>Y</span>)</div><div class='output co'>#&gt; <span class='error'>Error in nrow(Y): object 'Y' not found</span></div><div class='input'>
+#&gt;  $ m01      : num [1:80] 66 3 3 3 7 7 171 46 50 46 ...
+#&gt;  $ m02      : num [1:80] 27 3 3 1 5 4 3 20 27 7 ...
+#&gt;  $ m03      : num [1:80] 3 6 10 35 1 6 3 0 7 7 ...
+#&gt;  $ m04      : num [1:80] 6 0 1 14 1 6 13 4 14 7 ...
+#&gt;  $ m05      : num [1:80] 6 1 1 0 5 0 2 8 0 0 ...</div><div class='input'><span class='no'>Y</span> <span class='kw'>=</span> <span class='kw pkg'>dplyr</span><span class='kw ns'>::</span><span class='fu'><a href='https://dplyr.tidyverse.org/reference/select.html'>select</a></span>(<span class='no'>df</span>, <span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='no'>df</span>)[<span class='fl'>3</span>:<span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>ncol</a></span>(<span class='no'>df</span>)])
+<span class='fu'>fit_poilog</span>(<span class='no'>Y</span>)</div><div class='output co'>#&gt; 
+#&gt;  Initialization...
+#&gt;  Adjusting a PLN model with full covariance model
+#&gt;  Post-treatments...
+#&gt;  DONE!
+#&gt; initial  value 488.218706 
+#&gt; iter   2 value 488.202446
+#&gt; iter   3 value 488.184123
+#&gt; iter   4 value 488.178458
+#&gt; iter   5 value 488.174502
+#&gt; iter   6 value 488.174191
+#&gt; iter   7 value 488.173541
+#&gt; iter   8 value 488.172719
+#&gt; iter   9 value 488.172304
+#&gt; iter  10 value 488.170698
+#&gt; iter  11 value 488.170597
+#&gt; iter  11 value 488.170591
+#&gt; iter  11 value 488.170591
+#&gt; final  value 488.170591 
+#&gt; converged
+#&gt; initial  value 473.676894 
+#&gt; iter   2 value 473.663855
+#&gt; iter   3 value 473.654709
+#&gt; iter   4 value 473.654226
+#&gt; iter   5 value 473.653907
+#&gt; iter   6 value 473.651285
+#&gt; iter   7 value 473.650966
+#&gt; iter   8 value 473.649877
+#&gt; iter   9 value 473.649867
+#&gt; iter   9 value 473.649867
+#&gt; iter   9 value 473.649867
+#&gt; final  value 473.649867 
+#&gt; converged
+#&gt; initial  value 499.247950 
+#&gt; iter   2 value 499.236708
+#&gt; iter   3 value 499.227971
+#&gt; iter   4 value 499.227467
+#&gt; iter   5 value 499.227351
+#&gt; iter   6 value 499.225167
+#&gt; iter   7 value 499.224534
+#&gt; iter   8 value 499.223204
+#&gt; iter   8 value 499.223204
+#&gt; iter   8 value 499.223204
+#&gt; final  value 499.223204 
+#&gt; converged
+#&gt; initial  value 514.388731 
+#&gt; iter   2 value 514.325150
+#&gt; iter   3 value 514.298228
+#&gt; iter   4 value 514.260266
+#&gt; iter   5 value 514.256128
+#&gt; iter   6 value 514.255941
+#&gt; iter   7 value 514.255809
+#&gt; iter   8 value 514.255484
+#&gt; iter   8 value 514.255480
+#&gt; iter   8 value 514.255480
+#&gt; final  value 514.255480 
+#&gt; converged
+#&gt; initial  value 442.436572 
+#&gt; iter   2 value 442.422144
+#&gt; iter   3 value 442.418174
+#&gt; iter   4 value 442.417839
+#&gt; iter   5 value 442.417785
+#&gt; iter   6 value 442.417698
+#&gt; iter   7 value 442.417617
+#&gt; iter   8 value 442.417051
+#&gt; iter   9 value 442.417007
+#&gt; iter   9 value 442.417006
+#&gt; iter   9 value 442.417006
+#&gt; final  value 442.417006 
+#&gt; converged
+#&gt; initial  value 471.729780 
+#&gt; iter   2 value 471.704714
+#&gt; iter   3 value 471.699789
+#&gt; iter   4 value 471.699485
+#&gt; iter   5 value 471.699328
+#&gt; iter   6 value 471.692210
+#&gt; iter   7 value 471.691278
+#&gt; iter   8 value 471.689474
+#&gt; iter   9 value 471.689333
+#&gt; iter   9 value 471.689329
+#&gt; iter   9 value 471.689329
+#&gt; final  value 471.689329 
+#&gt; converged
+#&gt; initial  value 487.852001 
+#&gt; iter   2 value 487.810875
+#&gt; iter   3 value 487.718270
+#&gt; iter   4 value 487.714217
+#&gt; iter   5 value 487.710942
+#&gt; iter   6 value 487.707822
+#&gt; iter   7 value 487.706974
+#&gt; iter   8 value 487.699798
+#&gt; iter   9 value 487.688595
+#&gt; iter  10 value 487.688374
+#&gt; iter  10 value 487.688374
+#&gt; iter  10 value 487.688374
+#&gt; final  value 487.688374 
+#&gt; converged
+#&gt; initial  value 459.151407 
+#&gt; iter   2 value 459.143375
+#&gt; iter   3 value 459.142864
+#&gt; iter   4 value 459.141240
+#&gt; iter   5 value 459.136647
+#&gt; iter   6 value 459.135234
+#&gt; iter   7 value 459.135090
+#&gt; iter   8 value 459.132631
+#&gt; iter   9 value 459.132426
+#&gt; iter   9 value 459.132426
+#&gt; iter   9 value 459.132426
+#&gt; final  value 459.132426 
+#&gt; converged
+#&gt; initial  value 471.327148 
+#&gt; iter   2 value 471.277941
+#&gt; iter   3 value 471.276326
+#&gt; iter   4 value 471.275768
+#&gt; iter   5 value 471.275423
+#&gt; iter   6 value 471.273901
+#&gt; iter   7 value 471.273517
+#&gt; iter   8 value 471.273017
+#&gt; iter   8 value 471.273015
+#&gt; iter   8 value 471.273015
+#&gt; final  value 471.273015 
+#&gt; converged
+#&gt; initial  value 498.361960 
+#&gt; iter   2 value 498.294869
+#&gt; iter   3 value 498.290226
+#&gt; iter   4 value 498.289651
+#&gt; iter   5 value 498.289583
+#&gt; iter   6 value 498.289194
+#&gt; iter   7 value 498.289042
+#&gt; iter   8 value 498.288718
+#&gt; iter   8 value 498.288712
+#&gt; iter   8 value 498.288712
+#&gt; final  value 498.288712 
+#&gt; converged</div><div class='output co'>#&gt; $beta
+#&gt; [1] 1.846455 1.602441 1.615194 1.975324 1.703377
+#&gt; 
+#&gt; $Sigma
+#&gt;             [,1]       [,2]       [,3]        [,4]       [,5]
+#&gt; [1,]  2.50451452  0.2250056  0.4198440  0.07623263 -0.2668343
+#&gt; [2,]  0.22500559  2.0624746 -0.7966710  0.36216416  0.4162924
+#&gt; [3,]  0.41984397 -0.7966710  1.4180623 -0.22253076 -0.7418978
+#&gt; [4,]  0.07623263  0.3621642 -0.2225308  1.29234194  0.3661240
+#&gt; [5,] -0.26683434  0.4162924 -0.7418978  0.36612400  3.3373933
+#&gt; </div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
