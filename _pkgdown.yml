@@ -12,3 +12,9 @@ reference:
   - '`poisson_lognormal_mcle`'
   - '`plot.cytoeffect_poisson_mcle`'
   - '`plot_distatis`'
+- title: internal
+  contents:
+  - cytoeffect-package
+  - fit_poilog
+  - posterior_predictive_log_lambda
+  - simulate_data

@@ -56,7 +56,7 @@ Depends:
     R (>= 3.6)
 SystemRequirements: GNU make
 NeedsCompilation: yes
-RoxygenNote: 7.0.2
+RoxygenNote: 7.2.3
 Suggests: 
     testthat,
     covr,
