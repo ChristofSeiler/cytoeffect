@@ -2,7 +2,7 @@
 
 <!-- badges: start -->
 
-[![build status](https://travis-ci.com/ChristofSeiler/cytoeffect.svg?branch=master)](https://travis-ci.com/ChristofSeiler/cytoeffect)
+[![Build Status](https://app.travis-ci.com/ChristofSeiler/cytoeffect.svg?branch=master)](https://app.travis-ci.com/ChristofSeiler/cytoeffect)
 <!-- 
 [![R build status](https://github.com/ChristofSeiler/cytoeffect/workflows/R-CMD-check/badge.svg)](https://github.com/ChristofSeiler/cytoeffect/actions)
 -->
